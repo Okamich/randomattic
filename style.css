@@ -2,18 +2,23 @@ body {
   font-family: Arial, sans-sefir;
   text-align: center;
   background-color: #f0f0f0;
-  margin-top: 50px;
+  padding: 20px;
 }
 h1 {
   color: #333;
 }
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+ul {
+  list-style-type: none;
+  padding: 0;
 }
-p {
+li {
+  margin: 10px 0;
+}
+a {
+  text-decoration: none;
+  color: #007bff:
   font-size: 18px;
-  margin-top: 20px;
-  color: #007bff;
+}
+a:hover {
+  text-decoration: underline;
 }
