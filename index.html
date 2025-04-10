@@ -19,7 +19,7 @@
       return names[randomIndex];
     }
     
-    document.getElementById('generate-btn').addEventListener('click', function() => {
+    document.getElementById('generate-btn').addEventListener('click', function() {
       console.log('Button pressed');
       const name = generateNames();
       document.getElementById('name-output').textContent = name;
