@@ -5,7 +5,7 @@ const lastNames = ['Дракон','Лось','Дуб','Фрегат','Гобли
       const randomFirstIndex = Math.floor(Math.random() * firstNames.length);
       const randomLastIndex = Math.floor(Math.random() * lastNames.length);
       console.log('Выбран индекс:', randomFirstIndex, randomLastIndex)
-      const tavernName = firstNames[randomFirstIndex] + lastNames[randomLastIndex]
+      const tavernName = firstNames[randomFirstIndex] + " " + lastNames[randomLastIndex]
       return tavernName;
     }
     
