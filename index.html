@@ -11,6 +11,19 @@
   <button id="generate-btn">Сгенерировать имя</button>
   <p id="name-output">Нажми на кнопку чтто бы получить имя</p>
   
-  <script scr="script.js"></script>
+  <script>
+    const names = ['Артур','Эльза','Гарольд','Лиана','Борис','Мира','Дариус','Селена'];
+
+    function generateNames() {
+      const randomIndex = Math.floor(Math.random() * names.lenght);
+      return = names[randomIndex];
+    }
+    
+    document.getElementById('generate-btn').addEventListener('click', function() => {
+      console.log('Button pressed');
+      const name = generateNames();
+      document.getElementById('name-output').textContent = name;
+    });
+  </script>
 </body>
 </html>
