@@ -9,13 +9,15 @@
 <body>
   <h1>Генератор случайных имен</h1>
   <button id="generate-btn">Сгенерировать имя</button>
-  <div id="name-output">Нажми на кнопку чтто бы получить имя</div>
+  <div id="name-output">Нажми на кнопку что бы получить имя</div>
   
   <script>
     const names = ['Артур','Эльза','Гарольд','Лиана','Борис','Мира','Дариус','Селена'];
 
     function generateNames() {
+      console.log('Имена:', names)
       const randomIndex = Math.floor(Math.random() * names.lenght);
+      console.log('Выбран индекс:', randomIndex)
       const name = names[randomIndex];
       console.log('Сгенерировано имя:', name)
       return name;
