@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Randomattic - Design Tokens & Theme Variables
+   Поддержка двух аутентичных тем: 
+   - [data-theme="dark"]  (Midnight Attic — чердак мага, свечи, аркана)
+   - [data-theme="light"] (Scholar's Parchment — пергамент, чернила, сургуч)
+   ========================================================================== */
+
+:root {
+  /* Шрифты */
+  --font-display: 'Cinzel', 'Trajan Pro', 'Georgia', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Базовые отступы и радиусы */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Переходы */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s ease;
+
+  /* Тёмная тема (Midnight Attic) — по умолчанию */
+  --color-bg: #0e0c13;
+  --color-bg-secondary: #16131d;
+  --color-surface: #1b1724;
+  --color-surface-hover: #241f30;
+  --color-surface-elevated: #282235;
+
+  --color-border: #322b3e;
+  --color-border-glow: #e5a93c44;
+
+  --color-text-primary: #f2edf9;
+  --color-text-secondary: #a99fb7;
+  --color-text-muted: #746b82;
+
+  --color-accent: #e5a93c;         /* Теплое пламя свечи / античное золото */
+  --color-accent-hover: #f3be5c;
+  --color-accent-dim: rgba(229, 169, 60, 0.15);
+  
+  --color-arcane: #9d65ff;         /* Магическое свечение арканы */
+  --color-arcane-dim: rgba(157, 101, 255, 0.15);
+
+  --color-danger: #e05252;
+  --color-success: #4ec985;
+  --color-info: #4ea8de;
+
+  /* Тени */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 24px rgba(229, 169, 60, 0.2);
+
+  /* Бейджи типов */
+  --badge-common-bg: rgba(78, 201, 133, 0.14);
+  --badge-common-text: #69e09f;
+  --badge-dm-bg: rgba(229, 169, 60, 0.15);
+  --badge-dm-text: #f0be65;
+  --badge-loot-bg: rgba(235, 179, 58, 0.18);
+  --badge-loot-text: #ffd166;
+  --badge-tool-bg: rgba(78, 168, 222, 0.16);
+  --badge-tool-text: #70c4ff;
+  --badge-special-bg: rgba(157, 101, 255, 0.18);
+  --badge-special-text: #c09bff;
+
+  /* Текстурный градиент */
+  --bg-gradient: radial-gradient(circle at 50% 0%, #20192e 0%, #0e0c13 70%);
+}
+
+/* Светлая тема (Scholar's Parchment) */
+[data-theme="light"] {
+  --color-bg: #f5eedf;
+  --color-bg-secondary: #ece3d0;
+  --color-surface: #fdfbf7;
+  --color-surface-hover: #ffffff;
+  --color-surface-elevated: #faf6ec;
+
+  --color-border: #d8cdba;
+  --color-border-glow: #b8860b44;
+
+  --color-text-primary: #2d241e;
+  --color-text-secondary: #66574b;
+  --color-text-muted: #958474;
+
+  --color-accent: #9b6b15;         /* Сусальное состаренное золото / бронза */
+  --color-accent-hover: #7e560f;
+  --color-accent-dim: rgba(155, 107, 21, 0.12);
+
+  --color-arcane: #6a40a8;         /* Темный чернильный аметист */
+  --color-arcane-dim: rgba(106, 64, 168, 0.12);
+
+  --color-danger: #b82d2d;
+  --color-success: #287a4d;
+  --color-info: #1b689c;
+
+  /* Тени светлой темы под свиток */
+  --shadow-sm: 0 2px 5px rgba(60, 45, 30, 0.08);
+  --shadow-md: 0 6px 16px rgba(60, 45, 30, 0.12);
+  --shadow-lg: 0 12px 28px rgba(60, 45, 30, 0.16);
+  --shadow-glow: 0 0 20px rgba(184, 134, 11, 0.15);
+
+  /* Бейджи светлой темы */
+  --badge-common-bg: #e2f4e8;
+  --badge-common-text: #1b6d3e;
+  --badge-dm-bg: #f9edd4;
+  --badge-dm-text: #8e5a07;
+  --badge-loot-bg: #fcf1d8;
+  --badge-loot-text: #966708;
+  --badge-tool-bg: #e2f0fb;
+  --badge-tool-text: #185a8a;
+  --badge-special-bg: #ede5f8;
+  --badge-special-text: #593196;
+
+  --bg-gradient: radial-gradient(circle at 50% 0%, #faf5ec 0%, #f1e9d8 75%);
+}

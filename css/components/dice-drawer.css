@@ -1,0 +1,267 @@
+/* ==========================================================================
+   Randomattic - Quick Dice Drawer & Tray Styles
+   ========================================================================== */
+
+.dice-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.dice-drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dice-drawer {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-normal);
+}
+
+.dice-drawer.active {
+  right: 0;
+}
+
+.dice-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+}
+
+.dice-drawer-title {
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dice-drawer-close {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 1.3rem;
+  transition: all var(--transition-fast);
+}
+
+.dice-drawer-close:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.dice-drawer-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Сетка стандартных кубиков D&D */
+.dice-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.dice-die-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.85rem 0.5rem;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.dice-die-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+  color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.dice-die-btn span.die-sub {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+/* Специальные кнопки D20: Преимущество / Помеха */
+.d20-special-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-advantage, .btn-disadvantage {
+  flex: 1;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.btn-advantage {
+  background: rgba(78, 201, 133, 0.12);
+  color: #5ce29f;
+}
+.btn-advantage:hover {
+  background: rgba(78, 201, 133, 0.25);
+  border-color: #5ce29f;
+}
+
+.btn-disadvantage {
+  background: rgba(224, 82, 82, 0.12);
+  color: #ff7676;
+}
+.btn-disadvantage:hover {
+  background: rgba(224, 82, 82, 0.25);
+  border-color: #ff7676;
+}
+
+/* Ввод произвольной формулы */
+.formula-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.formula-input {
+  flex: 1;
+  padding: 0.65rem 0.9rem;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.formula-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.btn-roll-formula {
+  padding: 0.65rem 1.1rem;
+  background: var(--color-accent);
+  color: #121016;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="light"] .btn-roll-formula {
+  color: #ffffff;
+}
+
+.btn-roll-formula:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Окно текущего результата броска */
+.dice-result-display {
+  background: var(--color-surface-elevated);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  text-align: center;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.dice-result-num {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+  text-shadow: 0 0 12px var(--color-accent-dim);
+}
+
+.dice-result-num.crit-success {
+  color: #4ec985;
+  text-shadow: 0 0 16px rgba(78, 201, 133, 0.4);
+}
+
+.dice-result-num.crit-fail {
+  color: #e05252;
+  text-shadow: 0 0 16px rgba(224, 82, 82, 0.4);
+}
+
+.dice-result-detail {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* История бросков */
+.dice-history-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.dice-history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.45rem 0.75rem;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  border-left: 2px solid var(--color-accent);
+}
