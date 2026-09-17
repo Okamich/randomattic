@@ -11,11 +11,28 @@ const MAX_HISTORY_LENGTH = 50;
 /**
  * Бросок одного кубика со сторонами sides.
  * @param {number} sides Количество граней (по умолчанию 20)
+ * @param {boolean} record Записывать ли в историю бросков (по умолчанию true)
  * @returns {number}
  */
-export function rollDie(sides = 20) {
+export function rollDie(sides = 20, record = true) {
   const s = Math.max(1, Math.floor(sides));
-  return Math.floor(Math.random() * s) + 1;
+  const result = Math.floor(Math.random() * s) + 1;
+  
+  if (record) {
+    const isCritSuccess = s === 20 && result === 20;
+    const isCritFail = s === 20 && result === 1;
+    recordRoll({
+      type: 'single',
+      sides: s,
+      total: result,
+      text: `1d${s} = ${result}${isCritSuccess ? ' (Критический успех!)' : ''}${isCritFail ? ' (Критический провал!)' : ''}`,
+      isCritSuccess,
+      isCritFail,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -27,7 +44,7 @@ export function rollDie(sides = 20) {
 export function rollDice(count = 1, sides = 20) {
   const rolls = [];
   for (let i = 0; i < count; i++) {
-    rolls.push(rollDie(sides));
+    rolls.push(rollDie(sides, false));
   }
   return rolls;
 }

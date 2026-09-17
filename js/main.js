@@ -1,10 +1,12 @@
 /**
  * Randomattic - Main Application Controller
- * Управление AppBoard, стилизованными карточками и экранами генераторов с настройками
+ * Управление каталогом, карточками и экранами генераторов с настройками
  */
 
 import { initTheme } from './theme.js';
 import { CATEGORIES, GENERATORS } from './data/generators-registry.js';
+import { D20_CATALOG } from './data/d20-data.js';
+import { TAVERN_DATA } from './data/tavern-data.js';
 import {
   rollDie,
   rollAdvantage,
@@ -20,12 +22,13 @@ import {
 import { generateCharacterName } from './generators/names.js';
 import { generateTavern } from './generators/taverns.js';
 import { generateLoot } from './generators/loot.js';
+import { generateD20Event } from './generators/d20.js';
 
 // Текущее состояние приложения
 const state = {
   selectedCategory: 'all',
   searchQuery: '',
-  currentView: 'board', // 'board' или viewId ('names', 'tavern', 'loot', 'dice')
+  currentView: 'board', // 'board' или viewId
   currentResultText: ''
 };
 
@@ -48,7 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupRouter() {
   const handleHash = () => {
     const hash = window.location.hash.replace('#', '').trim();
-    if (hash && ['names', 'tavern', 'loot', 'dice'].includes(hash)) {
+    const validViews = ['names', 'tavern', 'loot', 'd20-hub', 'd20-wild-magic', 'd20-secret-societies', 'd20-artefacts', 'd20-potions'];
+    
+    if (hash && validViews.includes(hash)) {
       openGeneratorView(hash, false);
     } else {
       closeGeneratorView(false);
@@ -56,7 +61,6 @@ function setupRouter() {
   };
 
   window.addEventListener('hashchange', handleHash);
-  // Первоначальная проверка при открытии страницы
   handleHash();
 
   const brandLink = document.getElementById('brand-link');
@@ -130,9 +134,8 @@ function renderCards() {
 
   grid.innerHTML = filtered.map(gen => createCardHTML(gen)).join('');
 
-  // Привязываем клик по карточке и кнопке
   grid.querySelectorAll('.generator-card').forEach(card => {
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', () => {
       const viewId = card.dataset.view;
       if (viewId) {
         window.location.hash = viewId;
@@ -195,7 +198,6 @@ export function openGeneratorView(viewId, updateHash = true) {
     window.location.hash = viewId;
   }
 
-  // Если это дайс-роллер — можем открыть и рабочий стол, и выдвижной трей
   const boardEl = document.getElementById('view-board');
   const genEl = document.getElementById('view-generator');
 
@@ -205,7 +207,6 @@ export function openGeneratorView(viewId, updateHash = true) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Находим метаданные генератора
   const genMeta = GENERATORS.find(g => g.viewId === viewId) || {
     title: 'Генератор',
     icon: '🎲'
@@ -214,10 +215,7 @@ export function openGeneratorView(viewId, updateHash = true) {
   document.getElementById('gen-header-icon').textContent = genMeta.icon;
   document.getElementById('gen-header-title').textContent = genMeta.title;
 
-  // Рендерим форму настроек для данного генератора
   renderGeneratorSettings(viewId);
-
-  // Сразу делаем одну первичную генерацию с дефолтными настройками
   executeCurrentGenerator();
 }
 
@@ -266,7 +264,7 @@ function setupGeneratorViewEvents() {
 }
 
 // ==========================================================================
-// Настройки и выполнение для каждого генератора
+// Настройки для каждого генератора
 // ==========================================================================
 function renderGeneratorSettings(viewId) {
   const container = document.getElementById('dynamic-settings-fields');
@@ -316,38 +314,81 @@ function renderGeneratorSettings(viewId) {
       `;
       break;
 
-    case 'tavern':
+    case 'tavern': {
+      const locations = Object.keys(TAVERN_DATA.menus_by_location);
+      const locOptions = locations.map(l => `<option value="${l}">${l}</option>`).join('');
+
       container.innerHTML = `
         <div class="form-group">
-          <label class="form-label" for="setting-tavern-style">Тип заведения</label>
-          <select class="form-select" id="setting-tavern-style">
-            <option value="cozy">Уютный постоялый двор у тракта</option>
-            <option value="shady">Злачный портовый притон контрабандистов</option>
-            <option value="noble">Роскошная столичная таверна</option>
+          <label class="form-label" for="setting-tavern-loc">Местность заведения</label>
+          <select class="form-select" id="setting-tavern-loc">
+            <option value="any">🎲 Случайная местность</option>
+            ${locOptions}
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Что включить в свиток:</label>
-          <label class="form-checkbox-label">
-            <input type="checkbox" class="form-checkbox" id="check-menu" checked>
-            <span>Меню: Фирменная еда и выпивка с ценами D&D</span>
-          </label>
-          <label class="form-checkbox-label">
-            <input type="checkbox" class="form-checkbox" id="check-innkeeper" checked>
-            <span>Хозяин заведения и его характерная черта</span>
-          </label>
-          <label class="form-checkbox-label">
-            <input type="checkbox" class="form-checkbox" id="check-rumors" checked>
-            <span>Слухи и зацепка для приключения</span>
-          </label>
-          <label class="form-checkbox-label">
-            <input type="checkbox" class="form-checkbox" id="check-event" checked>
-            <span>Случайное событие в зале прямо сейчас</span>
-          </label>
+          <label class="form-label" for="setting-tavern-class">Класс заведения</label>
+          <select class="form-select" id="setting-tavern-class">
+            <option value="cheap">Дешёвое (для простолюдинов и наемников)</option>
+            <option value="normal" selected>Обычное (добротный постоялый двор)</option>
+            <option value="luxury">Роскошное (для купцов и знати)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="setting-tavern-race">Раса хозяина</label>
+          <select class="form-select" id="setting-tavern-race">
+            <option value="any">🎲 Случайная раса</option>
+            <option value="Человек">Человек</option>
+            <option value="Дварф">Дварф</option>
+            <option value="Эльф">Эльф</option>
+            <option value="Полурослик">Полурослик</option>
+            <option value="Тифлинг">Тифлинг</option>
+            <option value="Драконорожденный">Драконорожденный</option>
+          </select>
         </div>
       `;
       break;
+    }
+
+    case 'd20-hub': {
+      const tableOptions = D20_CATALOG.map(t => `<option value="${t.id}">${t.icon} ${t.title}</option>`).join('');
+      container.innerHTML = `
+        <div class="form-group">
+          <label class="form-label" for="setting-d20-table">Таблица D20</label>
+          <select class="form-select" id="setting-d20-table">
+            <option value="all">🎲 Случайная из всех 12 таблиц</option>
+            ${tableOptions}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="setting-d20-roll">Бросок кубика d20</label>
+          <select class="form-select" id="setting-d20-roll">
+            <option value="random">🎲 Бросить d20 случайно</option>
+            ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">Значение: ${i+1}</option>`).join('')}
+          </select>
+        </div>
+      `;
+      break;
+    }
+
+    case 'd20-wild-magic':
+    case 'd20-secret-societies':
+    case 'd20-artefacts':
+    case 'd20-potions': {
+      container.innerHTML = `
+        <div class="form-group">
+          <label class="form-label" for="setting-d20-single-roll">Бросок d20</label>
+          <select class="form-select" id="setting-d20-single-roll">
+            <option value="random">🎲 Бросить кубик d20 случайно</option>
+            ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">Значение: ${i+1}</option>`).join('')}
+          </select>
+        </div>
+      `;
+      break;
+    }
 
     case 'loot':
       container.innerHTML = `
@@ -370,24 +411,15 @@ function renderGeneratorSettings(viewId) {
       `;
       break;
 
-    case 'dice':
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-dice-formula">Формула броска</label>
-          <input type="text" class="form-input" id="setting-dice-formula" value="2d20kh1 + 1d8 + 4" placeholder="Напр: 2d6 + 3">
-        </div>
-        <p style="color:var(--color-text-muted); font-size:0.85rem; line-height:1.4;">
-          Поддерживаются стандартные формулы D&D: преимущество <code>2d20kh1</code>, помеха <code>2d20kl1</code>, генерация характеристик <code>4d6kh3</code>, любые кости d4–d100.
-        </p>
-      `;
-      break;
-
     default:
       container.innerHTML = `<p style="color:var(--color-text-muted);">Настройки по умолчанию.</p>`;
       break;
   }
 }
 
+// ==========================================================================
+// Выполнение генерации
+// ==========================================================================
 function executeCurrentGenerator() {
   const resultContainer = document.getElementById('generator-result-content');
   if (!resultContainer) return;
@@ -421,22 +453,95 @@ function executeCurrentGenerator() {
     }
 
     case 'tavern': {
-      const tavern = generateTavern();
-      state.currentResultText = `${tavern.name}\nТрактирщик: ${tavern.innkeeper}\nЕда: ${tavern.dish}\nВыпивка: ${tavern.drink}\nСлух: ${tavern.rumor}\nСобытие: ${tavern.event}`;
+      const location = document.getElementById('setting-tavern-loc')?.value || 'any';
+      const classType = document.getElementById('setting-tavern-class')?.value || 'normal';
+      const innkeeperRace = document.getElementById('setting-tavern-race')?.value || 'any';
+
+      const tavern = generateTavern({ location, classType, innkeeperRace });
+      state.currentResultText = `${tavern.name} [${tavern.classLabel} | ${tavern.location}]\nХозяин: ${tavern.innkeeper}\nЦены: ${tavern.roomPrices}\nШтат: ${tavern.roomsInfo}\nБлюдо: ${tavern.dish}\nВыпивка: ${tavern.drink}\nАтмосфера: ${tavern.atmosphere}\nЗаполненность: ${tavern.crowd}\nСлух: ${tavern.rumor}\nСобытие: ${tavern.event}`;
 
       resultContainer.innerHTML = `
         <div class="result-item-card">
           <h4 class="result-item-title">${tavern.name}</h4>
           <div class="result-item-meta">
-            <span class="result-badge">Таверна & Постоялый Двор</span>
+            <span class="result-badge">${tavern.classLabel}</span>
+            <span class="result-badge">${tavern.location}</span>
+            <span class="result-badge">${tavern.crowd}</span>
           </div>
           <div class="result-item-body" style="display:flex; flex-direction:column; gap:0.75rem;">
-            <p><strong>👤 Трактирщик:</strong> ${tavern.innkeeper}</p>
-            <p><strong>🍲 Фирменное блюдо:</strong> ${tavern.dish}</p>
+            <p><strong>👤 Хозяин:</strong> ${tavern.innkeeper}</p>
+            <p><strong>🛏️ Ночлег & Цены:</strong> ${tavern.roomPrices} (${tavern.roomsInfo})</p>
+            <p><strong>🕯️ Обстановка:</strong> ${tavern.classDescription}</p>
+            <p><strong>🍲 Особое блюдо местности:</strong> ${tavern.dish}</p>
             <p><strong>🍺 Выпивка в кружке:</strong> ${tavern.drink}</p>
+            <p><strong>🎭 Настроение в зале:</strong> ${tavern.atmosphere}</p>
             <p><strong>🗣️ Свежий слух:</strong> «${tavern.rumor}»</p>
-            <p><strong>⚡ Случайное событие в зале:</strong> ${tavern.event}</p>
+            <p><strong>⚡ Происшествие:</strong> ${tavern.event}</p>
           </div>
+        </div>
+      `;
+      break;
+    }
+
+    case 'd20-hub': {
+      const tableId = document.getElementById('setting-d20-table')?.value || 'all';
+      const rollVal = document.getElementById('setting-d20-roll')?.value || 'random';
+      const rollNum = rollVal !== 'random' ? parseInt(rollVal, 10) : undefined;
+
+      const evt = generateD20Event({ tableId, rollNum });
+      state.currentResultText = `[${evt.tableTitle}] d20 = ${evt.roll}\n${evt.text}`;
+
+      resultContainer.innerHTML = `
+        <div class="result-item-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+            <h4 class="result-item-title">${evt.icon} ${evt.tableTitle}</h4>
+            <span style="font-family:var(--font-display); font-size:1.8rem; font-weight:bold; color:var(--color-accent); background:var(--color-surface); padding:0.2rem 0.8rem; border-radius:10px; border:1px solid var(--color-border);">
+              d20: ${evt.roll}
+            </span>
+          </div>
+          <div class="result-item-meta">
+            <span class="result-badge">${evt.badge}</span>
+            <span>${evt.tableDescription}</span>
+          </div>
+          <p class="result-item-body" style="font-size:1.1rem; line-height:1.6; margin-top:0.5rem; background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px; border-left:3px solid var(--color-accent);">
+            ${evt.text}
+          </p>
+        </div>
+      `;
+      break;
+    }
+
+    case 'd20-wild-magic':
+    case 'd20-secret-societies':
+    case 'd20-artefacts':
+    case 'd20-potions': {
+      const map = {
+        'd20-wild-magic': 'wild-magic',
+        'd20-secret-societies': 'secret-societies',
+        'd20-artefacts': 'artefacts-clues',
+        'd20-potions': 'strange-potions'
+      };
+      const tableId = map[state.currentView];
+      const rollVal = document.getElementById('setting-d20-single-roll')?.value || 'random';
+      const rollNum = rollVal !== 'random' ? parseInt(rollVal, 10) : undefined;
+
+      const evt = generateD20Event({ tableId, rollNum });
+      state.currentResultText = `[${evt.tableTitle}] d20 = ${evt.roll}\n${evt.text}`;
+
+      resultContainer.innerHTML = `
+        <div class="result-item-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+            <h4 class="result-item-title">${evt.icon} ${evt.tableTitle}</h4>
+            <span style="font-family:var(--font-display); font-size:1.8rem; font-weight:bold; color:var(--color-accent); background:var(--color-surface); padding:0.2rem 0.8rem; border-radius:10px; border:1px solid var(--color-border);">
+              d20: ${evt.roll}
+            </span>
+          </div>
+          <div class="result-item-meta">
+            <span class="result-badge">${evt.badge}</span>
+          </div>
+          <p class="result-item-body" style="font-size:1.1rem; line-height:1.6; margin-top:0.5rem; background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px; border-left:3px solid var(--color-accent);">
+            ${evt.text}
+          </p>
         </div>
       `;
       break;
@@ -466,26 +571,6 @@ function executeCurrentGenerator() {
       break;
     }
 
-    case 'dice': {
-      const formula = document.getElementById('setting-dice-formula')?.value || '2d20kh1 + 1d8 + 4';
-      const roll = rollFormula(formula);
-
-      state.currentResultText = `${roll.formula} = ${roll.total} (${roll.breakdown})`;
-
-      resultContainer.innerHTML = `
-        <div class="result-item-card" style="text-align:center;">
-          <h4 class="result-item-title" style="font-size:3.2rem; color:var(--color-accent); margin-bottom:0.2rem;">${roll.total}</h4>
-          <div class="result-item-meta" style="justify-content:center;">
-            <span class="result-badge">${roll.formula}</span>
-          </div>
-          <p class="result-item-body" style="font-size:1.1rem; color:var(--color-text-secondary); margin-top:0.5rem;">
-            <strong>Расчёт:</strong> ${roll.breakdown}
-          </p>
-        </div>
-      `;
-      break;
-    }
-
     default:
       resultContainer.innerHTML = `<div class="result-item-card"><p>Выберите генератор на главной доске.</p></div>`;
       break;
@@ -507,7 +592,8 @@ function setupDiceDrawer() {
   document.querySelectorAll('.dice-die-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const sides = parseInt(btn.dataset.sides, 10) || 20;
-      const result = rollDie(sides);
+      // rollDie(sides, true) сохраняет бросок в историю
+      const result = rollDie(sides, true);
       displayDiceResult(result, `1d${sides}`);
     });
   });
