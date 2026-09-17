@@ -1,24 +1,135 @@
+/* === Базовые переменные и Темы === */
+:root {
+    /* Светлая тема (Старый пергамент) */
+    --bg-color: #f4f1ea;
+    --text-color: #2c241b;
+    --text-muted: #5c4d3c;
+    --card-bg: #ffffff;
+    --card-border: #d1c7b7;
+    --card-hover-border: #8b5a2b;
+    --accent-color: #8b5a2b;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+    /* Темная тема (Магический чердак) */
+    --bg-color: #16141c;
+    --text-color: #e6dfcc;
+    --text-muted: #9e9581;
+    --card-bg: #231f2b;
+    --card-border: #383145;
+    --card-hover-border: #b89056;
+    --accent-color: #b89056;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* === Глобальные стили === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-  font-family: Arial, sans-sefir;
-  text-align: center;
-  background-color: #f0f0f0;
-  padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
 }
-h1 {
-  color: #333;
+
+h1, h2, h3 {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+/* === Шапка (Header) === */
+.header {
+    padding: 2rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    background-color: var(--card-bg);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-li {
-  margin: 10px 0;
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-a {
-  text-decoration: none;
-  color: #007bff:
-  font-size: 18px;
+
+.logo h1 {
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    letter-spacing: 2px;
 }
-a:hover {
-  text-decoration: underline;
+
+.logo p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.theme-btn {
+    background: none;
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: border-color 0.3s ease;
+}
+
+.theme-btn:hover {
+    border-color: var(--accent-color);
+}
+
+/* === Сетка генераторов (Dashboard) === */
+.dashboard {
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* === Карточка генератора === */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: var(--card-hover-border);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
