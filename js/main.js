@@ -1116,11 +1116,18 @@ function setupStaffCardSync() {
   });
 
   const detailsCard = document.getElementById('card-tavern-details');
-  if (detailsCard && window.ResizeObserver) {
-    const ro = new ResizeObserver(() => {
-      syncStaffCardHeight();
-    });
-    ro.observe(detailsCard);
+  if (detailsCard) {
+    const layout = detailsCard.querySelector('.details-layout');
+    if (layout && window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        syncStaffCardHeight();
+      });
+      ro.observe(layout);
+    }
+    const sketchImg = document.getElementById('t-details-sketch');
+    if (sketchImg) {
+      sketchImg.addEventListener('load', () => syncStaffCardHeight());
+    }
   }
 }
 
@@ -1130,16 +1137,24 @@ function syncStaffCardHeight() {
   if (!detailsCard || !staffCard) return;
 
   if (window.innerWidth > 1200) {
-    // Reset heights so detailsCard can determine its natural content height
-    staffCard.style.maxHeight = '';
-    staffCard.style.height = '';
+    const header = detailsCard.querySelector('.tavern-card-header');
+    const layout = detailsCard.querySelector('.details-layout');
+    
+    // Calculate true natural content height of tavern details
+    const headerH = header ? header.offsetHeight : 36;
+    const layoutH = layout ? layout.offsetHeight : 380;
+    // 24px padding (12 top + 12 bottom) + 10px gap + 2px border = 36px
+    const naturalHeight = headerH + layoutH + 36;
 
-    const h = detailsCard.offsetHeight;
-    if (h > 0) {
-      staffCard.style.height = `${h}px`;
-      staffCard.style.maxHeight = `${h}px`;
+    if (naturalHeight > 0) {
+      detailsCard.style.height = `${naturalHeight}px`;
+      detailsCard.style.maxHeight = `${naturalHeight}px`;
+      staffCard.style.height = `${naturalHeight}px`;
+      staffCard.style.maxHeight = `${naturalHeight}px`;
     }
   } else {
+    detailsCard.style.height = '';
+    detailsCard.style.maxHeight = '';
     staffCard.style.maxHeight = '380px';
     staffCard.style.height = '';
   }
