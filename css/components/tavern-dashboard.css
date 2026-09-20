@@ -159,27 +159,24 @@
   align-items: stretch;
 }
 
-/* ROW 1: 3 cards (Generation params 1fr | Patron params 1fr | Patron profile 1.2fr) */
+/* ROW 1: 2 cards (Unified parameters 1.35fr | Patron profile 1fr) */
 .tavern-row-top {
-  grid-template-columns: 1fr 1fr 1.2fr;
+  grid-template-columns: 1.35fr 1fr;
 }
 
-/* ROW 2: 2 cards (Tavern details with sketch ~1.35fr | Visitors table 1fr) */
+/* ROW 2: 2 cards (Tavern details with sketch 1.35fr | Staff roster 1fr) */
 .tavern-row-mid {
   grid-template-columns: 1.35fr 1fr;
 }
 
-/* ROW 3: 3 cards (Rooms 1fr | Staff roster 1fr | Menu & Prices 1.15fr) */
+/* ROW 3: 3 cards (Rooms 1fr | Visitors table 1.25fr | Menu & Prices 1.15fr) */
 .tavern-row-bottom {
-  grid-template-columns: 1fr 1fr 1.15fr;
+  grid-template-columns: 1fr 1.25fr 1.15fr;
 }
 
 @media (max-width: 1200px) {
   .tavern-row-top {
-    grid-template-columns: 1fr 1fr;
-  }
-  .tavern-row-top #card-patron-profile {
-    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
   }
   .tavern-row-mid {
     grid-template-columns: 1fr;
@@ -198,7 +195,6 @@
   .tavern-row-bottom {
     grid-template-columns: 1fr;
   }
-  .tavern-row-top #card-patron-profile,
   .tavern-row-bottom #card-tavern-menu {
     grid-column: auto;
   }
@@ -257,6 +253,56 @@
   color: var(--accent-primary, #e2b76f);
   border: 1px solid rgba(226, 183, 111, 0.3);
   white-space: nowrap;
+}
+
+/* Unified Parameters Block (Tavern | Innkeeper) */
+.unified-params-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .unified-params-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.param-subblock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.param-subblock-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--accent-primary, #e2b76f);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(226, 183, 111, 0.2);
+  margin-bottom: 2px;
+}
+
+.param-reroll-wrapper {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.btn-reroll-integrated {
+  width: 100%;
+  justify-content: center;
+  padding: 10px 16px;
+  font-size: 0.88rem;
+  letter-spacing: 0.5px;
 }
 
 /* Parameter Controls with Lock Toggle */

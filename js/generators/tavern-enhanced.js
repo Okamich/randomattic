@@ -561,7 +561,7 @@ function generateMenu(location, category) {
 function generateVisitors(crowdCount) {
   const visitors = [];
   const races = Object.keys(RACE_PORTRAIT_KEYS);
-  const count = Math.max(2, Math.min(crowdCount || 6, 12));
+  const count = Math.max(1, Number(crowdCount) || 8);
 
   for (let i = 0; i < count; i++) {
     const arch = getRandomItem(TAVERN_DATA.visitor_archetypes);
@@ -663,7 +663,7 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
   if (crowd <= 4) crowdDesc = `Практически пусто (${crowd} чел.), лишь редкие одинокие путники тихо сидят по углам.`;
   else if (crowd <= 12) crowdDesc = `Умеренно оживлённо (${crowd} чел.), несколько столов заняты беседующими гостями.`;
   else if (crowd <= 22) crowdDesc = `Шумно и многолюдно (${crowd} чел.), смех, стук кружек и оживлённые споры.`;
-  else crowdDesc = `Яблоку негде упасть (${crowd}+ чел.), гулянка в самом разгаре, за столами теснятся гости!`;
+  else crowdDesc = `Яблоку негде упасть (${crowd} чел.), гулянка в самом разгаре, за столами теснятся гости!`;
 
   return {
     params: {
