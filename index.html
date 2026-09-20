@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="css/components/generator-view.css">
   <link rel="stylesheet" href="css/components/dice-drawer.css">
   <link rel="stylesheet" href="css/components/modal.css">
+  <link rel="stylesheet" href="css/components/tavern-dashboard.css">
 </head>
 <body>
 
@@ -116,8 +117,8 @@
         </div>
       </div>
 
-      <!-- Рабочая зона: Настройки (слева) + Результат (справа) -->
-      <div class="generator-workspace">
+      <!-- Стандартная рабочая зона: Настройки (слева) + Результат (справа) -->
+      <div class="generator-workspace" id="standard-generator-workspace">
         <!-- Панель настроек -->
         <div class="settings-panel">
           <h3 class="settings-panel-title">⚙️ Настройки генерации</h3>
@@ -146,6 +147,275 @@
 
             <div class="result-content" id="generator-result-content">
               <!-- Сюда выводится готовый результат -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Специализированная 3-колоночная консоль таверны (Tavern Dashboard) -->
+      <div id="tavern-dashboard-workspace" class="tavern-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="tavern-header-bar">
+          <div class="tavern-header-title">
+            <span style="font-size: 1.8rem;">🍺</span>
+            <div>
+              <h2>Rand-om-Attic | Архитектор Таверны и Профиль Хозяина</h2>
+              <div class="tavern-header-subtitle">Процедурная генерация заведений, персонала, комнат, меню и посетителей по D&D 5e</div>
+            </div>
+          </div>
+          <div class="tavern-actions">
+            <button class="btn-tavern-primary" id="btn-reroll-tavern">
+              <span>🎲</span>
+              <span>Сгенерировать таверну (Re-roll)</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-unlock-all-tavern">
+              <span>🔓</span>
+              <span>Сбросить все замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-tavern-summary">
+              <span>📋</span>
+              <span>Копировать сводку</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Column Grid Layout -->
+        <div class="tavern-grid-layout">
+          <!-- COLUMN 1 -->
+          <div class="tavern-col">
+            <!-- 1. Tavern Parameters Card with Lock toggles -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>⚙️</span> Параметры Генерации</h3>
+                <span class="tavern-card-badge">Locks on controls</span>
+              </div>
+              <div class="param-controls-list">
+                <!-- Location -->
+                <div class="param-row">
+                  <label for="t-param-loc">Месторасположение:</label>
+                  <div class="param-input-group">
+                    <select id="t-param-loc" class="param-select"></select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-loc" title="Заблокировать от случайного броска" aria-label="Блокировка местности">🔓</button>
+                </div>
+                <!-- Type -->
+                <div class="param-row">
+                  <label for="t-param-type">Тип заведения:</label>
+                  <div class="param-input-group">
+                    <select id="t-param-type" class="param-select"></select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-type" title="Заблокировать от случайного броска" aria-label="Блокировка типа">🔓</button>
+                </div>
+                <!-- Category -->
+                <div class="param-row">
+                  <label for="t-param-cat">Категория:</label>
+                  <div class="param-input-group">
+                    <select id="t-param-cat" class="param-select"></select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-cat" title="Заблокировать от случайного броска" aria-label="Блокировка категории">🔓</button>
+                </div>
+                <!-- Crowd Slider -->
+                <div class="param-row">
+                  <label for="t-param-crowd">Количество гостей:</label>
+                  <div class="param-slider-wrapper">
+                    <input type="range" id="t-param-crowd" class="param-slider" min="1" max="30" value="8">
+                    <span class="param-slider-value" id="t-val-crowd">8</span>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-crowd" title="Заблокировать от случайного броска" aria-label="Блокировка гостей">🔓</button>
+                </div>
+                <!-- Atmosphere -->
+                <div class="param-row">
+                  <label for="t-param-atmo">Тип атмосферы:</label>
+                  <div class="param-input-group">
+                    <select id="t-param-atmo" class="param-select"></select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-atmo" title="Заблокировать от случайного броска" aria-label="Блокировка атмосферы">🔓</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Tavern Details Card -->
+            <div class="tavern-card" id="card-tavern-details">
+              <div class="tavern-card-header">
+                <h3 id="t-details-title"><span>🏠</span> Подробности Таверны</h3>
+                <span class="tavern-card-badge" id="t-details-badge">Обычное</span>
+              </div>
+              <div class="details-layout">
+                <div class="details-sketch-box">
+                  <img src="assets/images/taverns/tavern_sketch_classic.jpg" alt="План здания" class="details-sketch-img" id="t-details-sketch">
+                  <div class="details-sketch-caption">План здания</div>
+                </div>
+                <div class="details-list" id="t-details-specs">
+                  <!-- Rendered specs -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Room Description Table Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>🛏️</span> Описание Комнат (Ночлег)</h3>
+                <span class="tavern-card-badge" id="t-rooms-count">Номера</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 45px;">№</th>
+                      <th>Тип и Описание</th>
+                      <th style="width: 80px;">Цена</th>
+                      <th style="width: 100px;">Статус</th>
+                      <th>Особенность комнаты</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-rooms-tbody">
+                    <!-- Rendered rooms -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMN 2 -->
+          <div class="tavern-col">
+            <!-- 4. Patron Parameters Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>👤</span> Параметры Хозяина</h3>
+                <span class="tavern-card-badge">Выбираемые</span>
+              </div>
+              <div class="param-controls-list">
+                <!-- Gender -->
+                <div class="param-row">
+                  <label for="p-param-gender">Пол хозяина:</label>
+                  <div class="param-input-group">
+                    <select id="p-param-gender" class="param-select">
+                      <option value="random">🎲 Случайный пол</option>
+                      <option value="m">♂ Мужской</option>
+                      <option value="f">♀ Женский</option>
+                    </select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-gender" title="Заблокировать от случайного броска" aria-label="Блокировка пола">🔓</button>
+                </div>
+                <!-- Race -->
+                <div class="param-row">
+                  <label for="p-param-race">Раса хозяина:</label>
+                  <div class="param-input-group">
+                    <select id="p-param-race" class="param-select"></select>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-race" title="Заблокировать от случайного броска" aria-label="Блокировка расы">🔓</button>
+                </div>
+                <!-- Age Slider -->
+                <div class="param-row">
+                  <label for="p-param-age">Возраст хозяина:</label>
+                  <div class="param-slider-wrapper">
+                    <input type="range" id="p-param-age" class="param-slider" min="18" max="250" value="38">
+                    <span class="param-slider-value" id="p-val-age">38</span>
+                  </div>
+                  <button class="btn-lock" id="btn-lock-age" title="Заблокировать от случайного броска" aria-label="Блокировка возраста">🔓</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Tavern Staff Roster Table Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>👥</span> Реестр Персонала (Tavern Roster)</h3>
+                <span class="tavern-card-badge" id="t-staff-count">Штат</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th>Имя</th>
+                      <th>Роль</th>
+                      <th>Раса</th>
+                      <th>Возраст</th>
+                      <th>Характер</th>
+                      <th>Навыки</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-roster-tbody">
+                    <!-- Rendered staff -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMN 3 -->
+          <div class="tavern-col">
+            <!-- 6. Non-editable Generated Patron Profile Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>📜</span> Профиль Хозяина</h3>
+                <span class="tavern-card-badge" id="p-profile-badge">Владелец</span>
+              </div>
+              <div class="patron-profile-layout">
+                <div class="patron-portrait-frame">
+                  <img src="assets/images/portraits/human_male.jpg" alt="Портрет хозяина" class="patron-portrait-img" id="p-profile-portrait">
+                </div>
+                <div class="patron-info">
+                  <h4 class="patron-name-title" id="p-profile-name">Имя</h4>
+                  <div class="patron-meta" id="p-profile-meta">Раса, пол, возраст</div>
+                  <p class="patron-desc" id="p-profile-bio">Биография...</p>
+                  <div class="details-item" style="font-size:0.8rem; margin-top:2px;">
+                    <span class="details-label">Особенность:</span> <span id="p-profile-quirk">...</span>
+                  </div>
+                  <div class="patron-secret-box">
+                    <strong style="color:var(--accent-primary, #e2b76f);">Тайна хозяина:</strong> <span id="p-profile-secret">...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Visitors Table Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>🎲</span> Посетители в зале (Visitors)</h3>
+                <span class="tavern-card-badge" id="t-visitors-count">Гости</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th>Имя</th>
+                      <th>Роль / Статус</th>
+                      <th>Класс D&D</th>
+                      <th>Раса</th>
+                      <th>Возраст</th>
+                      <th>Занятие в зале</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-visitors-tbody">
+                    <!-- Rendered visitors -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 8. Menu & Prices Table Card -->
+            <div class="tavern-card">
+              <div class="tavern-card-header">
+                <h3><span>🍲</span> Меню и Цены (Menu & Prices)</h3>
+                <span class="tavern-card-badge">Цены D&D 5e</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th>Категория</th>
+                      <th>Позиция меню</th>
+                      <th style="width: 70px;">Цена</th>
+                      <th style="width: 90px;">Пометка</th>
+                      <th>Описание</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-menu-tbody">
+                    <!-- Rendered menu rows -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

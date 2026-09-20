@@ -23,6 +23,13 @@ import { generateCharacterName } from './generators/names.js';
 import { generateTavern } from './generators/taverns.js';
 import { generateLoot } from './generators/loot.js';
 import { generateD20Event } from './generators/d20.js';
+import {
+  generateTavernEnhanced,
+  BIOMES,
+  TAVERN_TYPES,
+  TAVERN_CATEGORIES,
+  RACE_PORTRAIT_KEYS
+} from './generators/tavern-enhanced.js';
 
 // Текущее состояние приложения
 const state = {
@@ -215,8 +222,21 @@ export function openGeneratorView(viewId, updateHash = true) {
   document.getElementById('gen-header-icon').textContent = genMeta.icon;
   document.getElementById('gen-header-title').textContent = genMeta.title;
 
-  renderGeneratorSettings(viewId);
-  executeCurrentGenerator();
+  const standardWorkspace = document.getElementById('standard-generator-workspace');
+  const tavernWorkspace = document.getElementById('tavern-dashboard-workspace');
+
+  if (viewId === 'tavern') {
+    if (standardWorkspace) standardWorkspace.style.display = 'none';
+    if (tavernWorkspace) {
+      tavernWorkspace.style.display = 'flex';
+      initTavernDashboard();
+    }
+  } else {
+    if (standardWorkspace) standardWorkspace.style.display = 'grid';
+    if (tavernWorkspace) tavernWorkspace.style.display = 'none';
+    renderGeneratorSettings(viewId);
+    executeCurrentGenerator();
+  }
 }
 
 export function closeGeneratorView(updateHash = true) {
@@ -687,3 +707,389 @@ function renderDiceHistory() {
     </li>
   `).join('');
 }
+
+// ==========================================================================
+// TAVERN ARCHITECT DASHBOARD CONTROLLER (Matching TGR_1_main reference)
+// ==========================================================================
+
+const tavernState = {
+  options: {
+    location: 'random',
+    type: 'random',
+    category: 'random',
+    crowd: 8,
+    atmosphere: 'random',
+    innkeeperGender: 'random',
+    innkeeperRace: 'random',
+    innkeeperAge: 38
+  },
+  locks: {
+    lockLocation: false,
+    lockType: false,
+    lockCategory: false,
+    lockCrowd: false,
+    lockAtmosphere: false,
+    lockGender: false,
+    lockRace: false,
+    lockAge: false
+  },
+  currentData: null,
+  isInitialized: false
+};
+
+const TAVERN_LOCK_ITEMS = [
+  { btnId: 'btn-lock-loc', lockKey: 'lockLocation', inputId: 't-param-loc', optKey: 'location' },
+  { btnId: 'btn-lock-type', lockKey: 'lockType', inputId: 't-param-type', optKey: 'type' },
+  { btnId: 'btn-lock-cat', lockKey: 'lockCategory', inputId: 't-param-cat', optKey: 'category' },
+  { btnId: 'btn-lock-crowd', lockKey: 'lockCrowd', inputId: 't-param-crowd', optKey: 'crowd' },
+  { btnId: 'btn-lock-atmo', lockKey: 'lockAtmosphere', inputId: 't-param-atmo', optKey: 'atmosphere' },
+  { btnId: 'btn-lock-gender', lockKey: 'lockGender', inputId: 'p-param-gender', optKey: 'innkeeperGender' },
+  { btnId: 'btn-lock-race', lockKey: 'lockRace', inputId: 'p-param-race', optKey: 'innkeeperRace' },
+  { btnId: 'btn-lock-age', lockKey: 'lockAge', inputId: 'p-param-age', optKey: 'innkeeperAge' }
+];
+
+function initTavernDashboard() {
+  if (!tavernState.isInitialized) {
+    populateTavernSelects();
+    setupTavernEventListeners();
+    tavernState.isInitialized = true;
+  }
+  rerollTavern();
+}
+
+function populateTavernSelects() {
+  // 1. Locations
+  const locSel = document.getElementById('t-param-loc');
+  if (locSel) {
+    locSel.innerHTML = `<option value="random">🎲 Любая местность</option>` +
+      BIOMES.map(b => `<option value="${b}">${b}</option>`).join('');
+  }
+
+  // 2. Types
+  const typeSel = document.getElementById('t-param-type');
+  if (typeSel) {
+    typeSel.innerHTML = `<option value="random">🎲 Любой тип</option>` +
+      TAVERN_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
+  }
+
+  // 3. Categories
+  const catSel = document.getElementById('t-param-cat');
+  if (catSel) {
+    catSel.innerHTML = `<option value="random">🎲 Любая категория</option>` +
+      TAVERN_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  // 4. Atmospheres
+  const atmoSel = document.getElementById('t-param-atmo');
+  if (atmoSel) {
+    atmoSel.innerHTML = `<option value="random">🎲 Любая атмосфера</option>` +
+      TAVERN_DATA.atmospheres.map(a => `<option value="${a.mood}">${a.mood}</option>`).join('');
+  }
+
+  // 5. Races
+  const raceSel = document.getElementById('p-param-race');
+  if (raceSel) {
+    const races = Object.keys(RACE_PORTRAIT_KEYS);
+    raceSel.innerHTML = `<option value="random">🎲 Любая раса</option>` +
+      races.map(r => `<option value="${r}">${r}</option>`).join('');
+  }
+}
+
+function setupTavernEventListeners() {
+  // Reroll button
+  document.getElementById('btn-reroll-tavern')?.addEventListener('click', () => {
+    rerollTavern();
+  });
+
+  // Unlock all button
+  document.getElementById('btn-unlock-all-tavern')?.addEventListener('click', () => {
+    TAVERN_LOCK_ITEMS.forEach(item => {
+      tavernState.locks[item.lockKey] = false;
+      const btn = document.getElementById(item.btnId);
+      if (btn) {
+        btn.classList.remove('locked');
+        btn.textContent = '🔓';
+        btn.title = 'Заблокировать от случайного броска';
+      }
+    });
+  });
+
+  // Copy summary button
+  document.getElementById('btn-copy-tavern-summary')?.addEventListener('click', () => {
+    copyTavernSummary();
+  });
+
+  // Lock buttons toggle
+  TAVERN_LOCK_ITEMS.forEach(item => {
+    const btn = document.getElementById(item.btnId);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      const isLocked = !tavernState.locks[item.lockKey];
+      tavernState.locks[item.lockKey] = isLocked;
+      btn.classList.toggle('locked', isLocked);
+      btn.textContent = isLocked ? '🔒' : '🔓';
+      btn.title = isLocked ? 'Заблокировано от случайного броска' : 'Разблокировано (будет перегенерировано)';
+
+      if (isLocked) {
+        const el = document.getElementById(item.inputId);
+        if (el) tavernState.options[item.optKey] = el.value;
+      }
+    });
+  });
+
+  // Sliders display values & sync
+  const crowdSlider = document.getElementById('t-param-crowd');
+  const crowdVal = document.getElementById('t-val-crowd');
+  if (crowdSlider && crowdVal) {
+    crowdSlider.addEventListener('input', (e) => {
+      crowdVal.textContent = e.target.value;
+      tavernState.options.crowd = Number(e.target.value);
+    });
+  }
+
+  const ageSlider = document.getElementById('p-param-age');
+  const ageVal = document.getElementById('p-val-age');
+  if (ageSlider && ageVal) {
+    ageSlider.addEventListener('input', (e) => {
+      ageVal.textContent = e.target.value;
+      tavernState.options.innkeeperAge = Number(e.target.value);
+    });
+  }
+
+  // Inputs change sync (when changed manually)
+  TAVERN_LOCK_ITEMS.forEach(item => {
+    const el = document.getElementById(item.inputId);
+    if (!el) return;
+    el.addEventListener('change', () => {
+      tavernState.options[item.optKey] = el.value;
+    });
+  });
+}
+
+function rerollTavern() {
+  // Sync options from controls for unlocked items if user specifically selected a non-random value
+  TAVERN_LOCK_ITEMS.forEach(item => {
+    if (!tavernState.locks[item.lockKey]) {
+      const el = document.getElementById(item.inputId);
+      if (el) {
+        tavernState.options[item.optKey] = el.value;
+      }
+    }
+  });
+
+  const generated = generateTavernEnhanced(tavernState.options, tavernState.locks);
+  tavernState.currentData = generated;
+
+  renderTavernUI(generated);
+}
+
+function renderTavernUI(data) {
+  if (!data) return;
+
+  // 1. Sync parameter controls if not locked
+  if (!tavernState.locks.lockLocation) {
+    const locEl = document.getElementById('t-param-loc');
+    if (locEl) locEl.value = data.params.location;
+  }
+  if (!tavernState.locks.lockType) {
+    const typeEl = document.getElementById('t-param-type');
+    if (typeEl) typeEl.value = data.params.type;
+  }
+  if (!tavernState.locks.lockCategory) {
+    const catEl = document.getElementById('t-param-cat');
+    if (catEl) catEl.value = data.params.category;
+  }
+  if (!tavernState.locks.lockCrowd) {
+    const crowdEl = document.getElementById('t-param-crowd');
+    const crowdVal = document.getElementById('t-val-crowd');
+    if (crowdEl && crowdVal) {
+      crowdEl.value = data.params.crowd;
+      crowdVal.textContent = data.params.crowd;
+    }
+  }
+  if (!tavernState.locks.lockAtmosphere) {
+    const atmoEl = document.getElementById('t-param-atmo');
+    if (atmoEl) atmoEl.value = data.params.atmosphere;
+  }
+  if (!tavernState.locks.lockGender) {
+    const genderEl = document.getElementById('p-param-gender');
+    if (genderEl) genderEl.value = data.params.innkeeperGender;
+  }
+  if (!tavernState.locks.lockRace) {
+    const raceEl = document.getElementById('p-param-race');
+    if (raceEl) raceEl.value = data.params.innkeeperRace;
+  }
+  if (!tavernState.locks.lockAge) {
+    const ageEl = document.getElementById('p-param-age');
+    const ageVal = document.getElementById('p-val-age');
+    if (ageEl && ageVal) {
+      ageEl.value = data.params.innkeeperAge;
+      ageVal.textContent = data.params.innkeeperAge;
+    }
+  }
+
+  // 2. Tavern Details Card
+  const detailsTitle = document.getElementById('t-details-title');
+  if (detailsTitle) detailsTitle.innerHTML = `<span>🏠</span> ${data.tavern.name}`;
+  
+  const detailsBadge = document.getElementById('t-details-badge');
+  if (detailsBadge) detailsBadge.textContent = `${data.tavern.category} • ${data.tavern.location}`;
+
+  const detailsSketch = document.getElementById('t-details-sketch');
+  if (detailsSketch) detailsSketch.src = data.tavern.sketchPath;
+
+  const detailsSpecs = document.getElementById('t-details-specs');
+  if (detailsSpecs) {
+    detailsSpecs.innerHTML = `
+      <div class="details-item"><span class="details-label">• Имя:</span> <strong>${data.tavern.name}</strong></div>
+      <div class="details-item"><span class="details-label">• Местоположение:</span> ${data.tavern.location}</div>
+      <div class="details-item"><span class="details-label">• Тип и Класс:</span> ${data.tavern.type} (${data.tavern.category})</div>
+      <div class="details-item"><span class="details-label">• Владелец:</span> ${data.patron.fullName} (${data.patron.race}, ${data.patron.genderText}, ${data.patron.age} лет)</div>
+      <div class="details-item"><span class="details-label">• Заполненность зала:</span> ${data.tavern.crowdDesc}</div>
+      <div class="details-item"><span class="details-label">• Атмосфера:</span> <strong>${data.tavern.atmosphere}</strong> — ${data.tavern.atmosphereDesc}</div>
+      <div class="details-item"><span class="details-label">• Слухи (Тема дня):</span> «${data.tavern.rumor}»</div>
+      <div class="details-item"><span class="details-label">• Случайное событие:</span> ${data.tavern.event}</div>
+      <div class="details-item"><span class="details-label">• Особое меню ⭐:</span> «${data.tavern.specialPair.dish}» и напиток «${data.tavern.specialPair.drink}»</div>
+    `;
+  }
+
+  // 3. Room Description Table
+  const roomsCountEl = document.getElementById('t-rooms-count');
+  if (roomsCountEl) roomsCountEl.textContent = `${data.rooms.length} номеров`;
+
+  const roomsTbody = document.getElementById('t-rooms-tbody');
+  if (roomsTbody) {
+    roomsTbody.innerHTML = data.rooms.map(r => `
+      <tr>
+        <td style="font-weight:700; text-align:center;">${r.roomNumber}</td>
+        <td>${r.typeDesc}</td>
+        <td><span class="cost-badge">${r.cost}</span></td>
+        <td>
+          ${r.isOccupied 
+            ? `<span class="badge-occupied" title="${r.tenant}">🔴 Занято</span><div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${r.tenant}</div>` 
+            : `<span class="badge-vacant">🟢 Свободно</span>`}
+        </td>
+        <td><span class="${r.noteType === 'positive' ? 'room-note-pos' : 'room-note-neg'}">«${r.note}»</span></td>
+      </tr>
+    `).join('');
+  }
+
+  // 4. Patron Profile Card
+  const pPortrait = document.getElementById('p-profile-portrait');
+  if (pPortrait) {
+    pPortrait.src = data.patron.portraitPath;
+    pPortrait.onerror = () => {
+      pPortrait.src = 'assets/images/portraits/human_male.jpg';
+    };
+  }
+
+  const pName = document.getElementById('p-profile-name');
+  if (pName) pName.textContent = data.patron.fullName;
+
+  const pMeta = document.getElementById('p-profile-meta');
+  if (pMeta) pMeta.textContent = `${data.patron.race} • ${data.patron.genderText} • ${data.patron.age} лет`;
+
+  const pBio = document.getElementById('p-profile-bio');
+  if (pBio) pBio.textContent = data.patron.backstory;
+
+  const pQuirk = document.getElementById('p-profile-quirk');
+  if (pQuirk) pQuirk.textContent = data.patron.quirk;
+
+  const pSecret = document.getElementById('p-profile-secret');
+  if (pSecret) pSecret.textContent = data.patron.secret;
+
+  // 5. Tavern Staff Roster Table
+  const staffCountEl = document.getElementById('t-staff-count');
+  if (staffCountEl) staffCountEl.textContent = `${data.roster.length} сотрудников`;
+
+  const rosterTbody = document.getElementById('t-roster-tbody');
+  if (rosterTbody) {
+    rosterTbody.innerHTML = data.roster.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td><span style="color:var(--accent-primary); font-weight:600;">${s.role}</span></td>
+        <td>${s.race}</td>
+        <td>${s.age}</td>
+        <td style="font-size:0.78rem;">${s.trait}</td>
+        <td style="font-size:0.78rem; color:var(--text-muted);">${s.skill}</td>
+      </tr>
+    `).join('');
+  }
+
+  // 6. Visitors Table
+  const visitorsCountEl = document.getElementById('t-visitors-count');
+  if (visitorsCountEl) visitorsCountEl.textContent = `${data.visitors.length} гостей`;
+
+  const visitorsTbody = document.getElementById('t-visitors-tbody');
+  if (visitorsTbody) {
+    visitorsTbody.innerHTML = data.visitors.map(v => `
+      <tr>
+        <td><strong>${v.name}</strong></td>
+        <td>${v.role}</td>
+        <td><span class="result-badge" style="margin:0;">${v.dndClass}</span></td>
+        <td>${v.race}</td>
+        <td>${v.age}</td>
+        <td style="font-size:0.78rem;">${v.activity}</td>
+      </tr>
+    `).join('');
+  }
+
+  // 7. Menu & Prices Table
+  const menuTbody = document.getElementById('t-menu-tbody');
+  if (menuTbody) {
+    menuTbody.innerHTML = data.menu.map(m => `
+      <tr style="${m.isSpecial ? 'background: rgba(212, 175, 55, 0.08);' : ''}">
+        <td><small style="color:var(--text-muted); font-weight:600;">${m.category}</small></td>
+        <td><strong>${m.name}</strong></td>
+        <td><span class="cost-badge">${m.cost}</span></td>
+        <td>${m.isSpecial ? '<span class="badge-special">Особое ⭐</span>' : '—'}</td>
+        <td style="font-size:0.78rem; color:var(--text-secondary);">${m.desc}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+function copyTavernSummary() {
+  const d = tavernState.currentData;
+  if (!d) return;
+
+  const btn = document.getElementById('btn-copy-tavern-summary');
+
+  const text = `
+🏰 ${d.tavern.name} (${d.tavern.category}, ${d.tavern.type})
+Местность: ${d.tavern.location}
+Атмосфера: ${d.tavern.atmosphere} — ${d.tavern.atmosphereDesc}
+Заполненность: ${d.tavern.crowdDesc}
+
+👤 Владелец: ${d.patron.fullName} (${d.patron.race}, ${d.patron.genderText}, ${d.patron.age} лет)
+- Особенность: ${d.patron.quirk}
+- Тайна: ${d.patron.secret}
+
+⭐ Особое меню региона (${d.tavern.location}):
+- Фирменное блюдо: ${d.tavern.specialPair.dish}
+- Фирменный напиток: ${d.tavern.specialPair.drink}
+
+🗣️ Слух дня: «${d.tavern.rumor}»
+⚡ Происшествие: ${d.tavern.event}
+
+🛏️ Номера (${d.rooms.length} комнат):
+${d.rooms.map(r => `  - №${r.roomNumber} ${r.typeDesc} | ${r.cost} | ${r.status}${r.tenant ? ` (${r.tenant})` : ''} [${r.note}]`).join('\n')}
+
+👥 Персонал:
+${d.roster.map(s => `  - ${s.role}: ${s.name} (${s.race}, ${s.age} л.) — ${s.trait}`).join('\n')}
+
+🎲 Завсегдатаи и гости (${d.visitors.length} чел.):
+${d.visitors.map(v => `  - ${v.name} (${v.role}, ${v.dndClass}, ${v.race}) — ${v.activity}`).join('\n')}
+`.trim();
+
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn) {
+      btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+      setTimeout(() => {
+        btn.innerHTML = '<span>📋</span><span>Копировать сводку</span>';
+      }, 2000);
+    }
+  });
+}
+

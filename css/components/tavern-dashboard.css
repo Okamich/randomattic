@@ -1,0 +1,532 @@
+/**
+ * Randomattic - Tavern Dashboard Component Stylesheet
+ * 3-Column Fantasy Tavern Architect layout matching TGR_1_main reference
+ */
+
+.tavern-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 24px);
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Header & Action Bar */
+.tavern-header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card, rgba(30, 24, 18, 0.7));
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: var(--radius-lg, 12px);
+  padding: 16px 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  gap: 16px;
+}
+
+.tavern-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tavern-header-title h2 {
+  margin: 0;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 1.5rem;
+  color: var(--accent-primary, #e2b76f);
+  letter-spacing: 0.5px;
+}
+
+.tavern-header-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted, #a89f91);
+}
+
+.tavern-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-tavern-primary {
+  background: linear-gradient(135deg, #b8860b, #d4af37);
+  color: #1a120b;
+  border: 1px solid #ffe082;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.4);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-tavern-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(212, 175, 55, 0.6);
+  background: linear-gradient(135deg, #c79213, #e5bf45);
+}
+
+.btn-tavern-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #f0e6d2);
+  border: 1px solid var(--border-color, #5a422e);
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-tavern-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-primary, #e2b76f);
+}
+
+/* 3-Column Grid Layout */
+.tavern-grid-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1.25fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1280px) {
+  .tavern-grid-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .tavern-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tavern-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Dashboard Cards */
+.tavern-card {
+  background: var(--bg-card, rgba(32, 25, 20, 0.85));
+  border: 1px solid var(--border-color, #4a3726);
+  border-radius: var(--radius-md, 10px);
+  padding: 18px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tavern-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary, #cda35f), transparent);
+  opacity: 0.6;
+}
+
+.tavern-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color, #443222);
+  padding-bottom: 10px;
+}
+
+.tavern-card-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  color: var(--accent-primary, #e2b76f);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tavern-card-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(226, 183, 111, 0.15);
+  color: var(--accent-primary, #e2b76f);
+  border: 1px solid rgba(226, 183, 111, 0.3);
+}
+
+/* Parameter Controls with Lock Toggle */
+.param-controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.param-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 38px;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .param-row {
+    grid-template-columns: 1fr 38px;
+  }
+  .param-row label {
+    grid-column: 1 / -1;
+  }
+}
+
+.param-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #e0d5c1);
+}
+
+.param-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.param-select, .param-input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color, #5a422e);
+  color: var(--text-primary, #f0e6d2);
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.param-select:focus, .param-input:focus {
+  outline: none;
+  border-color: var(--accent-primary, #e2b76f);
+  box-shadow: 0 0 6px rgba(226, 183, 111, 0.3);
+}
+
+/* Range Slider */
+.param-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.param-slider {
+  flex: 1;
+  accent-color: var(--accent-primary, #d4af37);
+  cursor: pointer;
+}
+
+.param-slider-value {
+  min-width: 26px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-primary, #e2b76f);
+  text-align: right;
+}
+
+/* Lock Button */
+.btn-lock {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn-lock:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary, #e2b76f);
+}
+
+.btn-lock.locked {
+  background: linear-gradient(135deg, rgba(184, 134, 11, 0.3), rgba(212, 175, 55, 0.45));
+  border-color: #ffd54f;
+  box-shadow: 0 0 8px rgba(255, 213, 79, 0.35);
+}
+
+/* Tavern Details Card */
+.details-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+@media (max-width: 580px) {
+  .details-layout {
+    flex-direction: column;
+  }
+}
+
+.details-sketch-box {
+  width: 140px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.details-sketch-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  filter: contrast(1.05) sepia(0.15);
+  transition: transform 0.3s ease;
+}
+
+.details-sketch-img:hover {
+  transform: scale(1.03);
+}
+
+.details-sketch-caption {
+  font-size: 0.7rem;
+  color: var(--text-muted, #9e9382);
+  padding: 4px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  width: 100%;
+}
+
+.details-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.details-item {
+  color: var(--text-primary, #ded4c0);
+}
+
+.details-label {
+  font-weight: 700;
+  color: var(--accent-primary, #e2b76f);
+  margin-right: 4px;
+}
+
+/* Patron Profile Card */
+.patron-profile-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+@media (max-width: 540px) {
+  .patron-profile-layout {
+    flex-direction: column;
+  }
+}
+
+.patron-portrait-frame {
+  width: 130px;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color, #705338);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: #120d09;
+}
+
+.patron-portrait-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.patron-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.patron-name-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  color: var(--accent-primary, #f0c97d);
+}
+
+.patron-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted, #a89f91);
+}
+
+.patron-desc {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-primary, #e3d9c8);
+  margin: 4px 0;
+}
+
+.patron-secret-box {
+  background: rgba(184, 134, 11, 0.1);
+  border-left: 3px solid var(--accent-primary, #d4af37);
+  padding: 6px 10px;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* Tables (Rooms, Roster, Menu, Visitors) */
+.tavern-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-color, #4a3726);
+  border-radius: 6px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.tavern-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.tavern-table th {
+  background: rgba(30, 20, 15, 0.85);
+  color: var(--accent-primary, #e2b76f);
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-weight: 600;
+  padding: 8px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 2px solid var(--border-color, #5a422e);
+  white-space: nowrap;
+}
+
+.tavern-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #ded4c0);
+  vertical-align: middle;
+}
+
+.tavern-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Status Badges */
+.badge-vacant {
+  background: rgba(46, 125, 50, 0.2);
+  color: #81c784;
+  border: 1px solid rgba(129, 199, 132, 0.4);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-occupied {
+  background: rgba(198, 40, 40, 0.2);
+  color: #e57373;
+  border: 1px solid rgba(229, 115, 115, 0.4);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-special {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(255, 215, 0, 0.15));
+  color: #ffd54f;
+  border: 1px solid #ffd54f;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.cost-badge {
+  font-weight: 700;
+  color: var(--accent-primary, #e2b76f);
+  white-space: nowrap;
+}
+
+/* Room Note Callout */
+.room-note-neg {
+  color: #ffab91;
+  font-style: italic;
+}
+
+.room-note-pos {
+  color: #a5d6a7;
+  font-style: italic;
+}
+
+/* Light Theme Adjustments */
+[data-theme="light"] .tavern-header-bar {
+  background: rgba(255, 252, 245, 0.9);
+  border-color: #d1b89d;
+  box-shadow: 0 4px 16px rgba(100, 70, 40, 0.1);
+}
+
+[data-theme="light"] .tavern-card {
+  background: rgba(255, 253, 248, 0.95);
+  border-color: #d8c2aa;
+  box-shadow: 0 3px 12px rgba(80, 50, 20, 0.08);
+}
+
+[data-theme="light"] .param-select, 
+[data-theme="light"] .param-input {
+  background: #fbf7ee;
+  border-color: #c7b095;
+  color: #2c2013;
+}
+
+[data-theme="light"] .tavern-table th {
+  background: #f4ecdc;
+  color: #7a4f15;
+  border-bottom-color: #c7b095;
+}
+
+[data-theme="light"] .tavern-table td {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  color: #3b2a1a;
+}
