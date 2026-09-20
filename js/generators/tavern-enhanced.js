@@ -556,29 +556,268 @@ function generateMenu(location, category) {
 }
 
 /**
+ * Occupancy Levels (Количество Посетителей) - Table 1 from user reference media_1789933202346.png
+ * Formula based on Occupancy and Room Count
+ */
+export const OCCUPANCY_LEVELS = [
+  {
+    id: 'Пусто',
+    name: 'Пусто',
+    formulaDesc: '0 чел.',
+    calculate: () => 0,
+    narrative: 'В заведении совершенно пусто — ни единой живой души, лишь трактирщик протирает стойку.'
+  },
+  {
+    id: 'Несколько человек',
+    name: 'Несколько человек',
+    formulaDesc: '1к8 чел.',
+    calculate: () => getRandomInt(1, 8),
+    narrative: 'Редкие посетители, пара одиноких путников тихо сидят за дальними столами.'
+  },
+  {
+    id: 'Небольшая толпа',
+    name: 'Небольшая толпа',
+    formulaDesc: '1к6 + 10 чел.',
+    calculate: () => getRandomInt(1, 6) + 10,
+    narrative: 'Умеренно оживлённо, несколько столов заняты негромко беседующими гостями.'
+  },
+  {
+    id: 'Суматоха',
+    name: 'Суматоха',
+    formulaDesc: '1к8 + 5 × комнат',
+    calculate: (rooms) => getRandomInt(1, 8) + 5 * rooms,
+    narrative: 'В зале суматоха, звон кружек и тарелок, слуги едва успевают разносить заказы!'
+  },
+  {
+    id: 'Толпа',
+    name: 'Толпа',
+    formulaDesc: '1к10 + 10 × комнат',
+    calculate: (rooms) => getRandomInt(1, 10) + 10 * rooms,
+    narrative: 'Шумно и многолюдно, густой табачный дым, громкие песни, смех и жаркие споры!'
+  },
+  {
+    id: 'Переполненное заведение',
+    name: 'Переполненное заведение',
+    formulaDesc: '2к10 + 15 × комнат',
+    calculate: (rooms) => getRandomInt(1, 10) + getRandomInt(1, 10) + 15 * rooms,
+    narrative: 'Яблоку негде упасть! Заведение трещит по швам, постояльцы теснятся за столами и у входа!'
+  }
+];
+
+/**
+ * Visitor Archetypes Database - Tables 2, 3, 4 from media_1789933202346.png
+ */
+const VISITOR_ROLE_TEMPLATES = {
+  'Городской страж': {
+    role: 'Городской страж',
+    dndClass: 'Воин',
+    activities: [
+      'Пьёт кружку эля после караула, положив шлем на лавку',
+      'Бдительно высматривает зачинщиков драк и беглых преступников',
+      'Травит байки о ночных погонях по городским трущобам',
+      'Жалуется сослуживцу на низкое жалованье и строгого сержанта'
+    ]
+  },
+  'Нищий': {
+    role: 'Нищий',
+    dndClass: 'Обыватель',
+    activities: [
+      'Греется у очага, надеясь выпросить хлебную корку или медный грош',
+      'Тихо подбирает недоеденные остатки со столов, пока трактирщик отвернулся',
+      'Слушает разговоры постояльцев, надеясь продать ценный слух',
+      'Дремлет в тёмном углу, закутавшись в дырявый дорожный плащ'
+    ]
+  },
+  'Бард': {
+    role: 'Бард',
+    dndClass: 'Бард',
+    activities: [
+      'Наигрывает на лютне залихватскую балладу под аплодисменты зала',
+      'Настраивает струны и записывает в блокнот услышанную городскую сплетню',
+      'Флиртует со служанкой, обещая посвятить ей романтическую поэму',
+      'Декламирует сказание о древнем герое, собирая монеты в шляпу'
+    ]
+  },
+  'Подозрительный тип': {
+    role: 'Подозрительный тип',
+    dndClass: 'Плут',
+    activities: [
+      'Низко надвинул капюшон, незаметно наблюдая за входящими гостями',
+      'Крутит в пальцах зазубренный кинжал и ждёт тайного связного',
+      'Шёпотом ведёт переговоры в глухом углу, взвешивая тугой кошель',
+      'Делает вид, что спит за столом, но чутко ловит каждое брошенное слово'
+    ]
+  },
+  'Обыватель': {
+    role: 'Обыватель',
+    dndClass: 'Обыватель',
+    activities: [
+      'Смакует горячее рагу после долгого рабочего дня',
+      'Играет с соседом в кости на медные монеты под стук кружек',
+      'Оживлённо спорит о последних городских налогах и указах',
+      'Неторопливо курит трубку, глядя на огонь в очаге'
+    ]
+  },
+  'МП искатель приключений': {
+    role: 'Искатель приключений',
+    dndClasses: ['Воин', 'Плут', 'Следопыт', 'Варвар', 'Волшебник', 'Жрец', 'Паладин', 'Чародей', 'Друид', 'Бард', 'Монах', 'Колдун'],
+    activities: [
+      'Изучает потёртую карту катакомб, делая пометки углем',
+      'Точит боевой клинок и расспрашивает о монстрах в округе',
+      'Ищет смельчаков в отряд для спуска в древнее подземелье',
+      'Хвастается трофеем из логова чудовища перед собравшейся толпой'
+    ]
+  },
+  'Торговец': {
+    role: 'Торговец',
+    dndClass: 'Обыватель',
+    activities: [
+      'Сверяет записи в амбарной книге при свете сальной свечи',
+      'Торгуется с заезжим караванщиком о цене на пряности и ткани',
+      'Ищет надёжную наёмную стражу для сопровождения обоза',
+      'Угощает деловых партнёров элем в честь удачной торговой сделки'
+    ]
+  },
+  'Жрец': {
+    role: 'Жрец',
+    dndClass: 'Жрец',
+    activities: [
+      'Тихо читает священное писание и благословляет трапезу',
+      'Выслушивает исповедь встревоженного прихожанина',
+      'Перевязывает рану уставшему путешественнику молитвой исцеления',
+      'Собирает пожертвования на местную обитель или храм'
+    ]
+  },
+  'Военная элита': {
+    role: 'Военная элита',
+    dndClass: 'Паладин',
+    activities: [
+      'Офицер в начищенных латах изучает тактическую карту гарнизона',
+      'Ведёт вербовку опытных бойцов в элитный королевский полк',
+      'Пьёт выдержанный бренди в кругу боевых офицеров',
+      'Оценивающим взглядом бывалого воина осматривает оружие гостей'
+    ]
+  },
+  'Дворянин': {
+    role: 'Дворянин',
+    dndClass: 'Аристократ',
+    activities: [
+      'Трапезничает за отдельным столом, брезгливо оглядывая простолюдинов',
+      'Неторопливо потягивает коллекционное вино из фамильного кубка',
+      'Обсуждает придворные интриги и политику столичных домов',
+      'Нанимает тайных агентов для деликатного фамильного поручения'
+    ]
+  }
+};
+
+// "Другое*" пул: любой другой уникальный посетитель
+const OTHER_VISITORS_POOL = [
+  { role: 'Следопыт', dndClass: 'Следопыт', activity: 'Торгуется с поваром о цене свежей оленьей туши' },
+  { role: 'Ученик чародея', dndClass: 'Волшебник', activity: 'Тихо шепчет слова заклинаний, читая магический свиток' },
+  { role: 'Алхимик', dndClass: 'Ремесленник', activity: 'Бережно перекладывает стеклянные склянки с редкими зельями' },
+  { role: 'Бродячий монах', dndClass: 'Монах', activity: 'Медитирует на лавке, абстрагировавшись от трактирного гомона' },
+  { role: 'Тайный культист', dndClass: 'Колдун', activity: 'Прячет под плащом зловещий амулет, выискивая жертву' },
+  { role: 'Беглый каторжник', dndClass: 'Плут', activity: 'Нервно озирается при каждом звуке и прячет шрам от кандалов' },
+  { role: 'Кузнец-оружейник', dndClass: 'Ремесленник', activity: 'Обсуждает с воинами качество стали и балансировку мечей' },
+  { role: 'Странствующий лекарь', dndClass: 'Друид', activity: 'Растирает целебные травы в ступке, источая аромат мяты' }
+];
+
+/**
+ * Pick Role key based on Tavern Category (Tables 2, 3, 4)
+ */
+function pickVisitorRole(category) {
+  if (category === 'Дешёвое') {
+    // Таблица 2: ПОСЕТИТЕЛИ ДЕШЁВОГО ЗАВЕДЕНИЯ
+    const pool = [
+      'Городской страж',
+      'Нищий',
+      'Бард',
+      'Подозрительный тип',
+      'Обыватель',
+      'МП искатель приключений'
+    ];
+    return getRandomItem(pool);
+  } else if (category === 'Роскошное') {
+    // Таблица 4: ПОСЕТИТЕЛИ ДОРОГОГО ЗАВЕДЕНИЯ
+    const pool = [
+      'Подозрительный тип',
+      'Торговец',
+      'Бард',
+      'Дворянин',
+      'Военная элита',
+      'Жрец',
+      'МП искатель приключений',
+      'Другое*'
+    ];
+    return getRandomItem(pool);
+  } else {
+    // Таблица 3: ПОСЕТИТЕЛИ ОБЫЧНОГО ЗАВЕДЕНИЯ
+    const pool = [
+      'Подозрительный тип',
+      'Торговец',
+      'Бард',
+      'Обыватель',
+      'МП искатель приключений',
+      'Городской страж',
+      'Важный МП'
+    ];
+    const picked = getRandomItem(pool);
+    if (picked === 'Важный МП') {
+      // Важный МП (к4): 1 — Жрец; 2 — Военная элита; 3 — Дворянин; 4 — Другое*
+      const d4 = getRandomInt(1, 4);
+      if (d4 === 1) return 'Жрец';
+      if (d4 === 2) return 'Военная элита';
+      if (d4 === 3) return 'Дворянин';
+      return 'Другое*';
+    }
+    return picked;
+  }
+}
+
+/**
  * Generate Visitors currently in the tavern
  */
-function generateVisitors(crowdCount) {
+function generateVisitors(crowdCount, category = 'Обычное') {
   const visitors = [];
   const races = Object.keys(RACE_PORTRAIT_KEYS);
-  const count = Math.max(1, Number(crowdCount) || 8);
+  const count = Math.max(0, Number(crowdCount) || 0);
 
   for (let i = 0; i < count; i++) {
-    const arch = getRandomItem(TAVERN_DATA.visitor_archetypes);
+    const roleKey = pickVisitorRole(category);
     const vRace = getRandomItem(races);
     const vGender = Math.random() > 0.5 ? 'm' : 'f';
     const raceData = TAVERN_DATA.races_innkeeper[vRace] || TAVERN_DATA.races_innkeeper['Человек'];
     const names = vGender === 'm' ? raceData.m : raceData.f;
     const vName = getRandomItem(names && names.length ? names : ['Рейн', 'Варис', 'Лира']);
     const [minA, maxA] = RACE_AGE_RANGES[vRace] || [20, 50];
+    const age = getRandomInt(minA, Math.floor(maxA * 0.8));
+
+    let roleName, dndClass, activity;
+
+    if (roleKey === 'Другое*') {
+      const other = getRandomItem(OTHER_VISITORS_POOL);
+      roleName = other.role;
+      dndClass = other.dndClass;
+      activity = other.activity;
+    } else if (roleKey === 'МП искатель приключений') {
+      const templ = VISITOR_ROLE_TEMPLATES[roleKey];
+      roleName = templ.role;
+      dndClass = getRandomItem(templ.dndClasses);
+      activity = getRandomItem(templ.activities);
+    } else {
+      const templ = VISITOR_ROLE_TEMPLATES[roleKey];
+      roleName = templ.role;
+      dndClass = templ.dndClass;
+      activity = getRandomItem(templ.activities);
+    }
 
     visitors.push({
       name: vName,
-      role: arch.role,
-      dndClass: arch.class,
+      role: roleName,
+      dndClass: dndClass,
       race: vRace,
-      age: getRandomInt(minA, Math.floor(maxA * 0.8)),
-      activity: arch.activity
+      age: age,
+      activity: activity
     });
   }
 
@@ -604,12 +843,37 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
     ? currentOptions.category
     : (currentOptions.category && currentOptions.category !== 'random' ? currentOptions.category : getRandomItem(TAVERN_CATEGORIES));
 
-  // 4. Resolve Crowd (Changes dynamically on roll unless locked)
-  const crowd = (lockState.lockCrowd && currentOptions.crowd !== undefined && currentOptions.crowd !== 'random')
-    ? Number(currentOptions.crowd)
-    : getRandomInt(2, 28);
+  // 4. Establishment Tier (Rooms count, staff ratio, narrative description from Excel sheet 4)
+  const tier = pickTierForCategory(category);
+  const description = tier.descriptions[category] || tier.descriptions['Обычное'];
 
-  // 5. Resolve Atmosphere
+  // 5. Resolve Occupancy & Crowd Count (Table 1 from reference media_1789933202346.png)
+  let resolvedOccupancy;
+  if (lockState.lockCrowd && currentOptions.crowd && currentOptions.crowd !== 'random') {
+    resolvedOccupancy = OCCUPANCY_LEVELS.find(o => o.id === currentOptions.crowd || o.name === currentOptions.crowd);
+    if (!resolvedOccupancy) {
+      resolvedOccupancy = OCCUPANCY_LEVELS[1]; // fallback
+    }
+  } else {
+    // Weighted random selection: common crowd levels roll most frequently
+    const pool = [
+      'Несколько человек',
+      'Несколько человек',
+      'Небольшая толпа',
+      'Небольшая толпа',
+      'Суматоха',
+      'Суматоха',
+      'Толпа',
+      'Переполненное заведение',
+      'Пусто'
+    ];
+    const pickedId = getRandomItem(pool);
+    resolvedOccupancy = OCCUPANCY_LEVELS.find(o => o.id === pickedId) || OCCUPANCY_LEVELS[1];
+  }
+
+  const crowd = resolvedOccupancy.calculate(tier.roomsCount);
+
+  // 6. Resolve Atmosphere
   let atmosphereObj;
   if (lockState.lockAtmosphere && currentOptions.atmosphere && currentOptions.atmosphere !== 'random') {
     atmosphereObj = TAVERN_DATA.atmospheres.find(a => a.mood === currentOptions.atmosphere) || getRandomItem(TAVERN_DATA.atmospheres);
@@ -617,7 +881,7 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
     atmosphereObj = getRandomItem(TAVERN_DATA.atmospheres);
   }
 
-  // 6. Innkeeper Parameters (Gender, Race, Age - Age changes dynamically on roll unless locked)
+  // 7. Innkeeper Parameters (Gender, Race, Age - Age changes dynamically on roll unless locked)
   const innkeeperGender = (lockState.lockGender && currentOptions.innkeeperGender && currentOptions.innkeeperGender !== 'random')
     ? currentOptions.innkeeperGender
     : (currentOptions.innkeeperGender && currentOptions.innkeeperGender !== 'random' ? currentOptions.innkeeperGender : 'random');
@@ -632,16 +896,12 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
 
   const innkeeper = generateInnkeeper(innkeeperGender, innkeeperRace, innkeeperAge);
 
-  // 7. Tavern Name
+  // 8. Tavern Name
   const tavernName = generateTavernName(type, innkeeper.firstName);
 
-  // 8. Rumor & Event
+  // 9. Rumor & Event
   const rumor = getRandomItem(TAVERN_DATA.rumors);
   const event = getRandomItem(TAVERN_DATA.events);
-
-  // 9. Establishment Tier (Rooms count, staff ratio, narrative description from Excel sheet 4)
-  const tier = pickTierForCategory(category);
-  const description = tier.descriptions[category] || tier.descriptions['Обычное'];
 
   // 10. Rooms (Based on tier roomsCount & category prices)
   const rooms = generateRooms(category, tier);
@@ -652,24 +912,21 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
   // 12. Menu
   const { specialPair, menuRows } = generateMenu(location, category);
 
-  // 13. Visitors
-  const visitors = generateVisitors(crowd);
+  // 13. Visitors (Based on rolled crowd count and category Tables 2, 3, 4)
+  const visitors = generateVisitors(crowd, category);
 
   // 14. Schematic Sketch
   const sketchPath = 'assets/images/taverns/tavern_sketch_classic.jpg';
 
   // Crowd narrative
-  let crowdDesc = '';
-  if (crowd <= 4) crowdDesc = `Практически пусто (${crowd} чел.), лишь редкие одинокие путники тихо сидят по углам.`;
-  else if (crowd <= 12) crowdDesc = `Умеренно оживлённо (${crowd} чел.), несколько столов заняты беседующими гостями.`;
-  else if (crowd <= 22) crowdDesc = `Шумно и многолюдно (${crowd} чел.), смех, стук кружек и оживлённые споры.`;
-  else crowdDesc = `Яблоку негде упасть (${crowd} чел.), гулянка в самом разгаре, за столами теснятся гости!`;
+  const crowdDesc = `${resolvedOccupancy.name} (${crowd} чел.) — ${resolvedOccupancy.narrative}`;
 
   return {
     params: {
       location,
       type,
       category,
+      occupancy: resolvedOccupancy.id,
       crowd,
       atmosphere: atmosphereObj.mood,
       innkeeperGender: innkeeper.gender,
@@ -689,6 +946,9 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
       atmosphere: atmosphereObj.mood,
       atmosphereDesc: atmosphereObj.desc,
       description,
+      occupancy: resolvedOccupancy.name,
+      occupancyFormula: resolvedOccupancy.formulaDesc,
+      occupancyNarrative: resolvedOccupancy.narrative,
       crowdDesc,
       crowdCount: crowd,
       rumor,
@@ -709,3 +969,4 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
 }
 
 export { BIOMES, TAVERN_TYPES, TAVERN_CATEGORIES, RACE_PORTRAIT_KEYS, RACE_AGE_RANGES };
+

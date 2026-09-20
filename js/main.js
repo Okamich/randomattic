@@ -28,7 +28,8 @@ import {
   BIOMES,
   TAVERN_TYPES,
   TAVERN_CATEGORIES,
-  RACE_PORTRAIT_KEYS
+  RACE_PORTRAIT_KEYS,
+  OCCUPANCY_LEVELS
 } from './generators/tavern-enhanced.js';
 
 // Текущее состояние приложения
@@ -796,14 +797,21 @@ function populateTavernSelects() {
       TAVERN_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
   }
 
-  // 4. Atmospheres
+  // 4. Occupancy / Crowd
+  const crowdSel = document.getElementById('t-param-crowd');
+  if (crowdSel) {
+    crowdSel.innerHTML = `<option value="random">🎲 Любая заполненность</option>` +
+      OCCUPANCY_LEVELS.map(o => `<option value="${o.id}">${o.name} (${o.formulaDesc})</option>`).join('');
+  }
+
+  // 5. Atmospheres
   const atmoSel = document.getElementById('t-param-atmo');
   if (atmoSel) {
     atmoSel.innerHTML = `<option value="random">🎲 Любая атмосфера</option>` +
       TAVERN_DATA.atmospheres.map(a => `<option value="${a.mood}">${a.mood}</option>`).join('');
   }
 
-  // 5. Races
+  // 6. Races
   const raceSel = document.getElementById('p-param-race');
   if (raceSel) {
     const races = Object.keys(RACE_PORTRAIT_KEYS);
@@ -852,7 +860,9 @@ function setupTavernEventListeners() {
       if (isLocked && el) {
         // If current element is set to 'random', lock the currently generated concrete value!
         if (el.value === 'random' && tavernState.currentData && tavernState.currentData.params) {
-          const concreteVal = tavernState.currentData.params[item.optKey];
+          const concreteVal = item.optKey === 'crowd'
+            ? tavernState.currentData.params.occupancy
+            : tavernState.currentData.params[item.optKey];
           if (concreteVal) {
             el.value = concreteVal;
           }
@@ -862,16 +872,7 @@ function setupTavernEventListeners() {
     });
   });
 
-  // Sliders display values & sync
-  const crowdSlider = document.getElementById('t-param-crowd');
-  const crowdVal = document.getElementById('t-val-crowd');
-  if (crowdSlider && crowdVal) {
-    crowdSlider.addEventListener('input', (e) => {
-      crowdVal.textContent = e.target.value;
-      tavernState.options.crowd = Number(e.target.value);
-    });
-  }
-
+  // Innkeeper Age slider display value & sync
   const ageSlider = document.getElementById('p-param-age');
   const ageVal = document.getElementById('p-val-age');
   if (ageSlider && ageVal) {
@@ -928,15 +929,12 @@ function renderTavernUI(data) {
     const catEl = document.getElementById('t-param-cat');
     if (catEl && tavernState.options.category !== 'random') catEl.value = data.params.category;
   }
-  // Crowd slider dynamically updates on reroll unless locked
+  // Occupancy select dynamically updates on reroll unless locked
   if (!tavernState.locks.lockCrowd) {
     const crowdEl = document.getElementById('t-param-crowd');
-    const crowdVal = document.getElementById('t-val-crowd');
-    if (crowdEl && crowdVal) {
-      crowdEl.value = data.params.crowd;
-      crowdVal.textContent = data.params.crowd;
+    if (crowdEl && tavernState.options.crowd !== 'random') {
+      crowdEl.value = data.params.occupancy;
     }
-    tavernState.options.crowd = data.params.crowd;
   }
   if (!tavernState.locks.lockAtmosphere) {
     const atmoEl = document.getElementById('t-param-atmo');
@@ -979,7 +977,7 @@ function renderTavernUI(data) {
       <div class="details-item"><span class="details-label">• Тип и Категория:</span> ${data.tavern.type} (${data.tavern.category})</div>
       <div class="details-item"><span class="details-label">• Описание:</span> <span style="color:var(--accent-primary, #e2b76f); font-style: italic;">«${data.tavern.description}»</span></div>
       <div class="details-item"><span class="details-label">• Владелец:</span> ${data.patron.fullName} (${data.patron.race}, ${data.patron.genderText}, ${data.patron.age} лет)</div>
-      <div class="details-item"><span class="details-label">• Заполненность зала:</span> ${data.tavern.crowdDesc}</div>
+      <div class="details-item"><span class="details-label">• Заполненность зала:</span> <strong>${data.tavern.occupancy}</strong> (${data.tavern.crowdCount} чел.) — <span style="color:var(--accent-primary, #e2b76f); font-style: italic;">«${data.tavern.occupancyNarrative}»</span></div>
       <div class="details-item"><span class="details-label">• Атмосфера:</span> <strong>${data.tavern.atmosphere}</strong> — ${data.tavern.atmosphereDesc}</div>
       <div class="details-item"><span class="details-label">• Номера и штат:</span> ${data.rooms.length} комнат, персонал: ${data.tavern.staffSummary} + владелец</div>
       <div class="details-item"><span class="details-label">• Слухи (Тема дня):</span> «${data.tavern.rumor}»</div>
@@ -1063,20 +1061,32 @@ function renderTavernUI(data) {
 
   // 6. Visitors Table
   const visitorsCountEl = document.getElementById('t-visitors-count');
-  if (visitorsCountEl) visitorsCountEl.textContent = `${data.visitors.length} гостей`;
+  if (visitorsCountEl) {
+    visitorsCountEl.textContent = `${data.visitors.length} гостей (${data.tavern.occupancy})`;
+  }
 
   const visitorsTbody = document.getElementById('t-visitors-tbody');
   if (visitorsTbody) {
-    visitorsTbody.innerHTML = data.visitors.map(v => `
-      <tr>
-        <td><strong>${v.name}</strong></td>
-        <td>${v.role}</td>
-        <td><span class="result-badge" style="margin:0;">${v.dndClass}</span></td>
-        <td>${v.race}</td>
-        <td>${v.age}</td>
-        <td style="font-size:0.78rem;">${v.activity}</td>
-      </tr>
-    `).join('');
+    if (data.visitors.length === 0) {
+      visitorsTbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center; padding: 26px 12px; color: var(--text-muted); font-style: italic;">
+            🍃 В зале совершенно пусто — ни одной живой души, кроме трактирщика и прислуги.
+          </td>
+        </tr>
+      `;
+    } else {
+      visitorsTbody.innerHTML = data.visitors.map(v => `
+        <tr>
+          <td><strong>${v.name}</strong></td>
+          <td><span style="color:var(--accent-primary); font-weight:600;">${v.role}</span></td>
+          <td><span class="result-badge" style="margin:0;">${v.dndClass}</span></td>
+          <td>${v.race}</td>
+          <td>${v.age}</td>
+          <td style="font-size:0.78rem;">${v.activity}</td>
+        </tr>
+      `).join('');
+    }
   }
 
   // 7. Menu & Prices Table
