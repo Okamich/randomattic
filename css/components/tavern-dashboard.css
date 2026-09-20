@@ -169,9 +169,13 @@
   grid-template-columns: 1.35fr 1fr;
 }
 
-/* ROW 3: 3 cards (Rooms 1fr | Visitors table 1.25fr | Menu & Prices 1.15fr) */
+/* ROW 3: 3 cards (Rooms 1fr | Menu & Prices 1.1fr | Visitors table 1.3fr) */
 .tavern-row-bottom {
-  grid-template-columns: 1fr 1.25fr 1.15fr;
+  grid-template-columns: 1fr 1.1fr 1.3fr;
+}
+
+.tavern-row-bottom .tavern-card {
+  height: clamp(320px, 38vh, 420px);
 }
 
 @media (max-width: 1200px) {
@@ -184,8 +188,11 @@
   .tavern-row-bottom {
     grid-template-columns: 1fr 1fr;
   }
-  .tavern-row-bottom #card-tavern-menu {
+  .tavern-row-bottom #card-tavern-visitors {
     grid-column: 1 / -1;
+  }
+  .tavern-row-bottom .tavern-card {
+    height: 340px;
   }
 }
 
@@ -195,8 +202,11 @@
   .tavern-row-bottom {
     grid-template-columns: 1fr;
   }
-  .tavern-row-bottom #card-tavern-menu {
+  .tavern-row-bottom #card-tavern-visitors {
     grid-column: auto;
+  }
+  .tavern-row-bottom .tavern-card {
+    height: 320px;
   }
 }
 
@@ -563,11 +573,13 @@
 .tavern-table-container {
   width: 100%;
   min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-x: auto;
+  overflow-y: auto;
   border: 1px solid var(--border-color, #4a3726);
   border-radius: 5px;
-  max-height: 240px;
-  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .tavern-table {
