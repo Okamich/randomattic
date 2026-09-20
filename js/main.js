@@ -282,6 +282,7 @@ function setupGeneratorViewEvents() {
   setupNamesEvents();
   setupLootEvents();
   setupD20Events();
+  document.getElementById('btn-back-from-tavern')?.addEventListener('click', () => closeGeneratorView());
 }
 
 // ==========================================================================
@@ -1020,6 +1021,11 @@ function populateTavernSelects() {
 }
 
 function setupTavernEventListeners() {
+  // Back button
+  document.getElementById('btn-back-from-tavern')?.addEventListener('click', () => {
+    closeGeneratorView();
+  });
+
   // Reroll button
   document.getElementById('btn-reroll-tavern')?.addEventListener('click', () => {
     rerollTavern();
