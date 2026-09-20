@@ -209,7 +209,6 @@ export function openGeneratorView(viewId, updateHash = true) {
   const boardEl = document.getElementById('view-board');
   const genEl = document.getElementById('view-generator');
   const mainContainer = document.querySelector('main.container');
-  const genTopBar = document.querySelector('.generator-top-bar');
 
   if (boardEl) boardEl.style.display = 'none';
   if (genEl) {
@@ -217,32 +216,40 @@ export function openGeneratorView(viewId, updateHash = true) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const genMeta = GENERATORS.find(g => g.viewId === viewId) || {
-    title: 'Генератор',
-    icon: '🎲'
-  };
+  // Все экраны генераторов используют широкий презентационный режим
+  if (mainContainer) mainContainer.classList.add('container-fluid-tavern');
 
-  document.getElementById('gen-header-icon').textContent = genMeta.icon;
-  document.getElementById('gen-header-title').textContent = genMeta.title;
+  const namesWs = document.getElementById('names-dashboard-workspace');
+  const lootWs = document.getElementById('loot-dashboard-workspace');
+  const d20Ws = document.getElementById('d20-dashboard-workspace');
+  const tavernWs = document.getElementById('tavern-dashboard-workspace');
 
-  const standardWorkspace = document.getElementById('standard-generator-workspace');
-  const tavernWorkspace = document.getElementById('tavern-dashboard-workspace');
+  if (namesWs) namesWs.style.display = 'none';
+  if (lootWs) lootWs.style.display = 'none';
+  if (d20Ws) d20Ws.style.display = 'none';
+  if (tavernWs) tavernWs.style.display = 'none';
 
-  if (viewId === 'tavern') {
-    if (mainContainer) mainContainer.classList.add('container-fluid-tavern');
-    if (genTopBar) genTopBar.style.display = 'none';
-    if (standardWorkspace) standardWorkspace.style.display = 'none';
-    if (tavernWorkspace) {
-      tavernWorkspace.style.display = 'flex';
+  if (viewId === 'names') {
+    if (namesWs) {
+      namesWs.style.display = 'flex';
+      initNamesDashboard();
+    }
+  } else if (viewId === 'loot') {
+    if (lootWs) {
+      lootWs.style.display = 'flex';
+      initLootDashboard();
+    }
+  } else if (viewId === 'tavern') {
+    if (tavernWs) {
+      tavernWs.style.display = 'flex';
       initTavernDashboard();
     }
   } else {
-    if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
-    if (genTopBar) genTopBar.style.display = 'flex';
-    if (standardWorkspace) standardWorkspace.style.display = 'grid';
-    if (tavernWorkspace) tavernWorkspace.style.display = 'none';
-    renderGeneratorSettings(viewId);
-    executeCurrentGenerator();
+    // d20-hub, d20-wild-magic, d20-secret-societies, d20-artefacts, d20-potions
+    if (d20Ws) {
+      d20Ws.style.display = 'flex';
+      initD20Dashboard(viewId);
+    }
   }
 }
 
@@ -255,363 +262,554 @@ export function closeGeneratorView(updateHash = true) {
   const boardEl = document.getElementById('view-board');
   const genEl = document.getElementById('view-generator');
   const mainContainer = document.querySelector('main.container');
-  const genTopBar = document.querySelector('.generator-top-bar');
+
+  const namesWs = document.getElementById('names-dashboard-workspace');
+  const lootWs = document.getElementById('loot-dashboard-workspace');
+  const d20Ws = document.getElementById('d20-dashboard-workspace');
+  const tavernWs = document.getElementById('tavern-dashboard-workspace');
 
   if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
-  if (genTopBar) genTopBar.style.display = 'flex';
+  if (namesWs) namesWs.style.display = 'none';
+  if (lootWs) lootWs.style.display = 'none';
+  if (d20Ws) d20Ws.style.display = 'none';
+  if (tavernWs) tavernWs.style.display = 'none';
+
   if (boardEl) boardEl.style.display = 'block';
   if (genEl) genEl.style.display = 'none';
 }
 
 function setupGeneratorViewEvents() {
-  const backBtn = document.getElementById('btn-back-to-board');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      closeGeneratorView();
+  setupNamesEvents();
+  setupLootEvents();
+  setupD20Events();
+}
+
+// ==========================================================================
+// 1. ИМЕНА И ПЕРСОНАЖИ (NAMES & CHARACTERS DASHBOARD CONTROLLER)
+// ==========================================================================
+const namesState = {
+  initialized: false,
+  locks: {
+    race: false,
+    gender: false,
+    classType: false,
+    format: false,
+    count: false
+  },
+  lastHero: null
+};
+
+function initNamesDashboard() {
+  setupNamesEvents();
+  executeNamesGenerator();
+}
+
+function setupNamesEvents() {
+  if (namesState.initialized) return;
+  namesState.initialized = true;
+
+  // Кнопка «Назад»
+  document.getElementById('btn-back-from-names')?.addEventListener('click', () => closeGeneratorView());
+
+  // Замки блокировки
+  const lockDefs = [
+    { id: 'btn-lock-n-race', key: 'race' },
+    { id: 'btn-lock-n-gender', key: 'gender' },
+    { id: 'btn-lock-n-class', key: 'classType' },
+    { id: 'btn-lock-n-format', key: 'format' },
+    { id: 'btn-lock-n-count', key: 'count' }
+  ];
+
+  lockDefs.forEach(({ id, key }) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      namesState.locks[key] = !namesState.locks[key];
+      btn.classList.toggle('locked', namesState.locks[key]);
+      btn.textContent = namesState.locks[key] ? '🔒' : '🔓';
     });
+  });
+
+  // Кнопка генерации
+  document.getElementById('btn-reroll-names')?.addEventListener('click', () => {
+    executeNamesGenerator();
+  });
+
+  // Сбросить все замки
+  document.getElementById('btn-unlock-all-names')?.addEventListener('click', () => {
+    lockDefs.forEach(({ id, key }) => {
+      namesState.locks[key] = false;
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.classList.remove('locked');
+        btn.textContent = '🔓';
+      }
+    });
+  });
+
+  // Копировать досье
+  document.getElementById('btn-copy-names-summary')?.addEventListener('click', () => {
+    if (!namesState.lastHero) return;
+    const h = namesState.lastHero;
+    const text = `Герой: ${h.name} (${h.race}, ${h.gender})\nКласс: ${h.classTitle} [${h.classRole}]\n${h.titleDetail}\nЦитата: ${h.quote}\nЧерта: ${h.trait}\nТайна/Зацепка: ${h.quirk}\nМотив: ${h.hook}`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-names-summary');
+      if (btn) {
+        btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<span>📋</span><span>Копировать героя</span>';
+        }, 2000);
+      }
+    });
+  });
+}
+
+function executeNamesGenerator() {
+  const raceEl = document.getElementById('n-param-race');
+  const genderEl = document.getElementById('n-param-gender');
+  const classEl = document.getElementById('n-param-class');
+  const formatEl = document.getElementById('n-param-format');
+  const countEl = document.getElementById('n-param-count');
+
+  // Если селектор не заблокирован и был выбран 'any', берем случайное значение
+  const race = (namesState.locks.race && raceEl) ? raceEl.value : (raceEl?.value || 'any');
+  const gender = (namesState.locks.gender && genderEl) ? genderEl.value : (genderEl?.value || 'any');
+  const classType = (namesState.locks.classType && classEl) ? classEl.value : (classEl?.value || 'any');
+  const format = (namesState.locks.format && formatEl) ? formatEl.value : (formatEl?.value || 'full');
+  const count = (namesState.locks.count && countEl) ? parseInt(countEl.value, 10) : parseInt(countEl?.value || '3', 10);
+
+  const hero = generateCharacterName({ race, gender, classType, format, count });
+  namesState.lastHero = hero;
+
+  // Обновление карточки героя
+  const portraitImg = document.getElementById('hero-portrait-img');
+  if (portraitImg) {
+    portraitImg.src = hero.portraitPath;
+    portraitImg.onerror = () => {
+      portraitImg.src = 'assets/images/portraits/human_male.jpg';
+    };
   }
 
-  const backFromTavernBtn = document.getElementById('btn-back-from-tavern');
-  if (backFromTavernBtn) {
-    backFromTavernBtn.addEventListener('click', () => {
-      closeGeneratorView();
-    });
+  const nameTitle = document.getElementById('hero-name-title');
+  if (nameTitle) nameTitle.textContent = hero.name;
+
+  const roleBadge = document.getElementById('hero-badge-role');
+  if (roleBadge) roleBadge.textContent = hero.classBadge;
+
+  const badgesList = document.getElementById('hero-badges-list');
+  if (badgesList) {
+    badgesList.innerHTML = `
+      <span class="tavern-card-badge">${hero.race}</span>
+      <span class="tavern-card-badge">${hero.gender}</span>
+      <span class="tavern-card-badge" style="background:rgba(212, 175, 55, 0.2); border-color:#ffd54f; color:#ffd54f;">${hero.classTitle}</span>
+      <span class="tavern-card-badge">${hero.titleDetail}</span>
+    `;
   }
 
-  const form = document.getElementById('generator-settings-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      executeCurrentGenerator();
-    });
+  const quoteBox = document.getElementById('hero-quote-box');
+  if (quoteBox) quoteBox.textContent = hero.quote;
+
+  const detailsGrid = document.getElementById('hero-details-grid');
+  if (detailsGrid) {
+    detailsGrid.innerHTML = `
+      <p><strong>🎭 Черта характера:</strong> ${hero.trait}</p>
+      <p><strong>🗝️ Тайна или особенность:</strong> ${hero.quirk}</p>
+      <p><strong>🗺️ Сюжетный мотив:</strong> ${hero.hook}</p>
+    `;
   }
 
-  const copyBtn = document.getElementById('btn-copy-result');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      if (state.currentResultText) {
-        navigator.clipboard.writeText(state.currentResultText).then(() => {
-          copyBtn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+  // Обновление реестра вариантов
+  const tbody = document.getElementById('tbody-names-variants');
+  if (tbody) {
+    tbody.innerHTML = hero.variants.map(v => `
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: var(--accent-primary);">${v.id}</td>
+        <td><strong style="color: #f0c97d;">${v.name}</strong></td>
+        <td>${v.race}</td>
+        <td>${v.gender}</td>
+        <td><span class="tavern-card-badge">${v.classTitle}</span></td>
+        <td><span style="color: var(--text-muted);">${v.detail}</span></td>
+        <td style="text-align: right;">
+          <button class="btn-mini-copy" data-copy="${v.name}" title="Копировать имя">📋 Копировать</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.btn-mini-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+          btn.textContent = '✔ Копия';
           setTimeout(() => {
-            copyBtn.innerHTML = '<span>📋</span><span>Копировать</span>';
-          }, 2000);
+            btn.textContent = '📋 Копировать';
+          }, 1500);
         });
-      }
+      });
     });
   }
 }
 
 // ==========================================================================
-// Настройки для каждого генератора
+// 2. СОКРОВИЩА И ЛУТ (LOOT & TREASURE HOARD DASHBOARD CONTROLLER)
 // ==========================================================================
-function renderGeneratorSettings(viewId) {
-  const container = document.getElementById('dynamic-settings-fields');
-  if (!container) return;
+const lootDashboardState = {
+  initialized: false,
+  locks: {
+    cr: false,
+    type: false,
+    mult: false
+  },
+  lastLoot: null
+};
 
-  switch (viewId) {
-    case 'names':
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-race">Раса персонажа</label>
-          <select class="form-select" id="setting-race">
-            <option value="any">🎲 Любая случайная раса</option>
-            <option value="human">Человек (Северяне и Южане)</option>
-            <option value="elf">Эльф (Высший / Лесной)</option>
-            <option value="dwarf">Дварф (Горный / Подгорный)</option>
-            <option value="tiefling">Тифлинг (Инфернальный род)</option>
-            <option value="drow">Дроу (Тёмный эльф)</option>
-          </select>
-        </div>
+function initLootDashboard() {
+  setupLootEvents();
+  executeLootGenerator();
+}
 
-        <div class="form-group">
-          <label class="form-label" for="setting-gender">Пол</label>
-          <select class="form-select" id="setting-gender">
-            <option value="any">🎲 Случайный</option>
-            <option value="male">Мужской</option>
-            <option value="female">Женский</option>
-          </select>
-        </div>
+function setupLootEvents() {
+  if (lootDashboardState.initialized) return;
+  lootDashboardState.initialized = true;
 
-        <div class="form-group">
-          <label class="form-label" for="setting-format">Формат имени</label>
-          <select class="form-select" id="setting-format">
-            <option value="full">Имя + Родовая фамилия / Клан</option>
-            <option value="epithet">Имя + Героический титул / Прозвище</option>
-            <option value="simple">Только Имя</option>
-          </select>
-        </div>
+  document.getElementById('btn-back-from-loot')?.addEventListener('click', () => closeGeneratorView());
 
-        <div class="form-group">
-          <label class="form-label" for="setting-count">Количество вариантов</label>
-          <select class="form-select" id="setting-count">
-            <option value="1">1 вариант</option>
-            <option value="3" selected>3 варианта</option>
-            <option value="5">5 вариантов</option>
-          </select>
-        </div>
+  const lockDefs = [
+    { id: 'btn-lock-l-cr', key: 'cr' },
+    { id: 'btn-lock-l-type', key: 'type' },
+    { id: 'btn-lock-l-mult', key: 'mult' }
+  ];
+
+  lockDefs.forEach(({ id, key }) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      lootDashboardState.locks[key] = !lootDashboardState.locks[key];
+      btn.classList.toggle('locked', lootDashboardState.locks[key]);
+      btn.textContent = lootDashboardState.locks[key] ? '🔒' : '🔓';
+    });
+  });
+
+  document.getElementById('btn-reroll-loot')?.addEventListener('click', () => {
+    executeLootGenerator();
+  });
+
+  document.getElementById('btn-unlock-all-loot')?.addEventListener('click', () => {
+    lockDefs.forEach(({ id, key }) => {
+      lootDashboardState.locks[key] = false;
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.classList.remove('locked');
+        btn.textContent = '🔓';
+      }
+    });
+  });
+
+  document.getElementById('btn-copy-loot-summary')?.addEventListener('click', () => {
+    if (!lootDashboardState.lastLoot) return;
+    const l = lootDashboardState.lastLoot;
+    const text = `Добыча [${l.tierLabel} | ${l.type}]\nОбщая стоимость: ~${l.totalEstimatedGp.toLocaleString('ru-RU')} зм\nМонеты: ${l.coinsFormatted}\nСамоцветы: ${l.gems.map(g => `${g.name} x${g.count} (${g.totalGp} зм)`).join('; ') || 'нет'}\nЦенности: ${l.arts.map(a => `${a.name} (${a.valueGp} зм)`).join('; ') || 'нет'}\nМагия: ${l.magicItems.map(m => `${m.name} [${m.rarityLabel}]`).join('; ') || 'нет'}`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-loot-summary');
+      if (btn) {
+        btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<span>📋</span><span>Копировать опись</span>';
+        }, 2000);
+      }
+    });
+  });
+}
+
+function executeLootGenerator() {
+  const crEl = document.getElementById('l-param-cr');
+  const typeEl = document.getElementById('l-param-type');
+  const multEl = document.getElementById('l-param-mult');
+
+  const crTier = (lootDashboardState.locks.cr && crEl) ? crEl.value : (crEl?.value || '0-4');
+  const type = (lootDashboardState.locks.type && typeEl) ? typeEl.value : (typeEl?.value || 'hoard');
+  const multiplier = (lootDashboardState.locks.mult && multEl) ? parseFloat(multEl.value) : parseFloat(multEl?.value || '1.0');
+
+  const loot = generateLoot({ crTier, type, multiplier });
+  lootDashboardState.lastLoot = loot;
+
+  // Сводка
+  const tierBadge = document.getElementById('hoard-badge-tier');
+  if (tierBadge) tierBadge.textContent = loot.tierLabel;
+
+  const totalVal = document.getElementById('hoard-total-val');
+  if (totalVal) totalVal.textContent = `~${loot.totalEstimatedGp.toLocaleString('ru-RU')} зм`;
+
+  const summaryStats = document.getElementById('hoard-summary-stats');
+  if (summaryStats) {
+    summaryStats.innerHTML = `
+      <p><strong>📦 Категория:</strong> ${loot.type}</p>
+      <p><strong>🪙 Монеты в золоте:</strong> ${loot.coinsGp.toLocaleString('ru-RU')} зм</p>
+      <p><strong>💎 Драгоценности:</strong> ${(loot.gemsGp + loot.artsGp).toLocaleString('ru-RU')} зм</p>
+      <p><strong>✨ Магических находок:</strong> ${loot.magicItems.length} шт.</p>
+    `;
+  }
+
+  // Таблица монет
+  const tbodyCoins = document.getElementById('tbody-loot-coins');
+  if (tbodyCoins) {
+    const coinRows = [
+      { name: 'Медные монеты (мм / CP)', count: loot.coins.cp, gp: (loot.coins.cp / 100).toFixed(2), cls: 'coin-cp', icon: '🥉' },
+      { name: 'Серебряные монеты (см / SP)', count: loot.coins.sp, gp: (loot.coins.sp / 10).toFixed(1), cls: 'coin-sp', icon: '⚪' },
+      { name: 'Электрумовые монеты (эм / EP)', count: loot.coins.ep, gp: (loot.coins.ep / 2).toFixed(1), cls: 'coin-ep', icon: '🔘' },
+      { name: 'Золотые монеты (зм / GP)', count: loot.coins.gp, gp: loot.coins.gp, cls: 'coin-gp', icon: '🟡' },
+      { name: 'Платиновые монеты (пм / PP)', count: loot.coins.pp, gp: loot.coins.pp * 10, cls: 'coin-pp', icon: '💎' }
+    ].filter(c => c.count > 0);
+
+    if (coinRows.length === 0) {
+      tbodyCoins.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">В кошельке пусто</td></tr>`;
+    } else {
+      tbodyCoins.innerHTML = coinRows.map(c => `
+        <tr>
+          <td><span class="coin-badge ${c.cls}">${c.icon} ${c.name}</span></td>
+          <td><strong>${c.count.toLocaleString('ru-RU')}</strong></td>
+          <td style="text-align: right;"><span class="cost-badge">${c.gp} зм</span></td>
+        </tr>
+      `).join('') + `
+        <tr style="border-top: 2px solid var(--border-color, #5a422e); background: rgba(0,0,0,0.3);">
+          <td colspan="2"><strong>Всего в монетах:</strong></td>
+          <td style="text-align: right;"><strong style="color: #ffd54f;">${loot.coinsGp.toLocaleString('ru-RU')} зм</strong></td>
+        </tr>
       `;
-      break;
-
-    case 'tavern': {
-      const locations = Object.keys(TAVERN_DATA.menus_by_location);
-      const locOptions = locations.map(l => `<option value="${l}">${l}</option>`).join('');
-
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-tavern-loc">Местность заведения</label>
-          <select class="form-select" id="setting-tavern-loc">
-            <option value="any">🎲 Случайная местность</option>
-            ${locOptions}
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="setting-tavern-class">Класс заведения</label>
-          <select class="form-select" id="setting-tavern-class">
-            <option value="cheap">Дешёвое (для простолюдинов и наемников)</option>
-            <option value="normal" selected>Обычное (добротный постоялый двор)</option>
-            <option value="luxury">Роскошное (для купцов и знати)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="setting-tavern-race">Раса хозяина</label>
-          <select class="form-select" id="setting-tavern-race">
-            <option value="any">🎲 Случайная раса</option>
-            <option value="Человек">Человек</option>
-            <option value="Дварф">Дварф</option>
-            <option value="Эльф">Эльф</option>
-            <option value="Полурослик">Полурослик</option>
-            <option value="Тифлинг">Тифлинг</option>
-            <option value="Драконорожденный">Драконорожденный</option>
-          </select>
-        </div>
-      `;
-      break;
     }
+  }
 
-    case 'd20-hub': {
-      const tableOptions = D20_CATALOG.map(t => `<option value="${t.id}">${t.icon} ${t.title}</option>`).join('');
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-d20-table">Таблица D20</label>
-          <select class="form-select" id="setting-d20-table">
-            <option value="all">🎲 Случайная из всех 12 таблиц</option>
-            ${tableOptions}
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="setting-d20-roll">Бросок кубика d20</label>
-          <select class="form-select" id="setting-d20-roll">
-            <option value="random">🎲 Бросить d20 случайно</option>
-            ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">Значение: ${i+1}</option>`).join('')}
-          </select>
-        </div>
-      `;
-      break;
+  // Таблица самоцветов и искусства
+  const tbodyGems = document.getElementById('tbody-loot-gems');
+  if (tbodyGems) {
+    const items = [...loot.gems, ...loot.arts];
+    if (items.length === 0) {
+      tbodyGems.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Драгоценных камней и редкостей нет</td></tr>`;
+    } else {
+      tbodyGems.innerHTML = items.map(item => `
+        <tr>
+          <td>
+            <strong>${item.name}</strong>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">${item.category || item.desc || ''}</div>
+          </td>
+          <td>${item.count} шт.</td>
+          <td style="text-align: right;"><span class="cost-badge">${item.totalGp} зм</span></td>
+        </tr>
+      `).join('');
     }
+  }
 
-    case 'd20-wild-magic':
-    case 'd20-secret-societies':
-    case 'd20-artefacts':
-    case 'd20-potions': {
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-d20-single-roll">Бросок d20</label>
-          <select class="form-select" id="setting-d20-single-roll">
-            <option value="random">🎲 Бросить кубик d20 случайно</option>
-            ${Array.from({length: 20}, (_, i) => `<option value="${i+1}">Значение: ${i+1}</option>`).join('')}
-          </select>
-        </div>
-      `;
-      break;
+  // Таблица магии
+  const tbodyMagic = document.getElementById('tbody-loot-magic');
+  if (tbodyMagic) {
+    if (loot.magicItems.length === 0) {
+      tbodyMagic.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Магических предметов не обнаружено</td></tr>`;
+    } else {
+      tbodyMagic.innerHTML = loot.magicItems.map(m => `
+        <tr>
+          <td><strong style="color: #ffd54f;">${m.name}</strong></td>
+          <td><span class="tavern-card-badge">${m.type}</span></td>
+          <td><span class="rarity-badge rarity-${m.rarity}">${m.rarityLabel}</span></td>
+          <td style="font-size: 0.78rem; color: var(--text-primary);">${m.desc}</td>
+        </tr>
+      `).join('');
     }
-
-    case 'loot':
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label" for="setting-cr">Уровень опасности отряда (CR)</label>
-          <select class="form-select" id="setting-cr">
-            <option value="0-4" selected>CR 0–4 (Начинающие искатели приключений)</option>
-            <option value="5-10">CR 5–10 (Опытные герои королевства)</option>
-            <option value="11-16">CR 11–16 (Мастера континента)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="setting-loot-type">Тип добычи</label>
-          <select class="form-select" id="setting-loot-type">
-            <option value="hoard" selected>Сокровищница босса (Сундук в логове)</option>
-            <option value="individual">Индивидуальная добыча из карманов монстра</option>
-          </select>
-        </div>
-      `;
-      break;
-
-    default:
-      container.innerHTML = `<p style="color:var(--color-text-muted);">Настройки по умолчанию.</p>`;
-      break;
   }
 }
 
 // ==========================================================================
-// Выполнение генерации
+// 3. D20 ТАБЛИЦЫ СОБЫТИЙ (D20 TABLES DASHBOARD CONTROLLER)
 // ==========================================================================
-function executeCurrentGenerator() {
-  const resultContainer = document.getElementById('generator-result-content');
-  if (!resultContainer) return;
+const d20DashboardState = {
+  initialized: false,
+  locks: {
+    table: false,
+    roll: false
+  },
+  activeTableId: 'fallen-gods',
+  lastEvent: null
+};
 
-  switch (state.currentView) {
-    case 'names': {
-      const race = document.getElementById('setting-race')?.value || 'any';
-      const gender = document.getElementById('setting-gender')?.value || 'any';
-      const format = document.getElementById('setting-format')?.value || 'full';
-      const count = parseInt(document.getElementById('setting-count')?.value || '1', 10);
+function initD20Dashboard(viewId) {
+  setupD20Events();
 
-      const items = [];
-      for (let i = 0; i < count; i++) {
-        items.push(generateCharacterName({ race, gender, format }));
+  // Заполнение селектора таблиц D20
+  const tableSelect = document.getElementById('d20-param-table');
+  if (tableSelect && tableSelect.children.length === 0) {
+    tableSelect.innerHTML = D20_CATALOG.map(t => `
+      <option value="${t.id}">${t.icon} ${t.title}</option>
+    `).join('');
+  }
+
+  // Заполнение селектора броска
+  const rollSelect = document.getElementById('d20-param-roll');
+  if (rollSelect && rollSelect.children.length === 0) {
+    let options = '<option value="random">🎲 Случайный бросок d20</option>';
+    for (let i = 1; i <= 20; i++) {
+      options += `<option value="${i}">Выпало на кости: ${i}</option>`;
+    }
+    rollSelect.innerHTML = options;
+  }
+
+  // Прямая адресация из каталога
+  const directMap = {
+    'd20-wild-magic': 'wild-magic',
+    'd20-secret-societies': 'secret-societies',
+    'd20-artefacts': 'artefacts-clues',
+    'd20-potions': 'strange-potions'
+  };
+
+  if (directMap[viewId] && !d20DashboardState.locks.table) {
+    d20DashboardState.activeTableId = directMap[viewId];
+    if (tableSelect) tableSelect.value = directMap[viewId];
+  } else if (!d20DashboardState.locks.table && tableSelect) {
+    d20DashboardState.activeTableId = tableSelect.value || 'fallen-gods';
+  }
+
+  executeD20DashboardGenerator();
+}
+
+function setupD20Events() {
+  if (d20DashboardState.initialized) return;
+  d20DashboardState.initialized = true;
+
+  document.getElementById('btn-back-from-d20')?.addEventListener('click', () => closeGeneratorView());
+
+  const lockDefs = [
+    { id: 'btn-lock-d20-table', key: 'table' },
+    { id: 'btn-lock-d20-roll', key: 'roll' }
+  ];
+
+  lockDefs.forEach(({ id, key }) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      d20DashboardState.locks[key] = !d20DashboardState.locks[key];
+      btn.classList.toggle('locked', d20DashboardState.locks[key]);
+      btn.textContent = d20DashboardState.locks[key] ? '🔒' : '🔓';
+    });
+  });
+
+  document.getElementById('btn-reroll-d20')?.addEventListener('click', () => {
+    executeD20DashboardGenerator();
+  });
+
+  document.getElementById('btn-unlock-all-d20')?.addEventListener('click', () => {
+    lockDefs.forEach(({ id, key }) => {
+      d20DashboardState.locks[key] = false;
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.classList.remove('locked');
+        btn.textContent = '🔓';
       }
+    });
+  });
 
-      state.currentResultText = items.map(it => `${it.name} (${it.race}, ${it.gender}) ${it.titleDetail}`).join('\n');
+  document.getElementById('btn-copy-d20-summary')?.addEventListener('click', () => {
+    if (!d20DashboardState.lastEvent) return;
+    const ev = d20DashboardState.lastEvent;
+    const text = `[${ev.tableTitle}] d20: ${ev.roll}\n${ev.text}\nСовет Мастеру: ${ev.dmTip}`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-d20-summary');
+      if (btn) {
+        btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<span>📋</span><span>Копировать событие</span>';
+        }, 2000);
+      }
+    });
+  });
+}
 
-      resultContainer.innerHTML = items.map(item => `
-        <div class="result-item-card">
-          <h4 class="result-item-title">${item.name}</h4>
-          <div class="result-item-meta">
-            <span class="result-badge">${item.race}</span>
-            <span class="result-badge">${item.gender}</span>
-            <span>${item.titleDetail}</span>
-          </div>
-          <p class="result-item-body" style="font-style:italic; color:var(--color-text-secondary);">${item.quote}</p>
-        </div>
-      `).join('');
-      break;
-    }
+function executeD20DashboardGenerator() {
+  const tableEl = document.getElementById('d20-param-table');
+  const rollEl = document.getElementById('d20-param-roll');
 
-    case 'tavern': {
-      const location = document.getElementById('setting-tavern-loc')?.value || 'any';
-      const classType = document.getElementById('setting-tavern-class')?.value || 'normal';
-      const innkeeperRace = document.getElementById('setting-tavern-race')?.value || 'any';
+  const tableId = (d20DashboardState.locks.table && tableEl) ? tableEl.value : (tableEl?.value || d20DashboardState.activeTableId);
+  const rollVal = (d20DashboardState.locks.roll && rollEl) ? rollEl.value : (rollEl?.value || 'random');
+  const rollNum = rollVal !== 'random' ? parseInt(rollVal, 10) : undefined;
 
-      const tavern = generateTavern({ location, classType, innkeeperRace });
-      state.currentResultText = `${tavern.name} [${tavern.classLabel} | ${tavern.location}]\nХозяин: ${tavern.innkeeper}\nЦены: ${tavern.roomPrices}\nШтат: ${tavern.roomsInfo}\nБлюдо: ${tavern.dish}\nВыпивка: ${tavern.drink}\nАтмосфера: ${tavern.atmosphere}\nЗаполненность: ${tavern.crowd}\nСлух: ${tavern.rumor}\nСобытие: ${tavern.event}`;
+  const eventData = generateD20Event({ tableId, rollNum });
+  d20DashboardState.lastEvent = eventData;
+  d20DashboardState.activeTableId = eventData.tableId;
 
-      resultContainer.innerHTML = `
-        <div class="result-item-card">
-          <h4 class="result-item-title">${tavern.name}</h4>
-          <div class="result-item-meta">
-            <span class="result-badge">${tavern.classLabel}</span>
-            <span class="result-badge">${tavern.location}</span>
-            <span class="result-badge">${tavern.crowd}</span>
-          </div>
-          <div class="result-item-body" style="display:flex; flex-direction:column; gap:0.75rem;">
-            <p><strong>👤 Хозяин:</strong> ${tavern.innkeeper}</p>
-            <p><strong>🛏️ Ночлег & Цены:</strong> ${tavern.roomPrices} (${tavern.roomsInfo})</p>
-            <p><strong>🕯️ Обстановка:</strong> ${tavern.classDescription}</p>
-            <p><strong>🍲 Особое блюдо местности:</strong> ${tavern.dish}</p>
-            <p><strong>🍺 Выпивка в кружке:</strong> ${tavern.drink}</p>
-            <p><strong>🎭 Настроение в зале:</strong> ${tavern.atmosphere}</p>
-            <p><strong>🗣️ Свежий слух:</strong> «${tavern.rumor}»</p>
-            <p><strong>⚡ Происшествие:</strong> ${tavern.event}</p>
-          </div>
-        </div>
+  if (tableEl && tableEl.value !== eventData.tableId) {
+    tableEl.value = eventData.tableId;
+  }
+
+  // Шапка D20
+  const headerTitle = document.getElementById('d20-header-title');
+  if (headerTitle) headerTitle.textContent = `RAND-OM-ATTIC | ${eventData.tableTitle}`;
+
+  const headerSub = document.getElementById('d20-header-subtitle');
+  if (headerSub) headerSub.textContent = eventData.tableDescription;
+
+  const headerIcon = document.getElementById('d20-header-icon');
+  if (headerIcon) headerIcon.textContent = eventData.icon;
+
+  // Витрина события
+  const showcaseTitle = document.getElementById('d20-showcase-title');
+  if (showcaseTitle) showcaseTitle.innerHTML = `<span>${eventData.icon}</span> Событие: d20 = ${eventData.roll}`;
+
+  const categoryBadge = document.getElementById('d20-badge-category');
+  if (categoryBadge) categoryBadge.textContent = eventData.badge;
+
+  const bannerImg = document.getElementById('d20-banner-img');
+  if (bannerImg) {
+    bannerImg.src = eventData.bgImage;
+    bannerImg.onerror = () => {
+      bannerImg.src = 'files/D20/wild_magic.png';
+    };
+  }
+
+  const tableNameEl = document.getElementById('d20-event-table-name');
+  if (tableNameEl) tableNameEl.textContent = eventData.tableTitle;
+
+  const glowNumber = document.getElementById('d20-glow-number');
+  if (glowNumber) glowNumber.textContent = `d20: ${eventData.roll}`;
+
+  const eventText = document.getElementById('d20-event-text');
+  if (eventText) eventText.textContent = eventData.text;
+
+  const dmTip = document.getElementById('d20-dm-tip');
+  if (dmTip) dmTip.innerHTML = `<strong>Совет Мастеру:</strong> ${eventData.dmTip}`;
+
+  // Реестр таблицы 1-20
+  const tbody = document.getElementById('tbody-d20-full');
+  if (tbody && eventData.items) {
+    tbody.innerHTML = eventData.items.map(item => {
+      const isRolled = String(item.roll) === String(eventData.roll);
+      return `
+        <tr class="${isRolled ? 'd20-row-rolled' : ''}" id="d20-row-${item.roll}">
+          <td style="text-align: center;">
+            <span class="d20-roll-pill">${item.roll}</span>
+          </td>
+          <td style="font-size: 0.82rem; line-height: 1.4;">
+            ${isRolled ? '<strong style="color:#ffd54f;">► </strong>' : ''}${item.text}
+          </td>
+          <td style="text-align: right;">
+            <button class="btn-mini-copy" data-copy="d20 [${item.roll}]: ${item.text}" title="Копировать строку">📋 Копия</button>
+          </td>
+        </tr>
       `;
-      break;
-    }
+    }).join('');
 
-    case 'd20-hub': {
-      const tableId = document.getElementById('setting-d20-table')?.value || 'all';
-      const rollVal = document.getElementById('setting-d20-roll')?.value || 'random';
-      const rollNum = rollVal !== 'random' ? parseInt(rollVal, 10) : undefined;
+    tbody.querySelectorAll('.btn-mini-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+          btn.textContent = '✔ Копия';
+          setTimeout(() => {
+            btn.textContent = '📋 Копия';
+          }, 1500);
+        });
+      });
+    });
 
-      const evt = generateD20Event({ tableId, rollNum });
-      state.currentResultText = `[${evt.tableTitle}] d20 = ${evt.roll}\n${evt.text}`;
-
-      resultContainer.innerHTML = `
-        <div class="result-item-card">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-            <h4 class="result-item-title">${evt.icon} ${evt.tableTitle}</h4>
-            <span style="font-family:var(--font-display); font-size:1.8rem; font-weight:bold; color:var(--color-accent); background:var(--color-surface); padding:0.2rem 0.8rem; border-radius:10px; border:1px solid var(--color-border);">
-              d20: ${evt.roll}
-            </span>
-          </div>
-          <div class="result-item-meta">
-            <span class="result-badge">${evt.badge}</span>
-            <span>${evt.tableDescription}</span>
-          </div>
-          <p class="result-item-body" style="font-size:1.1rem; line-height:1.6; margin-top:0.5rem; background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px; border-left:3px solid var(--color-accent);">
-            ${evt.text}
-          </p>
-        </div>
-      `;
-      break;
-    }
-
-    case 'd20-wild-magic':
-    case 'd20-secret-societies':
-    case 'd20-artefacts':
-    case 'd20-potions': {
-      const map = {
-        'd20-wild-magic': 'wild-magic',
-        'd20-secret-societies': 'secret-societies',
-        'd20-artefacts': 'artefacts-clues',
-        'd20-potions': 'strange-potions'
-      };
-      const tableId = map[state.currentView];
-      const rollVal = document.getElementById('setting-d20-single-roll')?.value || 'random';
-      const rollNum = rollVal !== 'random' ? parseInt(rollVal, 10) : undefined;
-
-      const evt = generateD20Event({ tableId, rollNum });
-      state.currentResultText = `[${evt.tableTitle}] d20 = ${evt.roll}\n${evt.text}`;
-
-      resultContainer.innerHTML = `
-        <div class="result-item-card">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-            <h4 class="result-item-title">${evt.icon} ${evt.tableTitle}</h4>
-            <span style="font-family:var(--font-display); font-size:1.8rem; font-weight:bold; color:var(--color-accent); background:var(--color-surface); padding:0.2rem 0.8rem; border-radius:10px; border:1px solid var(--color-border);">
-              d20: ${evt.roll}
-            </span>
-          </div>
-          <div class="result-item-meta">
-            <span class="result-badge">${evt.badge}</span>
-          </div>
-          <p class="result-item-body" style="font-size:1.1rem; line-height:1.6; margin-top:0.5rem; background:rgba(0,0,0,0.2); padding:1rem; border-radius:8px; border-left:3px solid var(--color-accent);">
-            ${evt.text}
-          </p>
-        </div>
-      `;
-      break;
-    }
-
-    case 'loot': {
-      const crTier = document.getElementById('setting-cr')?.value || '0-4';
-      const type = document.getElementById('setting-loot-type')?.value || 'hoard';
-      const loot = generateLoot({ crTier, type });
-
-      state.currentResultText = `Добыча [${loot.tier}, ${loot.type}]:\nМонеты: ${loot.coinsFormatted}\nСамоцветы: ${loot.gems.join(', ') || 'нет'}\nЦенности: ${loot.arts.join(', ') || 'нет'}\nМагия: ${loot.magicItems.join(', ') || 'нет'}`;
-
-      resultContainer.innerHTML = `
-        <div class="result-item-card">
-          <h4 class="result-item-title">🏆 ${loot.type}</h4>
-          <div class="result-item-meta">
-            <span class="result-badge">${loot.tier}</span>
-          </div>
-          <div class="result-item-body" style="display:flex; flex-direction:column; gap:0.75rem;">
-            <p><strong>🪙 Россыпь монет:</strong> <span style="color:var(--color-accent); font-weight:bold;">${loot.coinsFormatted}</span></p>
-            ${loot.gems.length > 0 ? `<p><strong>💎 Драгоценные камни:</strong> ${loot.gems.join('; ')}</p>` : ''}
-            ${loot.arts.length > 0 ? `<p><strong>🏺 Произведения искусства:</strong> ${loot.arts.join('; ')}</p>` : ''}
-            ${loot.magicItems.length > 0 ? `<p><strong>✨ Магические предметы:</strong> ${loot.magicItems.join('; ')}</p>` : ''}
-          </div>
-        </div>
-      `;
-      break;
-    }
-
-    default:
-      resultContainer.innerHTML = `<div class="result-item-card"><p>Выберите генератор на главной доске.</p></div>`;
-      break;
+    // Плавная прокрутка к активной строке таблицы
+    setTimeout(() => {
+      const rolledEl = tbody.querySelector('.d20-row-rolled');
+      if (rolledEl) {
+        rolledEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 100);
   }
 }
 

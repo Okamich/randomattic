@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="css/components/dice-drawer.css">
   <link rel="stylesheet" href="css/components/modal.css">
   <link rel="stylesheet" href="css/components/tavern-dashboard.css">
+  <link rel="stylesheet" href="css/components/generator-dashboard.css">
 </head>
 <body>
 
@@ -102,51 +103,470 @@
 
     <!-- ВИД 2: Экран выбранного генератора с настройками (Generator View) -->
     <div id="view-generator" class="generator-view-container" style="display: none;">
-      <!-- Навигационная панель -->
-      <div class="generator-top-bar">
-        <button class="btn-back-to-board" id="btn-back-to-board">
-          <span>←</span>
-          <span>Назад к карточкам</span>
-        </button>
+      <!-- 1. Консоль Генератора Имен & Персонажей (Names Dashboard) -->
+      <div id="names-dashboard-workspace" class="gen-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="gen-header-bar">
+          <div class="gen-header-left">
+            <button class="btn-tavern-back" id="btn-back-from-names" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
+            </button>
+            <div class="gen-header-title">
+              <span class="gen-header-icon">🪖</span>
+              <div>
+                <h2>RAND-OM-ATTIC | Генератор Имен & Героев</h2>
+                <div class="gen-header-subtitle">D&D 5e • Процедурные имена, кланы, архетипы и профили персонажей</div>
+              </div>
+            </div>
+          </div>
+          <div class="gen-actions">
+            <button class="btn-tavern-secondary" id="btn-unlock-all-names">
+              <span>🔓</span>
+              <span>Сбросить замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-names-summary">
+              <span>📋</span>
+              <span>Копировать героя</span>
+            </button>
+          </div>
+        </div>
 
-        <div class="generator-info-header">
-          <div class="gen-header-icon" id="gen-header-icon">🎲</div>
-          <div>
-            <h2 class="gen-header-title" id="gen-header-title">Генератор</h2>
+        <!-- Layout Rows -->
+        <div class="gen-grid-rows">
+          <!-- Ряд 1: Параметры слева | Досье героя справа -->
+          <div class="gen-row names-row-top">
+            <!-- Блок параметров с замками -->
+            <div class="tavern-card" id="card-names-params">
+              <div class="tavern-card-header">
+                <h3><span>⚙️</span> Параметры Персонажа</h3>
+                <span class="tavern-card-badge">Locks on controls</span>
+              </div>
+              <div class="param-subblock">
+                <div class="param-subblock-title"><span>🧙</span> Происхождение & Роль</div>
+                <div class="param-controls-list">
+                  <!-- Race -->
+                  <div class="param-row">
+                    <label for="n-param-race">Раса героя:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-race" class="param-select">
+                        <option value="any">🎲 Любая случайная раса</option>
+                        <option value="human">Человек</option>
+                        <option value="elf">Эльф</option>
+                        <option value="dwarf">Дварф</option>
+                        <option value="halfling">Полурослик</option>
+                        <option value="tiefling">Тифлинг</option>
+                        <option value="dragonborn">Драконорожденный</option>
+                        <option value="halfelf">Полуэльф</option>
+                        <option value="halforc">Полуорк</option>
+                        <option value="gnome">Гном</option>
+                        <option value="drow">Дроу (Темный эльф)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-race" title="Заблокировать расу">🔓</button>
+                  </div>
+                  <!-- Gender -->
+                  <div class="param-row">
+                    <label for="n-param-gender">Пол героя:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-gender" class="param-select">
+                        <option value="any">🎲 Случайный пол</option>
+                        <option value="male">♂ Мужской</option>
+                        <option value="female">♀ Женский</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-gender" title="Заблокировать пол">🔓</button>
+                  </div>
+                  <!-- Class / Role -->
+                  <div class="param-row">
+                    <label for="n-param-class">Класс / Роль:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-class" class="param-select">
+                        <option value="any">🎲 Случайный класс</option>
+                        <option value="fighter">Воин (Мастер клинка)</option>
+                        <option value="wizard">Волшебник (Тайные искусства)</option>
+                        <option value="rogue">Плут (Скрытность & Ловкость)</option>
+                        <option value="cleric">Жрец (Служитель веры)</option>
+                        <option value="ranger">Следопыт (Дикие земли)</option>
+                        <option value="paladin">Паладин (Священная клятва)</option>
+                        <option value="barbarian">Варвар (Первобытная ярость)</option>
+                        <option value="bard">Бард (Менестрель & Сказитель)</option>
+                        <option value="warlock">Колдун (Потусторонний договор)</option>
+                        <option value="druid">Друид (Природный круг)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-class" title="Заблокировать класс">🔓</button>
+                  </div>
+                  <!-- Format -->
+                  <div class="param-row">
+                    <label for="n-param-format">Формат имени:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-format" class="param-select">
+                        <option value="full">Имя + Фамилия / Клан</option>
+                        <option value="epithet">Имя + Прозвище / Титул</option>
+                        <option value="simple">Только Имя</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-format" title="Заблокировать формат">🔓</button>
+                  </div>
+                  <!-- Count -->
+                  <div class="param-row">
+                    <label for="n-param-count">Вариантов в список:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-count" class="param-select">
+                        <option value="3" selected>3 варианта</option>
+                        <option value="5">5 вариантов</option>
+                        <option value="1">1 вариант</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-count" title="Заблокировать количество">🔓</button>
+                  </div>
+                </div>
+                <div class="param-reroll-wrapper">
+                  <button class="btn-tavern-primary btn-reroll-integrated" id="btn-reroll-names">
+                    <span>🎲 Сгенерировать Героя</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Досье персонажа с портретом -->
+            <div class="tavern-card" id="card-hero-profile">
+              <div class="tavern-card-header">
+                <h3><span>👤</span> Досье Персонажа</h3>
+                <span class="tavern-card-badge" id="hero-badge-role">Герой</span>
+              </div>
+              <div class="hero-profile-layout">
+                <div class="hero-portrait-frame">
+                  <img id="hero-portrait-img" class="hero-portrait-img" src="assets/images/portraits/human_male.jpg" alt="Портрет героя">
+                </div>
+                <div class="hero-info">
+                  <h4 class="hero-name-title" id="hero-name-title">Эларион Лунный Шепот</h4>
+                  <div class="hero-badges-list" id="hero-badges-list"></div>
+                  <div class="hero-quote-box" id="hero-quote-box"></div>
+                  <div class="hero-details-grid" id="hero-details-grid"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ряд 2: Таблица вариантов -->
+          <div class="gen-row names-row-bottom">
+            <div class="tavern-card" id="card-names-variants">
+              <div class="tavern-card-header">
+                <h3><span>📜</span> Реестр Сгенерированных Вариантов</h3>
+                <span class="tavern-card-badge">Кликните «Копировать» у строки</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table" id="table-names-variants">
+                  <thead>
+                    <tr>
+                      <th style="width: 40px; text-align: center;">#</th>
+                      <th>Полное имя героя</th>
+                      <th>Раса</th>
+                      <th>Пол</th>
+                      <th>Класс / Роль</th>
+                      <th>Происхождение / Титул</th>
+                      <th style="width: 120px; text-align: right;">Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-names-variants"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Стандартная рабочая зона: Настройки (слева) + Результат (справа) -->
-      <div class="generator-workspace" id="standard-generator-workspace">
-        <!-- Панель настроек -->
-        <div class="settings-panel">
-          <h3 class="settings-panel-title">⚙️ Настройки генерации</h3>
-          <form id="generator-settings-form">
-            <!-- Динамические поля настроек конкретного генератора -->
-            <div id="dynamic-settings-fields"></div>
-
-            <button type="submit" class="btn-run-generator" id="btn-run-gen">
-              <span>🎲 Сгенерировать</span>
+      <!-- 2. Консоль Генератора Сокровищ & Лута (Loot Dashboard) -->
+      <div id="loot-dashboard-workspace" class="gen-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="gen-header-bar">
+          <div class="gen-header-left">
+            <button class="btn-tavern-back" id="btn-back-from-loot" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
             </button>
-          </form>
+            <div class="gen-header-title">
+              <span class="gen-header-icon">👑</span>
+              <div>
+                <h2>RAND-OM-ATTIC | Генератор Сокровищ & Лута</h2>
+                <div class="gen-header-subtitle">D&D 5e • Расчет сокровищниц, монет, самоцветов и магии по CR</div>
+              </div>
+            </div>
+          </div>
+          <div class="gen-actions">
+            <button class="btn-tavern-secondary" id="btn-unlock-all-loot">
+              <span>🔓</span>
+              <span>Сбросить замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-loot-summary">
+              <span>📋</span>
+              <span>Копировать опись</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Область результатов -->
-        <div class="results-container">
-          <div class="result-card">
-            <div class="result-card-header">
-              <div class="result-card-title">📜 Свиток результатов</div>
-              <div class="result-actions">
-                <button class="btn-result-action" id="btn-copy-result" title="Скопировать результат в буфер обмена">
-                  <span>📋</span>
-                  <span>Копировать</span>
-                </button>
+        <!-- Layout Rows -->
+        <div class="gen-grid-rows">
+          <!-- Ряд 1: Параметры слева | Сводка сундука справа -->
+          <div class="gen-row loot-row-top">
+            <div class="tavern-card" id="card-loot-params">
+              <div class="tavern-card-header">
+                <h3><span>⚙️</span> Параметры Сокровищницы</h3>
+                <span class="tavern-card-badge">Locks on controls</span>
+              </div>
+              <div class="param-subblock">
+                <div class="param-subblock-title"><span>💎</span> Уровень Опасности и Размер</div>
+                <div class="param-controls-list">
+                  <!-- CR -->
+                  <div class="param-row">
+                    <label for="l-param-cr">Опасность (CR):</label>
+                    <div class="param-input-group">
+                      <select id="l-param-cr" class="param-select">
+                        <option value="0-4" selected>CR 0–4 (Начинающие искатели)</option>
+                        <option value="5-10">CR 5–10 (Опытные герои)</option>
+                        <option value="11-16">CR 11–16 (Мастера королевства)</option>
+                        <option value="17+">CR 17+ (Легендарные герои)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-l-cr" title="Заблокировать CR">🔓</button>
+                  </div>
+                  <!-- Type -->
+                  <div class="param-row">
+                    <label for="l-param-type">Тип добычи:</label>
+                    <div class="param-input-group">
+                      <select id="l-param-type" class="param-select">
+                        <option value="hoard" selected>Сокровищница логова (Сундук)</option>
+                        <option value="individual">Карманная добыча чудовища</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-l-type" title="Заблокировать тип">🔓</button>
+                  </div>
+                  <!-- Multiplier -->
+                  <div class="param-row">
+                    <label for="l-param-mult">Объем сокровищницы:</label>
+                    <div class="param-input-group">
+                      <select id="l-param-mult" class="param-select">
+                        <option value="0.5">Скудное логово (×0.5)</option>
+                        <option value="1.0" selected>Обычное сокровище (×1.0)</option>
+                        <option value="1.5">Щедрая сокровищница (×1.5)</option>
+                        <option value="2.0">Драконье богатство (×2.0)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-l-mult" title="Заблокировать множитель">🔓</button>
+                  </div>
+                </div>
+                <div class="param-reroll-wrapper">
+                  <button class="btn-tavern-primary btn-reroll-integrated" id="btn-reroll-loot">
+                    <span>🎲 Вскрыть Сокровищницу</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="result-content" id="generator-result-content">
-              <!-- Сюда выводится готовый результат -->
+            <!-- Hoard Overview Card -->
+            <div class="tavern-card" id="card-hoard-overview">
+              <div class="tavern-card-header">
+                <h3><span>🏆</span> Сводка Сокровищницы</h3>
+                <span class="tavern-card-badge" id="hoard-badge-tier">CR 0–4</span>
+              </div>
+              <div class="hoard-overview-layout">
+                <div class="hoard-chest-frame">
+                  <img class="hoard-chest-img" src="assets/images/cards/card-loot.jpg" alt="Сундук с сокровищами">
+                </div>
+                <div class="hoard-overview-info">
+                  <div class="hoard-value-badge" id="hoard-total-gp">
+                    <span>💰</span> <span id="hoard-total-val">0 зм</span>
+                  </div>
+                  <div class="hoard-summary-stats" id="hoard-summary-stats"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ряд 2: 3 Таблицы (Монеты | Драгоценности | Магия) -->
+          <div class="gen-row loot-row-bottom">
+            <!-- Таблица монет -->
+            <div class="tavern-card" id="card-loot-coins">
+              <div class="tavern-card-header">
+                <h3><span>🪙</span> Монетный Мешок</h3>
+                <span class="tavern-card-badge" id="badge-coins-total">Монеты</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table" id="table-loot-coins">
+                  <thead>
+                    <tr>
+                      <th>Тип монеты</th>
+                      <th>Количество</th>
+                      <th style="text-align: right;">В эквиваленте зм</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-loot-coins"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Таблица самоцветов и искусства -->
+            <div class="tavern-card" id="card-loot-gems">
+              <div class="tavern-card-header">
+                <h3><span>💎</span> Самоцветы & Арт</h3>
+                <span class="tavern-card-badge" id="badge-gems-total">Драгоценности</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table" id="table-loot-gems">
+                  <thead>
+                    <tr>
+                      <th>Предмет</th>
+                      <th>Кол-во</th>
+                      <th style="text-align: right;">Цена (зм)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-loot-gems"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Таблица магии -->
+            <div class="tavern-card" id="card-loot-magic">
+              <div class="tavern-card-header">
+                <h3><span>✨</span> Магические Предметы</h3>
+                <span class="tavern-card-badge" id="badge-magic-total">Реликвии</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table" id="table-loot-magic">
+                  <thead>
+                    <tr>
+                      <th>Название</th>
+                      <th>Тип</th>
+                      <th>Редкость</th>
+                      <th>Свойство</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-loot-magic"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Консоль Каталога и Таблиц D20 (D20 Dashboard) -->
+      <div id="d20-dashboard-workspace" class="gen-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="gen-header-bar">
+          <div class="gen-header-left">
+            <button class="btn-tavern-back" id="btn-back-from-d20" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
+            </button>
+            <div class="gen-header-title">
+              <span class="gen-header-icon" id="d20-header-icon">🎲</span>
+              <div>
+                <h2 id="d20-header-title">RAND-OM-ATTIC | D20 Таблицы</h2>
+                <div class="gen-header-subtitle" id="d20-header-subtitle">D&D 5e • Процедурные события, катаклизмы, аномалии и культы</div>
+              </div>
+            </div>
+          </div>
+          <div class="gen-actions">
+            <button class="btn-tavern-secondary" id="btn-unlock-all-d20">
+              <span>🔓</span>
+              <span>Сбросить замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-d20-summary">
+              <span>📋</span>
+              <span>Копировать событие</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Layout Rows -->
+        <div class="gen-grid-rows">
+          <!-- Ряд 1: Параметры слева | Карточка события справа -->
+          <div class="gen-row d20-row-top">
+            <div class="tavern-card" id="card-d20-params">
+              <div class="tavern-card-header">
+                <h3><span>⚙️</span> Параметры Броска</h3>
+                <span class="tavern-card-badge">Locks on controls</span>
+              </div>
+              <div class="param-subblock">
+                <div class="param-subblock-title"><span>🎲</span> Выбор Таблицы и Кости</div>
+                <div class="param-controls-list">
+                  <!-- Table Selector -->
+                  <div class="param-row">
+                    <label for="d20-param-table">Таблица D20:</label>
+                    <div class="param-input-group">
+                      <select id="d20-param-table" class="param-select"></select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-d20-table" title="Заблокировать таблицу">🔓</button>
+                  </div>
+                  <!-- Roll Selector -->
+                  <div class="param-row">
+                    <label for="d20-param-roll">Значение d20:</label>
+                    <div class="param-input-group">
+                      <select id="d20-param-roll" class="param-select"></select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-d20-roll" title="Заблокировать бросок">🔓</button>
+                  </div>
+                </div>
+                <div class="param-reroll-wrapper">
+                  <button class="btn-tavern-primary btn-reroll-integrated" id="btn-reroll-d20">
+                    <span>🎲 Бросить кость d20</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rolled Event Showcase Card -->
+            <div class="tavern-card" id="card-d20-showcase">
+              <div class="tavern-card-header">
+                <h3 id="d20-showcase-title"><span>🔮</span> Выпавшее Событие</h3>
+                <span class="tavern-card-badge" id="d20-badge-category">Категория</span>
+              </div>
+              <div class="d20-showcase-layout">
+                <div class="d20-banner-box">
+                  <img class="d20-banner-img" id="d20-banner-img" src="files/D20/wild_magic.png" alt="Иллюстрация таблицы">
+                  <div class="d20-banner-overlay">
+                    <span class="tavern-card-badge" id="d20-banner-badge">D20</span>
+                  </div>
+                </div>
+                <div class="d20-showcase-content">
+                  <div class="d20-event-header">
+                    <h4 id="d20-event-table-name" style="margin:0; font-family:var(--font-heading, 'Cinzel', serif); font-size:1.1rem; color:var(--accent-primary, #f0c97d);">Таблица</h4>
+                    <div class="d20-glow-badge" id="d20-glow-badge">
+                      <span>🎲</span> <span id="d20-glow-number">d20: 12</span>
+                    </div>
+                  </div>
+                  <div class="d20-parchment-box" id="d20-event-text">
+                    Текст события...
+                  </div>
+                  <div class="d20-dm-tip" id="d20-dm-tip">
+                    <strong>Совет Мастеру:</strong> ...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ряд 2: Полная таблица 1-20 с подсветкой -->
+          <div class="gen-row d20-row-bottom">
+            <div class="tavern-card" id="card-d20-full-table">
+              <div class="tavern-card-header">
+                <h3 id="d20-full-table-title"><span>📜</span> Полный Реестр Таблицы (1–20)</h3>
+                <span class="tavern-card-badge">Выпавший результат подсвечен</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table" id="table-d20-full">
+                  <thead>
+                    <tr>
+                      <th style="width: 55px; text-align: center;">d20</th>
+                      <th>Описание эффекта / события / зацепки</th>
+                      <th style="width: 120px; text-align: right;">Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-d20-full"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
