@@ -770,6 +770,7 @@ function initTavernDashboard() {
   if (!tavernState.isInitialized) {
     populateTavernSelects();
     setupTavernEventListeners();
+    setupStaffCardSync();
     tavernState.isInitialized = true;
   }
   rerollTavern();
@@ -1101,6 +1102,46 @@ function renderTavernUI(data) {
         <td style="font-size:0.78rem; color:var(--text-secondary);">${m.desc}</td>
       </tr>
     `).join('');
+  }
+
+  // Sync staff roster card height to exactly match tavern details card
+  requestAnimationFrame(() => {
+    syncStaffCardHeight();
+  });
+}
+
+function setupStaffCardSync() {
+  window.addEventListener('resize', () => {
+    syncStaffCardHeight();
+  });
+
+  const detailsCard = document.getElementById('card-tavern-details');
+  if (detailsCard && window.ResizeObserver) {
+    const ro = new ResizeObserver(() => {
+      syncStaffCardHeight();
+    });
+    ro.observe(detailsCard);
+  }
+}
+
+function syncStaffCardHeight() {
+  const detailsCard = document.getElementById('card-tavern-details');
+  const staffCard = document.getElementById('card-tavern-staff');
+  if (!detailsCard || !staffCard) return;
+
+  if (window.innerWidth > 1200) {
+    // Reset heights so detailsCard can determine its natural content height
+    staffCard.style.maxHeight = '';
+    staffCard.style.height = '';
+
+    const h = detailsCard.offsetHeight;
+    if (h > 0) {
+      staffCard.style.height = `${h}px`;
+      staffCard.style.maxHeight = `${h}px`;
+    }
+  } else {
+    staffCard.style.maxHeight = '380px';
+    staffCard.style.height = '';
   }
 }
 
