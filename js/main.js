@@ -892,12 +892,16 @@ function setupTavernEventListeners() {
 }
 
 function rerollTavern() {
-  // Sync options from controls for unlocked items if user specifically selected a non-random value
+  // Sync options from controls: crowd & age roll dynamically on reroll unless locked!
   TAVERN_LOCK_ITEMS.forEach(item => {
     if (!tavernState.locks[item.lockKey]) {
-      const el = document.getElementById(item.inputId);
-      if (el) {
-        tavernState.options[item.optKey] = el.value;
+      if (item.optKey === 'crowd' || item.optKey === 'innkeeperAge') {
+        tavernState.options[item.optKey] = 'random';
+      } else {
+        const el = document.getElementById(item.inputId);
+        if (el) {
+          tavernState.options[item.optKey] = el.value;
+        }
       }
     }
   });
@@ -924,6 +928,7 @@ function renderTavernUI(data) {
     const catEl = document.getElementById('t-param-cat');
     if (catEl && tavernState.options.category !== 'random') catEl.value = data.params.category;
   }
+  // Crowd slider dynamically updates on reroll unless locked
   if (!tavernState.locks.lockCrowd) {
     const crowdEl = document.getElementById('t-param-crowd');
     const crowdVal = document.getElementById('t-val-crowd');
@@ -931,6 +936,7 @@ function renderTavernUI(data) {
       crowdEl.value = data.params.crowd;
       crowdVal.textContent = data.params.crowd;
     }
+    tavernState.options.crowd = data.params.crowd;
   }
   if (!tavernState.locks.lockAtmosphere) {
     const atmoEl = document.getElementById('t-param-atmo');
@@ -944,6 +950,7 @@ function renderTavernUI(data) {
     const raceEl = document.getElementById('p-param-race');
     if (raceEl && tavernState.options.innkeeperRace !== 'random') raceEl.value = data.params.innkeeperRace;
   }
+  // Innkeeper Age slider dynamically updates on reroll unless locked
   if (!tavernState.locks.lockAge) {
     const ageEl = document.getElementById('p-param-age');
     const ageVal = document.getElementById('p-val-age');
@@ -951,6 +958,7 @@ function renderTavernUI(data) {
       ageEl.value = data.params.innkeeperAge;
       ageVal.textContent = data.params.innkeeperAge;
     }
+    tavernState.options.innkeeperAge = data.params.innkeeperAge;
   }
 
   // 2. Tavern Details Card
@@ -968,10 +976,12 @@ function renderTavernUI(data) {
     detailsSpecs.innerHTML = `
       <div class="details-item"><span class="details-label">• Имя:</span> <strong>${data.tavern.name}</strong></div>
       <div class="details-item"><span class="details-label">• Местоположение:</span> ${data.tavern.location}</div>
-      <div class="details-item"><span class="details-label">• Тип и Класс:</span> ${data.tavern.type} (${data.tavern.category})</div>
+      <div class="details-item"><span class="details-label">• Тип и Категория:</span> ${data.tavern.type} (${data.tavern.category})</div>
+      <div class="details-item"><span class="details-label">• Описание:</span> <span style="color:var(--accent-primary, #e2b76f); font-style: italic;">«${data.tavern.description}»</span></div>
       <div class="details-item"><span class="details-label">• Владелец:</span> ${data.patron.fullName} (${data.patron.race}, ${data.patron.genderText}, ${data.patron.age} лет)</div>
       <div class="details-item"><span class="details-label">• Заполненность зала:</span> ${data.tavern.crowdDesc}</div>
       <div class="details-item"><span class="details-label">• Атмосфера:</span> <strong>${data.tavern.atmosphere}</strong> — ${data.tavern.atmosphereDesc}</div>
+      <div class="details-item"><span class="details-label">• Номера и штат:</span> ${data.rooms.length} комнат, персонал: ${data.tavern.staffSummary} + владелец</div>
       <div class="details-item"><span class="details-label">• Слухи (Тема дня):</span> «${data.tavern.rumor}»</div>
       <div class="details-item"><span class="details-label">• Случайное событие:</span> ${data.tavern.event}</div>
       <div class="details-item"><span class="details-label">• Особое меню ⭐:</span> «${data.tavern.specialPair.dish}» и напиток «${data.tavern.specialPair.drink}»</div>
@@ -984,19 +994,29 @@ function renderTavernUI(data) {
 
   const roomsTbody = document.getElementById('t-rooms-tbody');
   if (roomsTbody) {
-    roomsTbody.innerHTML = data.rooms.map(r => `
-      <tr>
-        <td style="font-weight:700; text-align:center;">${r.roomNumber}</td>
-        <td>${r.typeDesc}</td>
-        <td><span class="cost-badge">${r.cost}</span></td>
-        <td>
-          ${r.isOccupied 
-            ? `<span class="badge-occupied" title="${r.tenant}">🔴 Занято</span><div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${r.tenant}</div>` 
-            : `<span class="badge-vacant">🟢 Свободно</span>`}
-        </td>
-        <td><span class="${r.noteType === 'positive' ? 'room-note-pos' : 'room-note-neg'}">«${r.note}»</span></td>
-      </tr>
-    `).join('');
+    if (data.rooms.length === 0) {
+      roomsTbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center; padding: 22px 12px; color: var(--text-muted);">
+            🚫 <em>В этом заведении нет комнат для ночлега — только общий трапезный зал.</em>
+          </td>
+        </tr>
+      `;
+    } else {
+      roomsTbody.innerHTML = data.rooms.map(r => `
+        <tr>
+          <td style="font-weight:700; text-align:center;">${r.roomNumber}</td>
+          <td>${r.typeDesc}</td>
+          <td><span class="cost-badge">${r.cost}</span></td>
+          <td>
+            ${r.isOccupied 
+              ? `<span class="badge-occupied" title="${r.tenant}">🔴 Занято</span><div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${r.tenant}</div>` 
+              : `<span class="badge-vacant">🟢 Свободно</span>`}
+          </td>
+          <td><span class="${r.noteType === 'positive' ? 'room-note-pos' : 'room-note-neg'}">«${r.note}»</span></td>
+        </tr>
+      `).join('');
+    }
   }
 
   // 4. Patron Profile Card
@@ -1025,7 +1045,7 @@ function renderTavernUI(data) {
 
   // 5. Tavern Staff Roster Table
   const staffCountEl = document.getElementById('t-staff-count');
-  if (staffCountEl) staffCountEl.textContent = `${data.roster.length} сотрудников`;
+  if (staffCountEl) staffCountEl.textContent = `${data.roster.length} чел. (${data.tavern.staffSummary})`;
 
   const rosterTbody = document.getElementById('t-roster-tbody');
   if (rosterTbody) {
@@ -1083,6 +1103,7 @@ function copyTavernSummary() {
   const text = `
 🏰 ${d.tavern.name} (${d.tavern.category}, ${d.tavern.type})
 Местность: ${d.tavern.location}
+Описание: «${d.tavern.description}»
 Атмосфера: ${d.tavern.atmosphere} — ${d.tavern.atmosphereDesc}
 Заполненность: ${d.tavern.crowdDesc}
 
@@ -1098,9 +1119,9 @@ function copyTavernSummary() {
 ⚡ Происшествие: ${d.tavern.event}
 
 🛏️ Номера (${d.rooms.length} комнат):
-${d.rooms.map(r => `  - №${r.roomNumber} ${r.typeDesc} | ${r.cost} | ${r.status}${r.tenant ? ` (${r.tenant})` : ''} [${r.note}]`).join('\n')}
+${d.rooms.length === 0 ? '  - В заведении нет номеров для ночлега (только общий трапезный зал)' : d.rooms.map(r => `  - №${r.roomNumber} ${r.typeDesc} | ${r.cost} | ${r.status}${r.tenant ? ` (${r.tenant})` : ''} [${r.note}]`).join('\n')}
 
-👥 Персонал:
+👥 Персонал (${d.tavern.staffSummary} + владелец):
 ${d.roster.map(s => `  - ${s.role}: ${s.name} (${s.race}, ${s.age} л.) — ${s.trait}`).join('\n')}
 
 🎲 Завсегдатаи и гости (${d.visitors.length} чел.):
