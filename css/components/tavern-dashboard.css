@@ -1,14 +1,31 @@
 /**
  * Randomattic - Tavern Dashboard Component Stylesheet
- * 3-Column Fantasy Tavern Architect layout matching TGR_1_main reference
+ * Layout strictly aligned with TGR_1_main.jpg reference:
+ * ROW 1: Generation Params (33%) | Patron Params (33%) | Patron Profile (33%)
+ * ROW 2: Tavern Details (58%) | Visitors Roster (42%)
+ * ROW 3: Rooms Table (33%) | Staff Roster (33%) | Menu & Prices (33%)
  */
+
+/* Wide container mode when tavern architect is open */
+.container.container-fluid-tavern {
+  max-width: 99vw !important;
+  width: 99vw !important;
+  padding-left: clamp(10px, 1.8vw, 24px) !important;
+  padding-right: clamp(10px, 1.8vw, 24px) !important;
+}
+
+.container.container-fluid-tavern #view-generator {
+  padding-top: 0.6rem !important;
+  padding-bottom: 2rem !important;
+  gap: 0.75rem !important;
+}
 
 .tavern-dashboard {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg, 24px);
+  gap: 14px;
   width: 100%;
-  max-width: 1600px;
+  max-width: 1840px;
   margin: 0 auto;
 }
 
@@ -18,38 +35,69 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-card, rgba(30, 24, 18, 0.7));
+  background: var(--bg-card, rgba(30, 24, 18, 0.85));
   border: 1px solid var(--border-color, #5a422e);
-  border-radius: var(--radius-lg, 12px);
-  padding: 16px 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-lg, 10px);
+  padding: 10px 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(8px);
-  gap: 16px;
+  gap: 12px;
+}
+
+.tavern-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-tavern-back {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 6px;
+  color: var(--text-primary, #ded4c0);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-tavern-back:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-primary, #e2b76f);
+  color: var(--accent-primary, #e2b76f);
 }
 
 .tavern-header-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.tavern-header-icon {
+  font-size: 1.5rem;
 }
 
 .tavern-header-title h2 {
   margin: 0;
   font-family: var(--font-heading, 'Cinzel', serif);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--accent-primary, #e2b76f);
   letter-spacing: 0.5px;
 }
 
 .tavern-header-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--text-muted, #a89f91);
 }
 
 .tavern-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -58,20 +106,21 @@
   color: #1a120b;
   border: 1px solid #ffe082;
   font-weight: 700;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.4);
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.4);
   transition: all 0.2s ease;
   font-family: inherit;
 }
 
 .btn-tavern-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 16px rgba(212, 175, 55, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.6);
   background: linear-gradient(135deg, #c79213, #e5bf45);
 }
 
@@ -79,8 +128,9 @@
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary, #f0e6d2);
   border: 1px solid var(--border-color, #5a422e);
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -94,45 +144,80 @@
   border-color: var(--accent-primary, #e2b76f);
 }
 
-/* 3-Column Grid Layout */
-.tavern-grid-layout {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr 1.25fr;
-  gap: 20px;
-  align-items: start;
-}
-
-@media (max-width: 1280px) {
-  .tavern-grid-layout {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 860px) {
-  .tavern-grid-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.tavern-col {
+/* 3-ROW GRID ARCHITECTURE (Matching TGR_1_main.jpg) */
+.tavern-grid-rows {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
+  width: 100%;
+}
+
+.tavern-row {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* ROW 1: 3 cards (Generation params 1fr | Patron params 1fr | Patron profile 1.2fr) */
+.tavern-row-top {
+  grid-template-columns: 1fr 1fr 1.2fr;
+}
+
+/* ROW 2: 2 cards (Tavern details with sketch ~1.35fr | Visitors table 1fr) */
+.tavern-row-mid {
+  grid-template-columns: 1.35fr 1fr;
+}
+
+/* ROW 3: 3 cards (Rooms 1fr | Staff roster 1fr | Menu & Prices 1.15fr) */
+.tavern-row-bottom {
+  grid-template-columns: 1fr 1fr 1.15fr;
+}
+
+@media (max-width: 1200px) {
+  .tavern-row-top {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tavern-row-top #card-patron-profile {
+    grid-column: 1 / -1;
+  }
+  .tavern-row-mid {
+    grid-template-columns: 1fr;
+  }
+  .tavern-row-bottom {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tavern-row-bottom #card-tavern-menu {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 800px) {
+  .tavern-row-top,
+  .tavern-row-mid,
+  .tavern-row-bottom {
+    grid-template-columns: 1fr;
+  }
+  .tavern-row-top #card-patron-profile,
+  .tavern-row-bottom #card-tavern-menu {
+    grid-column: auto;
+  }
 }
 
 /* Dashboard Cards */
 .tavern-card {
-  background: var(--bg-card, rgba(32, 25, 20, 0.85));
+  background: var(--bg-card, rgba(32, 25, 20, 0.88));
   border: 1px solid var(--border-color, #4a3726);
-  border-radius: var(--radius-md, 10px);
-  padding: 18px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
+  min-width: 0; /* Prevents flex/grid children from overflowing */
 }
 
 .tavern-card::before {
@@ -151,45 +236,46 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border-color, #443222);
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .tavern-card-header h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-family: var(--font-heading, 'Cinzel', serif);
   color: var(--accent-primary, #e2b76f);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tavern-card-badge {
-  font-size: 0.75rem;
-  padding: 2px 8px;
+  font-size: 0.72rem;
+  padding: 2px 7px;
   border-radius: 4px;
   background: rgba(226, 183, 111, 0.15);
   color: var(--accent-primary, #e2b76f);
   border: 1px solid rgba(226, 183, 111, 0.3);
+  white-space: nowrap;
 }
 
 /* Parameter Controls with Lock Toggle */
 .param-controls-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .param-row {
   display: grid;
-  grid-template-columns: 140px 1fr 38px;
+  grid-template-columns: 130px 1fr 34px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 @media (max-width: 480px) {
   .param-row {
-    grid-template-columns: 1fr 38px;
+    grid-template-columns: 1fr 34px;
   }
   .param-row label {
     grid-column: 1 / -1;
@@ -197,53 +283,59 @@
 }
 
 .param-row label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-primary, #e0d5c1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .param-input-group {
   display: flex;
   align-items: center;
-  gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .param-select, .param-input {
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-color, #5a422e);
   color: var(--text-primary, #f0e6d2);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  min-width: 0;
 }
 
 .param-select:focus, .param-input:focus {
   outline: none;
   border-color: var(--accent-primary, #e2b76f);
-  box-shadow: 0 0 6px rgba(226, 183, 111, 0.3);
+  box-shadow: 0 0 5px rgba(226, 183, 111, 0.3);
 }
 
 /* Range Slider */
 .param-slider-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .param-slider {
   flex: 1;
   accent-color: var(--accent-primary, #d4af37);
   cursor: pointer;
+  min-width: 0;
 }
 
 .param-slider-value {
-  min-width: 26px;
-  font-size: 0.85rem;
+  min-width: 24px;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--accent-primary, #e2b76f);
   text-align: right;
@@ -251,19 +343,20 @@
 
 /* Lock Button */
 .btn-lock {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-color, #5a422e);
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: all 0.2s ease;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .btn-lock:hover {
@@ -277,11 +370,12 @@
   box-shadow: 0 0 8px rgba(255, 213, 79, 0.35);
 }
 
-/* Tavern Details Card */
+/* Tavern Details Card (Sketch on left, Specs on right) */
 .details-layout {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
+  min-width: 0;
 }
 
 @media (max-width: 580px) {
@@ -291,10 +385,10 @@
 }
 
 .details-sketch-box {
-  width: 140px;
+  width: 150px;
   flex-shrink: 0;
   border: 1px solid var(--border-color, #5a422e);
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
   display: flex;
@@ -304,7 +398,7 @@
 
 .details-sketch-img {
   width: 100%;
-  height: auto;
+  height: 145px;
   display: block;
   object-fit: cover;
   filter: contrast(1.05) sepia(0.15);
@@ -316,9 +410,9 @@
 }
 
 .details-sketch-caption {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted, #9e9382);
-  padding: 4px;
+  padding: 3px;
   text-align: center;
   background: rgba(0, 0, 0, 0.4);
   width: 100%;
@@ -328,13 +422,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.85rem;
-  line-height: 1.45;
+  gap: 5px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  min-width: 0;
 }
 
 .details-item {
   color: var(--text-primary, #ded4c0);
+  word-break: break-word;
 }
 
 .details-label {
@@ -346,8 +442,9 @@
 /* Patron Profile Card */
 .patron-profile-layout {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   align-items: flex-start;
+  min-width: 0;
 }
 
 @media (max-width: 540px) {
@@ -357,18 +454,18 @@
 }
 
 .patron-portrait-frame {
-  width: 130px;
+  width: 110px;
   flex-shrink: 0;
   border: 2px solid var(--border-color, #705338);
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   background: #120d09;
 }
 
 .patron-portrait-img {
   width: 100%;
-  height: 160px;
+  height: 135px;
   object-fit: cover;
   display: block;
 }
@@ -377,76 +474,87 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .patron-name-title {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-family: var(--font-heading, 'Cinzel', serif);
   color: var(--accent-primary, #f0c97d);
+  line-height: 1.2;
 }
 
 .patron-meta {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted, #a89f91);
 }
 
 .patron-desc {
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  line-height: 1.35;
   color: var(--text-primary, #e3d9c8);
-  margin: 4px 0;
+  margin: 2px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .patron-secret-box {
   background: rgba(184, 134, 11, 0.1);
   border-left: 3px solid var(--accent-primary, #d4af37);
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 0 4px 4px 0;
-  font-size: 0.8rem;
-  margin-top: 4px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  margin-top: 2px;
+  word-break: break-word;
 }
 
-/* Tables (Rooms, Roster, Menu, Visitors) */
+/* Tables (Rooms, Roster, Visitors, Menu) */
 .tavern-table-container {
   width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--border-color, #4a3726);
-  border-radius: 6px;
-  max-height: 380px;
+  border-radius: 5px;
+  max-height: 240px;
   overflow-y: auto;
 }
 
 .tavern-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   text-align: left;
 }
 
 .tavern-table th {
-  background: rgba(30, 20, 15, 0.85);
+  background: rgba(28, 20, 15, 0.95);
   color: var(--accent-primary, #e2b76f);
   font-family: var(--font-heading, 'Cinzel', serif);
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 6px 8px;
   position: sticky;
   top: 0;
   z-index: 2;
   border-bottom: 2px solid var(--border-color, #5a422e);
   white-space: nowrap;
+  font-size: 0.75rem;
 }
 
 .tavern-table td {
-  padding: 8px 10px;
+  padding: 5px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   color: var(--text-primary, #ded4c0);
   vertical-align: middle;
+  line-height: 1.3;
 }
 
 .tavern-table tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 /* Status Badges */
@@ -454,33 +562,36 @@
   background: rgba(46, 125, 50, 0.2);
   color: #81c784;
   border: 1px solid rgba(129, 199, 132, 0.4);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-occupied {
   background: rgba(198, 40, 40, 0.2);
   color: #e57373;
   border: 1px solid rgba(229, 115, 115, 0.4);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-special {
   background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(255, 215, 0, 0.15));
   color: #ffd54f;
   border: 1px solid #ffd54f;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .cost-badge {
@@ -507,6 +618,12 @@
   box-shadow: 0 4px 16px rgba(100, 70, 40, 0.1);
 }
 
+[data-theme="light"] .btn-tavern-back {
+  background: #fbf7ee;
+  border-color: #c7b095;
+  color: #3b2a1a;
+}
+
 [data-theme="light"] .tavern-card {
   background: rgba(255, 253, 248, 0.95);
   border-color: #d8c2aa;
@@ -518,6 +635,11 @@
   background: #fbf7ee;
   border-color: #c7b095;
   color: #2c2013;
+}
+
+[data-theme="light"] .btn-lock {
+  background: #fbf7ee;
+  border-color: #c7b095;
 }
 
 [data-theme="light"] .tavern-table th {

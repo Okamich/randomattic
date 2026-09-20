@@ -207,6 +207,8 @@ export function openGeneratorView(viewId, updateHash = true) {
 
   const boardEl = document.getElementById('view-board');
   const genEl = document.getElementById('view-generator');
+  const mainContainer = document.querySelector('main.container');
+  const genTopBar = document.querySelector('.generator-top-bar');
 
   if (boardEl) boardEl.style.display = 'none';
   if (genEl) {
@@ -226,12 +228,16 @@ export function openGeneratorView(viewId, updateHash = true) {
   const tavernWorkspace = document.getElementById('tavern-dashboard-workspace');
 
   if (viewId === 'tavern') {
+    if (mainContainer) mainContainer.classList.add('container-fluid-tavern');
+    if (genTopBar) genTopBar.style.display = 'none';
     if (standardWorkspace) standardWorkspace.style.display = 'none';
     if (tavernWorkspace) {
       tavernWorkspace.style.display = 'flex';
       initTavernDashboard();
     }
   } else {
+    if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
+    if (genTopBar) genTopBar.style.display = 'flex';
     if (standardWorkspace) standardWorkspace.style.display = 'grid';
     if (tavernWorkspace) tavernWorkspace.style.display = 'none';
     renderGeneratorSettings(viewId);
@@ -247,7 +253,11 @@ export function closeGeneratorView(updateHash = true) {
 
   const boardEl = document.getElementById('view-board');
   const genEl = document.getElementById('view-generator');
+  const mainContainer = document.querySelector('main.container');
+  const genTopBar = document.querySelector('.generator-top-bar');
 
+  if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
+  if (genTopBar) genTopBar.style.display = 'flex';
   if (boardEl) boardEl.style.display = 'block';
   if (genEl) genEl.style.display = 'none';
 }
@@ -256,6 +266,13 @@ function setupGeneratorViewEvents() {
   const backBtn = document.getElementById('btn-back-to-board');
   if (backBtn) {
     backBtn.addEventListener('click', () => {
+      closeGeneratorView();
+    });
+  }
+
+  const backFromTavernBtn = document.getElementById('btn-back-from-tavern');
+  if (backFromTavernBtn) {
+    backFromTavernBtn.addEventListener('click', () => {
       closeGeneratorView();
     });
   }
@@ -831,9 +848,16 @@ function setupTavernEventListeners() {
       btn.textContent = isLocked ? '🔒' : '🔓';
       btn.title = isLocked ? 'Заблокировано от случайного броска' : 'Разблокировано (будет перегенерировано)';
 
-      if (isLocked) {
-        const el = document.getElementById(item.inputId);
-        if (el) tavernState.options[item.optKey] = el.value;
+      const el = document.getElementById(item.inputId);
+      if (isLocked && el) {
+        // If current element is set to 'random', lock the currently generated concrete value!
+        if (el.value === 'random' && tavernState.currentData && tavernState.currentData.params) {
+          const concreteVal = tavernState.currentData.params[item.optKey];
+          if (concreteVal) {
+            el.value = concreteVal;
+          }
+        }
+        tavernState.options[item.optKey] = el.value;
       }
     });
   });
@@ -887,18 +911,18 @@ function rerollTavern() {
 function renderTavernUI(data) {
   if (!data) return;
 
-  // 1. Sync parameter controls if not locked
+  // 1. Sync parameter controls if not locked and not kept in random mode
   if (!tavernState.locks.lockLocation) {
     const locEl = document.getElementById('t-param-loc');
-    if (locEl) locEl.value = data.params.location;
+    if (locEl && tavernState.options.location !== 'random') locEl.value = data.params.location;
   }
   if (!tavernState.locks.lockType) {
     const typeEl = document.getElementById('t-param-type');
-    if (typeEl) typeEl.value = data.params.type;
+    if (typeEl && tavernState.options.type !== 'random') typeEl.value = data.params.type;
   }
   if (!tavernState.locks.lockCategory) {
     const catEl = document.getElementById('t-param-cat');
-    if (catEl) catEl.value = data.params.category;
+    if (catEl && tavernState.options.category !== 'random') catEl.value = data.params.category;
   }
   if (!tavernState.locks.lockCrowd) {
     const crowdEl = document.getElementById('t-param-crowd');
@@ -910,15 +934,15 @@ function renderTavernUI(data) {
   }
   if (!tavernState.locks.lockAtmosphere) {
     const atmoEl = document.getElementById('t-param-atmo');
-    if (atmoEl) atmoEl.value = data.params.atmosphere;
+    if (atmoEl && tavernState.options.atmosphere !== 'random') atmoEl.value = data.params.atmosphere;
   }
   if (!tavernState.locks.lockGender) {
     const genderEl = document.getElementById('p-param-gender');
-    if (genderEl) genderEl.value = data.params.innkeeperGender;
+    if (genderEl && tavernState.options.innkeeperGender !== 'random') genderEl.value = data.params.innkeeperGender;
   }
   if (!tavernState.locks.lockRace) {
     const raceEl = document.getElementById('p-param-race');
-    if (raceEl) raceEl.value = data.params.innkeeperRace;
+    if (raceEl && tavernState.options.innkeeperRace !== 'random') raceEl.value = data.params.innkeeperRace;
   }
   if (!tavernState.locks.lockAge) {
     const ageEl = document.getElementById('p-param-age');

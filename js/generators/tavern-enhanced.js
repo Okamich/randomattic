@@ -61,6 +61,8 @@ const FEM_NOUNS = new Set([
  * Generate full tavern name with proper Russian declensions and gender agreement
  */
 function generateTavernName(type, patronName) {
+  const safeType = (!type || type.toLowerCase() === 'random') ? getRandomItem(TAVERN_TYPES) : type;
+
   const nounIndex = getRandomInt(0, TAVERN_DATA.names.nouns_nom.length - 1);
   const nounNom = TAVERN_DATA.names.nouns_nom[nounIndex];
   const nounGen = TAVERN_DATA.names.nouns_gen[nounIndex] || nounNom;
@@ -80,19 +82,19 @@ function generateTavernName(type, patronName) {
   const roll = getRandomInt(1, 7);
   switch (roll) {
     case 1:
-      return `${type} «${adjNom} ${nounNom}»`;
+      return `${safeType} «${adjNom} ${nounNom}»`;
     case 2:
-      return `${type} «${adjGen} ${nounGen}»`;
+      return `${safeType} «${adjGen} ${nounGen}»`;
     case 3:
       return `«${adjNom} ${nounNom}»`;
     case 4:
       return `«${nounNom} и ${nounNom2}»`;
     case 5:
-      return `${type} «${adjNom} ${nounNom}»`;
+      return `${safeType} «${adjNom} ${nounNom}»`;
     case 6:
-      return patronName ? `${type} ${patronName}` : `${type} «${adjNom} ${nounNom}»`;
+      return patronName ? `${safeType} ${patronName}` : `${safeType} «${adjNom} ${nounNom}»`;
     default:
-      return `${type} «${adjNom} ${nounNom}»`;
+      return `${safeType} «${adjNom} ${nounNom}»`;
   }
 }
 
@@ -364,22 +366,22 @@ function generateVisitors(crowdCount) {
  */
 export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
   // 1. Resolve Location
-  const location = (lockState.lockLocation && currentOptions.location)
+  const location = (lockState.lockLocation && currentOptions.location && currentOptions.location !== 'random')
     ? currentOptions.location
     : (currentOptions.location && currentOptions.location !== 'random' ? currentOptions.location : getRandomItem(BIOMES));
 
   // 2. Resolve Type
-  const type = (lockState.lockType && currentOptions.type)
+  const type = (lockState.lockType && currentOptions.type && currentOptions.type !== 'random')
     ? currentOptions.type
     : (currentOptions.type && currentOptions.type !== 'random' ? currentOptions.type : getRandomItem(TAVERN_TYPES));
 
   // 3. Resolve Category
-  const category = (lockState.lockCategory && currentOptions.category)
+  const category = (lockState.lockCategory && currentOptions.category && currentOptions.category !== 'random')
     ? currentOptions.category
     : (currentOptions.category && currentOptions.category !== 'random' ? currentOptions.category : getRandomItem(TAVERN_CATEGORIES));
 
   // 4. Resolve Crowd
-  const crowd = (lockState.lockCrowd && currentOptions.crowd !== undefined)
+  const crowd = (lockState.lockCrowd && currentOptions.crowd !== undefined && currentOptions.crowd !== 'random')
     ? Number(currentOptions.crowd)
     : (currentOptions.crowd !== undefined && currentOptions.crowd !== 'random' ? Number(currentOptions.crowd) : getRandomInt(3, 20));
 
@@ -392,17 +394,17 @@ export function generateTavernEnhanced(currentOptions = {}, lockState = {}) {
   }
 
   // 6. Innkeeper Parameters (Gender, Race, Age)
-  const innkeeperGender = (lockState.lockGender && currentOptions.innkeeperGender)
+  const innkeeperGender = (lockState.lockGender && currentOptions.innkeeperGender && currentOptions.innkeeperGender !== 'random')
     ? currentOptions.innkeeperGender
-    : currentOptions.innkeeperGender;
+    : (currentOptions.innkeeperGender && currentOptions.innkeeperGender !== 'random' ? currentOptions.innkeeperGender : 'random');
   
-  const innkeeperRace = (lockState.lockRace && currentOptions.innkeeperRace)
+  const innkeeperRace = (lockState.lockRace && currentOptions.innkeeperRace && currentOptions.innkeeperRace !== 'random')
     ? currentOptions.innkeeperRace
-    : currentOptions.innkeeperRace;
+    : (currentOptions.innkeeperRace && currentOptions.innkeeperRace !== 'random' ? currentOptions.innkeeperRace : 'random');
 
-  const innkeeperAge = (lockState.lockAge && currentOptions.innkeeperAge)
+  const innkeeperAge = (lockState.lockAge && currentOptions.innkeeperAge && currentOptions.innkeeperAge !== 'random')
     ? currentOptions.innkeeperAge
-    : currentOptions.innkeeperAge;
+    : (currentOptions.innkeeperAge && currentOptions.innkeeperAge !== 'random' ? currentOptions.innkeeperAge : 'random');
 
   const innkeeper = generateInnkeeper(innkeeperGender, innkeeperRace, innkeeperAge);
 

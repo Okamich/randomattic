@@ -152,15 +152,21 @@
         </div>
       </div>
 
-      <!-- Специализированная 3-колоночная консоль таверны (Tavern Dashboard) -->
+      <!-- Специализированная консоль архитектора таверны (Tavern Dashboard) в точности по TGR_1_main -->
       <div id="tavern-dashboard-workspace" class="tavern-dashboard" style="display: none;">
         <!-- Header Action Bar -->
         <div class="tavern-header-bar">
-          <div class="tavern-header-title">
-            <span style="font-size: 1.8rem;">🍺</span>
-            <div>
-              <h2>Rand-om-Attic | Архитектор Таверны и Профиль Хозяина</h2>
-              <div class="tavern-header-subtitle">Процедурная генерация заведений, персонала, комнат, меню и посетителей по D&D 5e</div>
+          <div class="tavern-header-left">
+            <button class="btn-back-to-board btn-tavern-back" id="btn-back-from-tavern" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
+            </button>
+            <div class="tavern-header-title">
+              <span class="tavern-header-icon">🍺</span>
+              <div>
+                <h2>Rand-om-Attic | Архитектор Таверны</h2>
+                <div class="tavern-header-subtitle">D&D 5e • Процедурная генерация заведений, персонала, комнат и меню</div>
+              </div>
             </div>
           </div>
           <div class="tavern-actions">
@@ -179,12 +185,14 @@
           </div>
         </div>
 
-        <!-- 3-Column Grid Layout -->
-        <div class="tavern-grid-layout">
-          <!-- COLUMN 1 -->
-          <div class="tavern-col">
-            <!-- 1. Tavern Parameters Card with Lock toggles -->
-            <div class="tavern-card">
+        <!-- 3-ROW GRID LAYOUT (Четко по референсу TGR_1_main.jpg) -->
+        <div class="tavern-grid-rows">
+          
+          <!-- РЯД 1 (ВЕРХНИЙ): 3 колонки (Параметры таверны | Параметры хозяина | Профиль хозяина) -->
+          <div class="tavern-row tavern-row-top">
+            
+            <!-- 1. Параметры генерации таверны с замками -->
+            <div class="tavern-card" id="card-tavern-params">
               <div class="tavern-card-header">
                 <h3><span>⚙️</span> Параметры Генерации</h3>
                 <span class="tavern-card-badge">Locks on controls</span>
@@ -234,52 +242,8 @@
               </div>
             </div>
 
-            <!-- 2. Tavern Details Card -->
-            <div class="tavern-card" id="card-tavern-details">
-              <div class="tavern-card-header">
-                <h3 id="t-details-title"><span>🏠</span> Подробности Таверны</h3>
-                <span class="tavern-card-badge" id="t-details-badge">Обычное</span>
-              </div>
-              <div class="details-layout">
-                <div class="details-sketch-box">
-                  <img src="assets/images/taverns/tavern_sketch_classic.jpg" alt="План здания" class="details-sketch-img" id="t-details-sketch">
-                  <div class="details-sketch-caption">План здания</div>
-                </div>
-                <div class="details-list" id="t-details-specs">
-                  <!-- Rendered specs -->
-                </div>
-              </div>
-            </div>
-
-            <!-- 3. Room Description Table Card -->
-            <div class="tavern-card">
-              <div class="tavern-card-header">
-                <h3><span>🛏️</span> Описание Комнат (Ночлег)</h3>
-                <span class="tavern-card-badge" id="t-rooms-count">Номера</span>
-              </div>
-              <div class="tavern-table-container">
-                <table class="tavern-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 45px;">№</th>
-                      <th>Тип и Описание</th>
-                      <th style="width: 80px;">Цена</th>
-                      <th style="width: 100px;">Статус</th>
-                      <th>Особенность комнаты</th>
-                    </tr>
-                  </thead>
-                  <tbody id="t-rooms-tbody">
-                    <!-- Rendered rooms -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- COLUMN 2 -->
-          <div class="tavern-col">
-            <!-- 4. Patron Parameters Card -->
-            <div class="tavern-card">
+            <!-- 2. Параметры хозяина заведения с замками -->
+            <div class="tavern-card" id="card-patron-params">
               <div class="tavern-card-header">
                 <h3><span>👤</span> Параметры Хозяина</h3>
                 <span class="tavern-card-badge">Выбираемые</span>
@@ -317,36 +281,8 @@
               </div>
             </div>
 
-            <!-- 5. Tavern Staff Roster Table Card -->
-            <div class="tavern-card">
-              <div class="tavern-card-header">
-                <h3><span>👥</span> Реестр Персонала (Tavern Roster)</h3>
-                <span class="tavern-card-badge" id="t-staff-count">Штат</span>
-              </div>
-              <div class="tavern-table-container">
-                <table class="tavern-table">
-                  <thead>
-                    <tr>
-                      <th>Имя</th>
-                      <th>Роль</th>
-                      <th>Раса</th>
-                      <th>Возраст</th>
-                      <th>Характер</th>
-                      <th>Навыки</th>
-                    </tr>
-                  </thead>
-                  <tbody id="t-roster-tbody">
-                    <!-- Rendered staff -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- COLUMN 3 -->
-          <div class="tavern-col">
-            <!-- 6. Non-editable Generated Patron Profile Card -->
-            <div class="tavern-card">
+            <!-- 3. Генерируемый профиль хозяина (Не редактируемый) -->
+            <div class="tavern-card" id="card-patron-profile">
               <div class="tavern-card-header">
                 <h3><span>📜</span> Профиль Хозяина</h3>
                 <span class="tavern-card-badge" id="p-profile-badge">Владелец</span>
@@ -369,8 +305,30 @@
               </div>
             </div>
 
-            <!-- 7. Visitors Table Card -->
-            <div class="tavern-card">
+          </div>
+
+          <!-- РЯД 2 (СРЕДНИЙ): 2 колонки (Подробности таверны со скетчем ~58% | Посетители в зале ~42%) -->
+          <div class="tavern-row tavern-row-mid">
+            
+            <!-- 4. Подробности таверны (План здания + Характеристики) -->
+            <div class="tavern-card" id="card-tavern-details">
+              <div class="tavern-card-header">
+                <h3 id="t-details-title"><span>🏠</span> Подробности Таверны</h3>
+                <span class="tavern-card-badge" id="t-details-badge">Обычное</span>
+              </div>
+              <div class="details-layout">
+                <div class="details-sketch-box">
+                  <img src="assets/images/taverns/tavern_sketch_classic.jpg" alt="План здания" class="details-sketch-img" id="t-details-sketch">
+                  <div class="details-sketch-caption">План здания</div>
+                </div>
+                <div class="details-list" id="t-details-specs">
+                  <!-- Rendered specs -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Посетители в зале (Visitors Table) -->
+            <div class="tavern-card" id="card-tavern-visitors">
               <div class="tavern-card-header">
                 <h3><span>🎲</span> Посетители в зале (Visitors)</h3>
                 <span class="tavern-card-badge" id="t-visitors-count">Гости</span>
@@ -394,8 +352,62 @@
               </div>
             </div>
 
-            <!-- 8. Menu & Prices Table Card -->
-            <div class="tavern-card">
+          </div>
+
+          <!-- РЯД 3 (НИЖНИЙ): 3 колонки (Описание комнат | Реестр персонала | Меню и цены) -->
+          <div class="tavern-row tavern-row-bottom">
+            
+            <!-- 6. Описание комнат (Ночлег) -->
+            <div class="tavern-card" id="card-tavern-rooms">
+              <div class="tavern-card-header">
+                <h3><span>🛏️</span> Описание Комнат (Ночлег)</h3>
+                <span class="tavern-card-badge" id="t-rooms-count">Номера</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 45px;">№</th>
+                      <th>Тип и Описание</th>
+                      <th style="width: 75px;">Цена</th>
+                      <th style="width: 95px;">Статус</th>
+                      <th>Особенность комнаты</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-rooms-tbody">
+                    <!-- Rendered rooms -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 7. Реестр персонала (Tavern Staff Roster) -->
+            <div class="tavern-card" id="card-tavern-staff">
+              <div class="tavern-card-header">
+                <h3><span>👥</span> Реестр Персонала (Tavern Roster)</h3>
+                <span class="tavern-card-badge" id="t-staff-count">Штат</span>
+              </div>
+              <div class="tavern-table-container">
+                <table class="tavern-table">
+                  <thead>
+                    <tr>
+                      <th>Имя</th>
+                      <th>Роль</th>
+                      <th>Раса</th>
+                      <th>Возраст</th>
+                      <th>Характер</th>
+                      <th>Навыки</th>
+                    </tr>
+                  </thead>
+                  <tbody id="t-roster-tbody">
+                    <!-- Rendered staff -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 8. Меню и цены (Menu & Prices) -->
+            <div class="tavern-card" id="card-tavern-menu">
               <div class="tavern-card-header">
                 <h3><span>🍲</span> Меню и Цены (Menu & Prices)</h3>
                 <span class="tavern-card-badge">Цены D&D 5e</span>
@@ -406,8 +418,8 @@
                     <tr>
                       <th>Категория</th>
                       <th>Позиция меню</th>
-                      <th style="width: 70px;">Цена</th>
-                      <th style="width: 90px;">Пометка</th>
+                      <th style="width: 65px;">Цена</th>
+                      <th style="width: 85px;">Пометка</th>
                       <th>Описание</th>
                     </tr>
                   </thead>
@@ -417,7 +429,9 @@
                 </table>
               </div>
             </div>
+
           </div>
+
         </div>
       </div>
     </div>
