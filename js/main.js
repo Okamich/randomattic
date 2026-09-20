@@ -146,7 +146,7 @@ function renderCards() {
 
 function createCardHTML(gen) {
   const tagsHTML = gen.tags.map(t => `<span class="card-tag">#${t}</span>`).join('');
-  const bgStyle = gen.bgImage ? `style="--card-bg: url('${gen.bgImage}');"` : '';
+  const bgStyle = gen.bgImage ? `style="background-image: url('${gen.bgImage}');"` : '';
 
   return `
     <article class="generator-card" data-id="${gen.id}" data-view="${gen.viewId || ''}" ${bgStyle}>
