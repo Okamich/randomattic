@@ -20,6 +20,12 @@ import {
 } from './utils/index.js';
 
 import { generateCharacterName } from './generators/names.js';
+import {
+  generateFullNPC,
+  getRussianAgeWord,
+  NPC_RACE_AGE_RANGES,
+  NPC_HALFBREED_ORIGINS
+} from './generators/npc.js';
 import { generateTavern } from './generators/taverns.js';
 import { generateLoot } from './generators/loot.js';
 import { generateD20Event } from './generators/d20.js';
@@ -286,23 +292,69 @@ function setupGeneratorViewEvents() {
 }
 
 // ==========================================================================
-// 1. ИМЕНА И ПЕРСОНАЖИ (NAMES & CHARACTERS DASHBOARD CONTROLLER)
+// 1. ГЕНЕРАТОР НИП И ПЕРСОНАЖЕЙ (NPC & CHARACTERS DASHBOARD CONTROLLER)
 // ==========================================================================
 const namesState = {
   initialized: false,
   locks: {
     race: false,
     gender: false,
-    classType: false,
-    format: false,
+    profession: false,
+    age: false,
+    origin: false,
+    appCount: false,
+    persCount: false,
     count: false
   },
-  lastHero: null
+  lastNPC: null
 };
 
 function initNamesDashboard() {
   setupNamesEvents();
   executeNamesGenerator();
+}
+
+function updateHalfbreedControlsVisibility(raceKey) {
+  const halfbreedRow = document.getElementById('n-halfbreed-row');
+  const kinWrapper = document.getElementById('n-halfelf-kin-wrapper');
+  const originSelect = document.getElementById('n-param-origin');
+  if (!halfbreedRow || !originSelect) return;
+
+  if (raceKey === 'halfelf' || raceKey === 'halforc') {
+    halfbreedRow.style.display = 'flex';
+    const origins = NPC_HALFBREED_ORIGINS[raceKey] || [];
+    
+    const currentVal = originSelect.value;
+    originSelect.innerHTML = `<option value="any">🎲 Случайное воспитание</option>` +
+      origins.map(o => `<option value="${o.id}">${o.title}</option>`).join('');
+
+    if (currentVal && origins.some(o => o.id === currentVal)) {
+      originSelect.value = currentVal;
+    }
+
+    if (kinWrapper) {
+      kinWrapper.style.display = (raceKey === 'halfelf') ? 'block' : 'none';
+    }
+  } else {
+    halfbreedRow.style.display = 'none';
+    if (kinWrapper) kinWrapper.style.display = 'none';
+  }
+}
+
+function updateAgeSliderForRace(raceKey) {
+  const ageSlider = document.getElementById('n-param-age');
+  const ageVal = document.getElementById('n-val-age');
+  if (!ageSlider || !ageVal) return;
+
+  const range = NPC_RACE_AGE_RANGES[raceKey] || NPC_RACE_AGE_RANGES.human;
+  ageSlider.min = range.min;
+  ageSlider.max = range.max;
+
+  if (!namesState.locks.age) {
+    const defaultVal = range.mature || Math.round((range.min + range.max) / 3);
+    ageSlider.value = defaultVal;
+    ageVal.textContent = `${defaultVal} ${getRussianAgeWord(defaultVal)}`;
+  }
 }
 
 function setupNamesEvents() {
@@ -316,8 +368,11 @@ function setupNamesEvents() {
   const lockDefs = [
     { id: 'btn-lock-n-race', key: 'race' },
     { id: 'btn-lock-n-gender', key: 'gender' },
-    { id: 'btn-lock-n-class', key: 'classType' },
-    { id: 'btn-lock-n-format', key: 'format' },
+    { id: 'btn-lock-n-profession', key: 'profession' },
+    { id: 'btn-lock-n-age', key: 'age' },
+    { id: 'btn-lock-n-origin', key: 'origin' },
+    { id: 'btn-lock-n-app-count', key: 'appCount' },
+    { id: 'btn-lock-n-pers-count', key: 'persCount' },
     { id: 'btn-lock-n-count', key: 'count' }
   ];
 
@@ -330,6 +385,26 @@ function setupNamesEvents() {
       btn.textContent = namesState.locks[key] ? '🔒' : '🔓';
     });
   });
+
+  // Изменение расы: адаптируем слайдер возраста и видимость настроек полукровки
+  const raceSelect = document.getElementById('n-param-race');
+  if (raceSelect) {
+    raceSelect.addEventListener('change', (e) => {
+      const selectedRace = e.target.value;
+      updateAgeSliderForRace(selectedRace);
+      updateHalfbreedControlsVisibility(selectedRace);
+    });
+  }
+
+  // Слайдер возраста
+  const ageSlider = document.getElementById('n-param-age');
+  const ageVal = document.getElementById('n-val-age');
+  if (ageSlider && ageVal) {
+    ageSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      ageVal.textContent = `${val} ${getRussianAgeWord(val)}`;
+    });
+  }
 
   // Кнопка генерации
   document.getElementById('btn-reroll-names')?.addEventListener('click', () => {
@@ -348,17 +423,33 @@ function setupNamesEvents() {
     });
   });
 
-  // Копировать досье
+  // Копировать краткое структурированное описание (Requirement 9)
+  document.getElementById('btn-copy-narrative')?.addEventListener('click', () => {
+    if (!namesState.lastNPC) return;
+    const text = namesState.lastNPC.structuredSummary;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-narrative');
+      if (btn) {
+        btn.innerHTML = '✔ Скопировано!';
+        setTimeout(() => {
+          btn.innerHTML = '📋 Копировать';
+        }, 1800);
+      }
+    });
+  });
+
+  // Копировать полное досье НИПа
   document.getElementById('btn-copy-names-summary')?.addEventListener('click', () => {
-    if (!namesState.lastHero) return;
-    const h = namesState.lastHero;
-    const text = `Герой: ${h.name} (${h.race}, ${h.gender})\nКласс: ${h.classTitle} [${h.classRole}]\n${h.titleDetail}\nЦитата: ${h.quote}\nЧерта: ${h.trait}\nТайна/Зацепка: ${h.quirk}\nМотив: ${h.hook}`;
+    if (!namesState.lastNPC) return;
+    const npc = namesState.lastNPC;
+    const text = npc.fullDossierText || npc.structuredSummary;
+
     navigator.clipboard.writeText(text).then(() => {
       const btn = document.getElementById('btn-copy-names-summary');
       if (btn) {
         btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
         setTimeout(() => {
-          btn.innerHTML = '<span>📋</span><span>Копировать героя</span>';
+          btn.innerHTML = '<span>📋</span><span>Копировать НИПа</span>';
         }, 2000);
       }
     });
@@ -368,70 +459,203 @@ function setupNamesEvents() {
 function executeNamesGenerator() {
   const raceEl = document.getElementById('n-param-race');
   const genderEl = document.getElementById('n-param-gender');
-  const classEl = document.getElementById('n-param-class');
-  const formatEl = document.getElementById('n-param-format');
+  const profEl = document.getElementById('n-param-profession');
+  const ageEl = document.getElementById('n-param-age');
+  const ageVal = document.getElementById('n-val-age');
+  const originEl = document.getElementById('n-param-origin');
+  const elfkinEl = document.getElementById('n-param-elfkin');
+  const appCountEl = document.getElementById('n-param-app-count');
+  const persCountEl = document.getElementById('n-param-pers-count');
   const countEl = document.getElementById('n-param-count');
 
-  // Если селектор не заблокирован и был выбран 'any', берем случайное значение
   const race = (namesState.locks.race && raceEl) ? raceEl.value : (raceEl?.value || 'any');
   const gender = (namesState.locks.gender && genderEl) ? genderEl.value : (genderEl?.value || 'any');
-  const classType = (namesState.locks.classType && classEl) ? classEl.value : (classEl?.value || 'any');
-  const format = (namesState.locks.format && formatEl) ? formatEl.value : (formatEl?.value || 'full');
-  const count = (namesState.locks.count && countEl) ? parseInt(countEl.value, 10) : parseInt(countEl?.value || '3', 10);
+  const profession = (namesState.locks.profession && profEl) ? profEl.value : (profEl?.value || 'any');
+  const age = (namesState.locks.age && ageEl) ? Number(ageEl.value) : 'random';
+  const halfbreedOrigin = (namesState.locks.origin && originEl) ? originEl.value : (originEl?.value || 'any');
+  const elfKinAll = elfkinEl ? elfkinEl.checked : true;
+  const appearanceCount = (namesState.locks.appCount && appCountEl) ? Number(appCountEl.value) : Number(appCountEl?.value || 2);
+  const personalityCount = (namesState.locks.persCount && persCountEl) ? Number(persCountEl.value) : Number(persCountEl?.value || 1);
+  const count = (namesState.locks.count && countEl) ? Number(countEl.value) : Number(countEl?.value || 3);
 
-  const hero = generateCharacterName({ race, gender, classType, format, count });
-  namesState.lastHero = hero;
+  const npc = generateFullNPC({
+    race,
+    gender,
+    profession,
+    age,
+    halfbreedOrigin,
+    elfKinAll,
+    appearanceCount,
+    personalityCount,
+    count
+  });
 
-  // Обновление карточки героя
+  namesState.lastNPC = npc;
+
+  // Если возраст не был заблокирован, синхронизируем контрол слайдера
+  if (!namesState.locks.age && ageEl && ageVal) {
+    const range = NPC_RACE_AGE_RANGES[npc.raceKey] || NPC_RACE_AGE_RANGES.human;
+    ageEl.min = range.min;
+    ageEl.max = range.max;
+    ageEl.value = npc.age;
+    ageVal.textContent = `${npc.age} ${npc.ageWord}`;
+  }
+
+  // Обновляем видимость настроек полукровки
+  updateHalfbreedControlsVisibility(npc.raceKey);
+
+  // Портрет
   const portraitImg = document.getElementById('hero-portrait-img');
   if (portraitImg) {
-    portraitImg.src = hero.portraitPath;
+    portraitImg.src = npc.portraitPath;
     portraitImg.onerror = () => {
       portraitImg.src = 'assets/images/portraits/human_male.jpg';
     };
   }
 
+  // Имя и бейдж
   const nameTitle = document.getElementById('hero-name-title');
-  if (nameTitle) nameTitle.textContent = hero.name;
+  if (nameTitle) nameTitle.textContent = npc.name;
 
   const roleBadge = document.getElementById('hero-badge-role');
-  if (roleBadge) roleBadge.textContent = hero.classBadge;
+  if (roleBadge) {
+    roleBadge.textContent = npc.profession
+      ? `${npc.profession.icon} ${npc.profession.title}`
+      : (npc.ageStage === 'old' ? 'Старейшина' : (npc.ageStage === 'young' ? 'Молодой' : 'Зрелый'));
+  }
 
+  // Бейджи
   const badgesList = document.getElementById('hero-badges-list');
   if (badgesList) {
-    badgesList.innerHTML = `
-      <span class="tavern-card-badge">${hero.race}</span>
-      <span class="tavern-card-badge">${hero.gender}</span>
-      <span class="tavern-card-badge" style="background:rgba(212, 175, 55, 0.2); border-color:#ffd54f; color:#ffd54f;">${hero.classTitle}</span>
-      <span class="tavern-card-badge">${hero.titleDetail}</span>
+    let badgesHtml = `
+      <span class="tavern-card-badge">${npc.race}</span>
+      <span class="tavern-card-badge">${npc.gender}</span>
+      <span class="tavern-card-badge" style="background:rgba(212, 175, 55, 0.2); border-color:#ffd54f; color:#ffd54f;">${npc.ageFormatted}</span>
     `;
+    if (npc.profession) {
+      badgesHtml += `<span class="tavern-card-badge" style="background:rgba(212, 175, 55, 0.25); border-color:#ffd54f; color:#ffe082;">${npc.profession.icon} ${npc.profession.title}</span>`;
+    }
+    if (npc.isHalfbreed && npc.halfbreedOrigin) {
+      badgesHtml += `<span class="tavern-card-badge" style="background:rgba(120, 80, 200, 0.2); border-color:#b388ff; color:#d1c4e9;">${npc.halfbreedOrigin.title}</span>`;
+    }
+    badgesList.innerHTML = badgesHtml;
   }
 
-  const quoteBox = document.getElementById('hero-quote-box');
-  if (quoteBox) quoteBox.textContent = hero.quote;
+  // Сводное краткое описание (Requirement 9)
+  const narrativeText = document.getElementById('npc-narrative-text');
+  if (narrativeText) {
+    narrativeText.textContent = `«${npc.structuredSummary}»`;
+  }
 
+  // Детализация: Внешность, Характер (Дарование + Взаимодействие + Манера), Характеристики, Привязанность, Слабость, Идеал
   const detailsGrid = document.getElementById('hero-details-grid');
   if (detailsGrid) {
-    detailsGrid.innerHTML = `
-      <p><strong>🎭 Черта характера:</strong> ${hero.trait}</p>
-      <p><strong>🗝️ Тайна или особенность:</strong> ${hero.quirk}</p>
-      <p><strong>🗺️ Сюжетный мотив:</strong> ${hero.hook}</p>
+    let detailsHtml = '<div class="npc-details-container">';
+
+    // Профессия и роль
+    if (npc.profession) {
+      detailsHtml += `
+        <div class="npc-detail-block">
+          <div class="npc-detail-title">💼 Профессия & Роль:</div>
+          <div class="npc-detail-content"><strong>${npc.profession.icon} ${npc.profession.title}</strong> — ${npc.profession.role}</div>
+        </div>
+      `;
+    }
+
+    // 1. Внешность (DMG «ВНЕШНОСТЬ ПМ», к20, может быть несколько)
+    const appBadges = npc.appearance.items.map(it => `<span class="npc-tag-badge">👁️ ${it.name}</span>`).join(' ');
+    detailsHtml += `
+      <div class="npc-detail-block">
+        <div class="npc-detail-title">👗 Внешность (к20 DMG):</div>
+        <div class="npc-detail-tags">${appBadges}</div>
+        <div class="npc-detail-subtext">${npc.appearance.textSummary}</div>
+      </div>
     `;
+
+    // 2. Характер = Дарование (к20) + Взаимодействие (к12) + Манера (к20)
+    detailsHtml += `
+      <div class="npc-detail-block">
+        <div class="npc-detail-title">🧠 Характер (DMG):</div>
+        <div class="npc-character-grid">
+          <div class="npc-char-item"><span class="char-lbl">🎯 Дарование:</span> <strong>${npc.character.talentText}</strong></div>
+          <div class="npc-char-item"><span class="char-lbl">🤝 Взаимодействие:</span> <strong>${npc.character.interactionText}</strong> <span class="char-desc">(${npc.character.interactions.map(i => i.desc).join(', ')})</span></div>
+          <div class="npc-char-item"><span class="char-lbl">🎭 Манера:</span> <strong>${npc.character.mannerismText}</strong></div>
+        </div>
+      </div>
+    `;
+
+    // 3. Отдельно: Характеристики (Высокая и Низкая, к6 DMG)
+    detailsHtml += `
+      <div class="npc-detail-block">
+        <div class="npc-detail-title">⚔️ Характеристики (к6 DMG):</div>
+        <div class="npc-abilities-row">
+          <div class="ability-pill high">
+            <span class="ability-icon">🔼</span>
+            <span class="ability-name">Высокая: ${npc.abilities.high.stat}</span>
+            <span class="ability-desc">(${npc.abilities.high.desc})</span>
+          </div>
+          <div class="ability-pill low">
+            <span class="ability-icon">🔽</span>
+            <span class="ability-name">Низкая: ${npc.abilities.low.stat}</span>
+            <span class="ability-desc">(${npc.abilities.low.desc})</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 4. Отдельно: Идеал, Привязанность, Слабость
+    detailsHtml += `
+      <div class="npc-detail-block">
+        <div class="npc-triad-grid">
+          <div class="triad-item">
+            <span class="triad-label">⚖️ Идеал (к6):</span>
+            <div class="triad-value"><strong>${npc.ideal.name}</strong> <span class="triad-cat">(${npc.ideal.category})</span></div>
+          </div>
+          <div class="triad-item">
+            <span class="triad-label">🔗 Привязанность (к10):</span>
+            <div class="triad-value"><strong>${npc.bond.textSummary}</strong></div>
+          </div>
+          <div class="triad-item">
+            <span class="triad-label">🗝️ Слабость (к12):</span>
+            <div class="triad-value"><strong>${npc.flaw.textSummary}</strong></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Воспитание полукровки (если применимо)
+    if (npc.isHalfbreed && npc.halfbreedOrigin) {
+      detailsHtml += `
+        <div class="npc-detail-block">
+          <div class="npc-detail-title">🏡 Воспитание & Культура:</div>
+          <div class="npc-detail-content">${npc.halfbreedOrigin.description}</div>
+        </div>
+      `;
+    }
+
+    detailsHtml += '</div>';
+    detailsGrid.innerHTML = detailsHtml;
   }
 
-  // Обновление реестра вариантов
+  // Таблица альтернативных вариантов
   const tbody = document.getElementById('tbody-names-variants');
   if (tbody) {
-    tbody.innerHTML = hero.variants.map(v => `
+    tbody.innerHTML = npc.variants.map(v => `
       <tr>
         <td style="text-align: center; font-weight: 700; color: var(--accent-primary);">${v.id}</td>
-        <td><strong style="color: #f0c97d;">${v.name}</strong></td>
+        <td><strong style="color: #f0c97d;">${v.fullName}</strong></td>
+        <td><span class="tavern-card-badge" style="font-size: 0.78rem; background: rgba(212, 175, 55, 0.15); border-color: #ffd54f; color: #ffe082;">${v.professionTitle}</span></td>
         <td>${v.race}</td>
         <td>${v.gender}</td>
-        <td><span class="tavern-card-badge">${v.classTitle}</span></td>
-        <td><span style="color: var(--text-muted);">${v.detail}</span></td>
+        <td><span class="tavern-card-badge">${v.age}</span></td>
+        <td>
+          <div style="font-size: 0.78rem; line-height: 1.3;">
+            <div>⚖️ <strong>${v.ideal.name}</strong> <span style="color: var(--text-muted);">(${v.ideal.category})</span></div>
+            <div style="color: var(--text-muted);">🤝 ${v.character.interactionText} • 🎭 ${v.character.mannerismText}</div>
+          </div>
+        </td>
         <td style="text-align: right;">
-          <button class="btn-mini-copy" data-copy="${v.name}" title="Копировать имя">📋 Копировать</button>
+          <button class="btn-mini-copy" data-copy="${v.fullDossierText.replace(/"/g, '&quot;')}" title="Копировать полное досье">📋 Досье</button>
         </td>
       </tr>
     `).join('');
@@ -441,7 +665,7 @@ function executeNamesGenerator() {
         navigator.clipboard.writeText(btn.dataset.copy).then(() => {
           btn.textContent = '✔ Копия';
           setTimeout(() => {
-            btn.textContent = '📋 Копировать';
+            btn.textContent = '📋 Досье';
           }, 1500);
         });
       });

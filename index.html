@@ -103,7 +103,7 @@
 
     <!-- ВИД 2: Экран выбранного генератора с настройками (Generator View) -->
     <div id="view-generator" class="generator-view-container" style="display: none;">
-      <!-- 1. Консоль Генератора Имен & Персонажей (Names Dashboard) -->
+      <!-- 1. Консоль Генератора НИП & Персонажей (NPC Dashboard) -->
       <div id="names-dashboard-workspace" class="gen-dashboard" style="display: none;">
         <!-- Header Action Bar -->
         <div class="gen-header-bar">
@@ -113,10 +113,10 @@
               <span>Назад</span>
             </button>
             <div class="gen-header-title">
-              <span class="gen-header-icon">🪖</span>
+              <span class="gen-header-icon">🧙</span>
               <div>
-                <h2>RAND-OM-ATTIC | Генератор Имен & Героев</h2>
-                <div class="gen-header-subtitle">D&D 5e • Процедурные имена, кланы, архетипы и профили персонажей</div>
+                <h2>RAND-OM-ATTIC | Генератор НИП & Персонажей</h2>
+                <div class="gen-header-subtitle">D&D 5e • Имена, происхождение полукровок, внешность, возраст и характер</div>
               </div>
             </div>
           </div>
@@ -127,7 +127,7 @@
             </button>
             <button class="btn-tavern-secondary" id="btn-copy-names-summary">
               <span>📋</span>
-              <span>Копировать героя</span>
+              <span>Копировать НИПа</span>
             </button>
           </div>
         </div>
@@ -139,15 +139,17 @@
             <!-- Блок параметров с замками -->
             <div class="tavern-card" id="card-names-params">
               <div class="tavern-card-header">
-                <h3><span>⚙️</span> Параметры Персонажа</h3>
+                <h3><span>⚙️</span> Параметры НИПа</h3>
                 <span class="tavern-card-badge">Locks on controls</span>
               </div>
+
+              <!-- Подблок: Раса, Пол и Возраст -->
               <div class="param-subblock">
-                <div class="param-subblock-title"><span>🧙</span> Происхождение & Роль</div>
+                <div class="param-subblock-title"><span>🧬</span> Происхождение & Биология</div>
                 <div class="param-controls-list">
                   <!-- Race -->
                   <div class="param-row">
-                    <label for="n-param-race">Раса героя:</label>
+                    <label for="n-param-race">Раса НИПа:</label>
                     <div class="param-input-group">
                       <select id="n-param-race" class="param-select">
                         <option value="any">🎲 Любая случайная раса</option>
@@ -161,13 +163,17 @@
                         <option value="halforc">Полуорк</option>
                         <option value="gnome">Гном</option>
                         <option value="drow">Дроу (Темный эльф)</option>
+                        <option value="eladrin">Элдарин</option>
+                        <option value="orc">Орк</option>
+                        <option value="tabaxi">Табакси</option>
                       </select>
                     </div>
                     <button class="btn-lock" id="btn-lock-n-race" title="Заблокировать расу">🔓</button>
                   </div>
+
                   <!-- Gender -->
                   <div class="param-row">
-                    <label for="n-param-gender">Пол героя:</label>
+                    <label for="n-param-gender">Пол НИПа:</label>
                     <div class="param-input-group">
                       <select id="n-param-gender" class="param-select">
                         <option value="any">🎲 Случайный пол</option>
@@ -177,39 +183,92 @@
                     </div>
                     <button class="btn-lock" id="btn-lock-n-gender" title="Заблокировать пол">🔓</button>
                   </div>
-                  <!-- Class / Role -->
+
+                  <!-- Profession / Role -->
                   <div class="param-row">
-                    <label for="n-param-class">Класс / Роль:</label>
+                    <label for="n-param-profession">Профессия / Роль:</label>
                     <div class="param-input-group">
-                      <select id="n-param-class" class="param-select">
-                        <option value="any">🎲 Случайный класс</option>
-                        <option value="fighter">Воин (Мастер клинка)</option>
-                        <option value="wizard">Волшебник (Тайные искусства)</option>
-                        <option value="rogue">Плут (Скрытность & Ловкость)</option>
-                        <option value="cleric">Жрец (Служитель веры)</option>
-                        <option value="ranger">Следопыт (Дикие земли)</option>
-                        <option value="paladin">Паладин (Священная клятва)</option>
-                        <option value="barbarian">Варвар (Первобытная ярость)</option>
-                        <option value="bard">Бард (Менестрель & Сказитель)</option>
-                        <option value="warlock">Колдун (Потусторонний договор)</option>
-                        <option value="druid">Друид (Природный круг)</option>
+                      <select id="n-param-profession" class="param-select">
+                        <option value="any">🎲 Любая случайная профессия</option>
+                        <option value="innkeep">🍺 Трактирщик (Innkeep)</option>
+                        <option value="alchemist">🧪 Алхимик (Alchemist)</option>
+                        <option value="blacksmith">🔨 Кузнец (Blacksmith)</option>
+                        <option value="jeweler">💎 Ювелир (Jeweler)</option>
+                        <option value="enchanter">✨ Зачарователь (Enchanter)</option>
+                        <option value="magic_weps">⚔️ Маг. оружейник (Magic Weps)</option>
+                        <option value="general_store">⚖️ Лавочник (General Store)</option>
+                        <option value="guard_captain">🛡️ Капитан стражи (Guard Captain)</option>
+                        <option value="holy_person">🕊️ Священнослужитель (Holy Person)</option>
+                        <option value="townmaster">👑 Градоправитель (Townmaster)</option>
+                        <option value="none">👤 Без профессии / Странник</option>
                       </select>
                     </div>
-                    <button class="btn-lock" id="btn-lock-n-class" title="Заблокировать класс">🔓</button>
+                    <button class="btn-lock" id="btn-lock-n-profession" title="Заблокировать профессию">🔓</button>
                   </div>
-                  <!-- Format -->
+
+                  <!-- Age Slider -->
                   <div class="param-row">
-                    <label for="n-param-format">Формат имени:</label>
-                    <div class="param-input-group">
-                      <select id="n-param-format" class="param-select">
-                        <option value="full">Имя + Фамилия / Клан</option>
-                        <option value="epithet">Имя + Прозвище / Титул</option>
-                        <option value="simple">Только Имя</option>
+                    <label for="n-param-age">Возраст НИПа:</label>
+                    <div class="param-slider-wrapper">
+                      <input type="range" id="n-param-age" class="param-slider" min="16" max="80" value="28">
+                      <span class="param-slider-value" id="n-val-age">28 лет</span>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-age" title="Заблокировать возраст">🔓</button>
+                  </div>
+
+                  <!-- Half-breed options row (Shown for halfelf or halforc) -->
+                  <div id="n-halfbreed-row" class="param-row" style="display: none; flex-direction: column; align-items: stretch; background: rgba(0,0,0,0.22); padding: 8px 10px; border-radius: 6px; border: 1px dashed var(--border-color, #705338); gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.8rem; font-weight: 600; color: var(--accent-primary, #e2b76f);">🧬 Воспитание полукровки:</span>
+                      <button class="btn-lock" id="btn-lock-n-origin" title="Заблокировать воспитание">🔓</button>
+                    </div>
+                    <div class="param-input-group" style="width: 100%;">
+                      <select id="n-param-origin" class="param-select" style="width: 100%;">
+                        <option value="any">🎲 Случайное воспитание</option>
                       </select>
                     </div>
-                    <button class="btn-lock" id="btn-lock-n-format" title="Заблокировать формат">🔓</button>
+
+                    <!-- Half-Elf Kin Toggle -->
+                    <div id="n-halfelf-kin-wrapper" style="display: none; padding-top: 4px; font-size: 0.78rem;">
+                      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary, #f0e6d2);">
+                        <input type="checkbox" id="n-param-elfkin" checked style="accent-color: var(--accent-primary, #e2b76f); width: 16px; height: 16px;">
+                        <span>Учитывать всех эльфовидных (дроу, эльфы, элдарины)</span>
+                      </label>
+                    </div>
                   </div>
-                  <!-- Count -->
+                </div>
+              </div>
+
+              <!-- Подблок: Черты и Настройки генерации -->
+              <div class="param-subblock">
+                <div class="param-subblock-title"><span>🎨</span> Черты & Выборка</div>
+                <div class="param-controls-list">
+                  <!-- Appearance Traits Count -->
+                  <div class="param-row">
+                    <label for="n-param-app-count">Черт внешности:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-app-count" class="param-select">
+                        <option value="1">1 черта (DMG к20)</option>
+                        <option value="2" selected>2 черты (баланс)</option>
+                        <option value="3">3 черты</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-app-count" title="Заблокировать черты внешности">🔓</button>
+                  </div>
+
+                  <!-- Personality Traits Count -->
+                  <div class="param-row">
+                    <label for="n-param-pers-count">Глубина характера:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-pers-count" class="param-select">
+                        <option value="1" selected>1 набор (дар. + вз. + ман.)</option>
+                        <option value="2">2 набора (по 2 черты)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-pers-count" title="Заблокировать черты характера">🔓</button>
+                  </div>
+
+                  <!-- Count in roster -->
                   <div class="param-row">
                     <label for="n-param-count">Вариантов в список:</label>
                     <div class="param-input-group">
@@ -222,9 +281,11 @@
                     <button class="btn-lock" id="btn-lock-n-count" title="Заблокировать количество">🔓</button>
                   </div>
                 </div>
+
                 <div class="param-reroll-wrapper">
                   <button class="btn-tavern-primary btn-reroll-integrated" id="btn-reroll-names">
-                    <span>🎲 Сгенерировать Героя</span>
+                    <span>🎲</span>
+                    <span>Сгенерировать НИПа</span>
                   </button>
                 </div>
               </div>
@@ -233,17 +294,26 @@
             <!-- Досье персонажа с портретом -->
             <div class="tavern-card" id="card-hero-profile">
               <div class="tavern-card-header">
-                <h3><span>👤</span> Досье Персонажа</h3>
-                <span class="tavern-card-badge" id="hero-badge-role">Герой</span>
+                <h3><span>👤</span> Досье НИПа</h3>
+                <span class="tavern-card-badge" id="hero-badge-role">НИП</span>
               </div>
               <div class="hero-profile-layout">
                 <div class="hero-portrait-frame">
-                  <img id="hero-portrait-img" class="hero-portrait-img" src="assets/images/portraits/human_male.jpg" alt="Портрет героя">
+                  <img id="hero-portrait-img" class="hero-portrait-img" src="assets/images/portraits/human_male.jpg" alt="Портрет НИПа">
                 </div>
                 <div class="hero-info">
                   <h4 class="hero-name-title" id="hero-name-title">Эларион Лунный Шепот</h4>
                   <div class="hero-badges-list" id="hero-badges-list"></div>
-                  <div class="hero-quote-box" id="hero-quote-box"></div>
+
+                  <!-- Structured Narrative Box (Requirement 9) -->
+                  <div class="npc-narrative-box" id="npc-narrative-container">
+                    <div class="npc-narrative-header">
+                      <span>📜 Сводное описание НИПа:</span>
+                      <button class="btn-mini-copy" id="btn-copy-narrative" title="Копировать краткое описание">📋 Копировать</button>
+                    </div>
+                    <div class="npc-narrative-text" id="npc-narrative-text"></div>
+                  </div>
+
                   <div class="hero-details-grid" id="hero-details-grid"></div>
                 </div>
               </div>
@@ -262,11 +332,12 @@
                   <thead>
                     <tr>
                       <th style="width: 40px; text-align: center;">#</th>
-                      <th>Полное имя героя</th>
+                      <th>Полное имя НИПа</th>
+                      <th>Профессия / Роль</th>
                       <th>Раса</th>
                       <th>Пол</th>
-                      <th>Класс / Роль</th>
-                      <th>Происхождение / Титул</th>
+                      <th>Возраст</th>
+                      <th>Идеал & Характер (DMG)</th>
                       <th style="width: 120px; text-align: right;">Действие</th>
                     </tr>
                   </thead>
