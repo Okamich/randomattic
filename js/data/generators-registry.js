@@ -43,6 +43,21 @@ export const GENERATORS = [
     actionText: 'Создать таверну'
   },
   {
+    id: 'town-generator',
+    viewId: 'town',
+    title: 'Архитектор Поселений & Городов',
+    category: 'locations',
+    badge: 'Для Мастера',
+    badgeType: 'dm',
+    bgImage: 'assets/images/cards/card-town.jpg',
+    description: 'Генератор деревень, городов и мегаполисов: планировка, плотность POI, районы, стража, банды, гильдии, досье жителей и заведений.',
+    icon: '🏰',
+    status: 'ready',
+    tags: ['Город', 'Поселение', 'Районы', 'POI', 'Стража', 'Карта'],
+    exampleOutput: '«Белая Гавань (The Ivory Harbor)» — Мегаполис (85 000 жит.), 8 районов, банда «Ночные Вороны», соборы и гильдии.',
+    actionText: 'Спроектировать город'
+  },
+  {
     id: 'name-generator',
     viewId: 'names',
     title: 'Генератор НИП & Персонажей',

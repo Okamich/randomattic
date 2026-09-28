@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="css/components/modal.css">
   <link rel="stylesheet" href="css/components/tavern-dashboard.css">
   <link rel="stylesheet" href="css/components/generator-dashboard.css">
+  <link rel="stylesheet" href="css/components/town-dashboard.css">
 </head>
 <body>
 
@@ -924,6 +925,435 @@
                   </thead>
                   <tbody id="t-visitors-tbody">
                     <!-- Rendered visitors -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Специализированная консоль: Архитектор Поселений & Городов (Town & Settlement Architect) -->
+      <div id="town-dashboard-workspace" class="town-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="gen-header-bar">
+          <div class="gen-header-left">
+            <button class="btn-tavern-back" id="btn-back-from-town" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
+            </button>
+            <div class="gen-header-title">
+              <span class="gen-header-icon">🏰</span>
+              <div>
+                <h2>RAND-OM-ATTIC | Архитектор Поселений & Городов</h2>
+                <div class="gen-header-subtitle">Main Console • D&D 5e • Деревни, городки, мегаполисы, районы, жители и заведения</div>
+              </div>
+            </div>
+          </div>
+          <div class="gen-actions">
+            <button class="btn-tavern-secondary" id="btn-unlock-all-town" title="Снять все блокировки параметров">
+              <span>🔓</span>
+              <span>Сбросить замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-town-summary" title="Скопировать краткое досье в буфер">
+              <span>📋</span>
+              <span>Копировать досье</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-export-town-md" title="Экспортировать полное досье в формате Markdown">
+              <span>📄</span>
+              <span>Экспорт MD</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-export-town-csv" title="Экспортировать таблицы в формате CSV">
+              <span>📊</span>
+              <span>Экспорт CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Column Main Layout strictly matching 2.jpg reference -->
+        <div class="town-main-layout">
+
+          <!-- ================================================================
+               КОЛОНКА 1: ПАРАМЕТРЫ С ЗАМКАМИ (CONTROLS & LOCKS)
+               ================================================================ -->
+          <div class="town-col-left">
+
+            <!-- Карточка 1: Базовые параметры поселения -->
+            <div class="town-card" id="card-town-params-base">
+              <div class="town-card-header">
+                <h3><span>🗺️</span> Параметры поселения</h3>
+                <span class="town-card-badge">Locks on controls</span>
+              </div>
+              <div class="town-controls-list">
+                <!-- Size -->
+                <div class="town-param-row">
+                  <label for="t-param-size">Размер:</label>
+                  <select id="t-param-size" class="town-param-select">
+                    <option value="random" selected>🎲 Случайный размер</option>
+                    <option value="village">Деревня (< 1 000)</option>
+                    <option value="town">Городок (< 6 000)</option>
+                    <option value="city">Большой город (< 25 000)</option>
+                    <option value="metropolis">Мегаполис (25 000+)</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-size" title="Заблокировать размер">🔓</button>
+                </div>
+
+                <!-- POI Density -->
+                <div class="town-param-row">
+                  <label for="t-param-density">Плотность POI:</label>
+                  <div class="town-slider-wrapper">
+                    <input type="range" id="t-param-density" class="town-slider" min="1" max="4" value="2">
+                    <span class="town-slider-val" id="t-val-density">Обычная</span>
+                  </div>
+                  <button class="town-lock-btn" id="btn-lock-t-density" title="Заблокировать плотность">🔓</button>
+                </div>
+
+                <!-- Layout Style -->
+                <div class="town-param-row">
+                  <label for="t-param-layout">Планировка:</label>
+                  <select id="t-param-layout" class="town-param-select">
+                    <option value="random" selected>🎲 Случайный стиль</option>
+                    <option value="grid">Сетка (Римская)</option>
+                    <option value="chaotic">Органическая (Хаос)</option>
+                    <option value="hillfort">Холм-цитадель</option>
+                    <option value="linear">Линейная (Вдоль реки)</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-layout" title="Заблокировать планировку">🔓</button>
+                </div>
+
+                <!-- Construction Material -->
+                <div class="town-param-row">
+                  <label for="t-param-material">Материал:</label>
+                  <select id="t-param-material" class="town-param-select">
+                    <option value="random" selected>🎲 Случайный материал</option>
+                    <option value="stone">Белый камень и гранит</option>
+                    <option value="timber">Брус и дерево (Фахверк)</option>
+                    <option value="brick">Терракотовый кирпич</option>
+                    <option value="arcane">Арканический монолит</option>
+                    <option value="clay">Глина и сырец</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-material" title="Заблокировать материал">🔓</button>
+                </div>
+
+                <!-- Predominant Race -->
+                <div class="town-param-row">
+                  <label for="t-param-race">Осн. раса:</label>
+                  <select id="t-param-race" class="town-param-select">
+                    <option value="random" selected>🎲 Случайная раса</option>
+                    <option value="mixed">Смешанное (Космополит)</option>
+                    <option value="human">Преимущественно люди</option>
+                    <option value="dwarf">Преимущественно дварфы</option>
+                    <option value="elf">Преимущественно эльфы</option>
+                    <option value="halfling">Полурослики</option>
+                    <option value="gnome">Гномы</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-race" title="Заблокировать расу">🔓</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Карточка 2: Культура и Экономика -->
+            <div class="town-card" id="card-town-params-culture">
+              <div class="town-card-header">
+                <h3><span>🏛️</span> Культура и Экономика</h3>
+                <span class="town-card-badge">Culture & Economy</span>
+              </div>
+              <div class="town-controls-list">
+                <!-- Primary Industry -->
+                <div class="town-param-row">
+                  <label for="t-param-industry">Индустрия:</label>
+                  <select id="t-param-industry" class="town-param-select">
+                    <option value="random" selected>🎲 Случайная индустрия</option>
+                    <option value="trade">Торговля и ярмарки</option>
+                    <option value="mining">Горное дело и плавильни</option>
+                    <option value="crafting">Ремесленное дело</option>
+                    <option value="agriculture">Сельское хозяйство</option>
+                    <option value="arcana">Магия и алхимия</option>
+                    <option value="fishing">Рыболовство и верфи</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-industry" title="Заблокировать индустрию">🔓</button>
+                </div>
+
+                <!-- Wealth Level -->
+                <div class="town-param-row">
+                  <label for="t-param-wealth">Богатство:</label>
+                  <select id="t-param-wealth" class="town-param-select">
+                    <option value="random" selected>🎲 Случайный достаток</option>
+                    <option value="poor">Бедное / Истощённое</option>
+                    <option value="moderate">Умеренное / Стабильное</option>
+                    <option value="wealthy">Богатое / Зажиточное</option>
+                    <option value="luxurious">Роскошное / Декадент</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-wealth" title="Заблокировать богатство">🔓</button>
+                </div>
+
+                <!-- Religious Focus -->
+                <div class="town-param-row">
+                  <label for="t-param-religion">Религия:</label>
+                  <select id="t-param-religion" class="town-param-select">
+                    <option value="random" selected>🎲 Случайная религия</option>
+                    <option value="pantheon">Традиционный пантеон</option>
+                    <option value="single_patron">Единый покровитель</option>
+                    <option value="secret_cult">Тайный культ</option>
+                    <option value="secular">Светское / Безбожие</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-religion" title="Заблокировать религию">🔓</button>
+                </div>
+
+                <!-- Social Stratification -->
+                <div class="town-param-row">
+                  <label for="t-param-stratification">Власть:</label>
+                  <select id="t-param-stratification" class="town-param-select">
+                    <option value="random" selected>🎲 Случайная форма</option>
+                    <option value="feudal">Феодальная знать</option>
+                    <option value="merchant_council">Купеческий совет</option>
+                    <option value="civic_elected">Выборный магистрат</option>
+                    <option value="military_regime">Военный гарнизон</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-stratification" title="Заблокировать форму власти">🔓</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Карточка 3: Угрозы и Власть -->
+            <div class="town-card" id="card-town-params-threat">
+              <div class="town-card-header">
+                <h3><span>⚖️</span> Угрозы и Власть</h3>
+                <span class="town-card-badge">Threat & Power</span>
+              </div>
+              <div class="town-controls-list">
+                <!-- Political Stability -->
+                <div class="town-param-row">
+                  <label for="t-param-stability">Стабильность:</label>
+                  <div class="town-slider-wrapper">
+                    <input type="range" id="t-param-stability" class="town-slider" min="1" max="5" value="3">
+                    <span class="town-slider-val" id="t-val-stability">3 / 5</span>
+                  </div>
+                  <button class="town-lock-btn" id="btn-lock-t-stability" title="Заблокировать стабильность">🔓</button>
+                </div>
+
+                <!-- Criminal Presence -->
+                <div class="town-param-row">
+                  <label for="t-param-crime">Преступность:</label>
+                  <div class="town-slider-wrapper">
+                    <input type="range" id="t-param-crime" class="town-slider" min="1" max="5" value="3">
+                    <span class="town-slider-val" id="t-val-crime">3 / 5</span>
+                  </div>
+                  <button class="town-lock-btn" id="btn-lock-t-crime" title="Заблокировать преступность">🔓</button>
+                </div>
+
+                <!-- Monster Infestation -->
+                <div class="town-param-row">
+                  <label for="t-param-monsters">Монстры:</label>
+                  <div class="town-slider-wrapper">
+                    <input type="range" id="t-param-monsters" class="town-slider" min="1" max="5" value="2">
+                    <span class="town-slider-val" id="t-val-monsters">2 / 5</span>
+                  </div>
+                  <button class="town-lock-btn" id="btn-lock-t-monsters" title="Заблокировать монстров">🔓</button>
+                </div>
+
+                <!-- Guild Power -->
+                <div class="town-param-row">
+                  <label for="t-param-guild">Власть гильдий:</label>
+                  <select id="t-param-guild" class="town-param-select">
+                    <option value="random" selected>🎲 Случайная сила</option>
+                    <option value="Слабая / Номинальная">Слабая</option>
+                    <option value="Умеренная">Умеренная</option>
+                    <option value="Высокая">Высокая</option>
+                    <option value="Тотальный контроль">Тотальный контроль</option>
+                  </select>
+                  <button class="town-lock-btn" id="btn-lock-t-guild" title="Заблокировать силу гильдий">🔓</button>
+                </div>
+              </div>
+
+              <!-- Main Roll Button -->
+              <div class="town-action-box">
+                <button class="btn-town-primary" id="btn-reroll-town">
+                  <span>🎲</span>
+                  <span>СГЕНЕРИРОВАТЬ ПОСЕЛЕНИЕ</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================
+               КОЛОНКА 2: ДОСЬЕ И ПЛАН ПОСЕЛЕНИЯ (CENTER DOSSIER & MAP PLAN)
+               ================================================================ -->
+          <div class="town-col-center">
+
+            <!-- Карточка: Досье поселения -->
+            <div class="town-card" id="card-town-details">
+              <!-- Заголовок и мета-теги -->
+              <div class="town-details-header">
+                <h2 class="town-name-heading" id="town-display-name">Белая Гавань (The Ivory Harbor)</h2>
+                <div class="town-meta-pills">
+                  <span class="town-meta-pill"><strong>Тип:</strong> <span id="t-meta-type">Мегаполис</span></span>
+                  <span class="town-meta-pill"><strong>Население:</strong> <span id="t-meta-pop">~85 000 жителей</span></span>
+                  <span class="town-meta-pill"><strong>Культура:</strong> <span id="t-meta-wealth">Богатое / Торговля</span></span>
+                  <span class="town-meta-pill"><strong>Власть:</strong> <span id="t-meta-gov">Купеческий совет</span></span>
+                </div>
+              </div>
+
+              <!-- Блок визуального плана карты -->
+              <div class="town-map-box">
+                <img id="town-map-img" class="town-map-img" src="assets/images/towns/harbor_map.jpg" alt="План поселения">
+                <div class="town-map-overlay-title" id="town-map-title">План Города: Гавань & Башни</div>
+                <div class="town-map-badges-layer">
+                  <span class="town-map-badge" id="town-map-poi-badge">8 Районов</span>
+                  <span class="town-map-badge" id="town-map-layout-badge">Органическая</span>
+                </div>
+              </div>
+
+              <!-- Двухколоночная сетка нарративных блоков в точности по 2.jpg -->
+              <div class="town-narrative-grid">
+                <!-- 1. Описание и география -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🏛️</span> Описание и География</div>
+                  <p class="town-narrative-block-text" id="town-narrative-desc">—</p>
+                </div>
+
+                <!-- 2. Застройка и население -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>👥</span> Застройка и Население</div>
+                  <p class="town-narrative-block-text" id="town-narrative-density">—</p>
+                </div>
+
+                <!-- 3. Слухи и кривотолки -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🗣️</span> Городские слухи</div>
+                  <div class="town-narrative-block-text" id="town-narrative-rumors">—</div>
+                </div>
+
+                <!-- 4. Зацепки для приключений -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🔍</span> Зацепки для группы</div>
+                  <div class="town-narrative-block-text" id="town-narrative-clues">—</div>
+                </div>
+
+                <!-- 5. События и празднества -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🎉</span> Текущие события</div>
+                  <div class="town-narrative-block-text" id="town-narrative-events">—</div>
+                </div>
+
+                <!-- 6. Преступный мир и монстры -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🗡️</span> Банды и Угрозы</div>
+                  <p class="town-narrative-block-text" id="town-narrative-opponents">—</p>
+                </div>
+
+                <!-- 7. Власть и суверенитет -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>👑</span> Власть и Правитель</div>
+                  <p class="town-narrative-block-text" id="town-narrative-rulers">—</p>
+                </div>
+
+                <!-- 8. Городская стража -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🛡️</span> Городская стража</div>
+                  <p class="town-narrative-block-text" id="town-narrative-watch">—</p>
+                </div>
+
+                <!-- 9. Гильдии и влияние -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>⚖️</span> Ведущие гильдии</div>
+                  <p class="town-narrative-block-text" id="town-narrative-guilds">—</p>
+                </div>
+
+                <!-- 10. Сокровища и реликвии -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>💎</span> Сокровища и Тайны</div>
+                  <p class="town-narrative-block-text" id="town-narrative-treasures">—</p>
+                </div>
+
+                <!-- 11. Исторические битвы -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>⚔️</span> Легендарные битвы</div>
+                  <p class="town-narrative-block-text" id="town-narrative-battles">—</p>
+                </div>
+
+                <!-- 12. Герои и волшебники -->
+                <div class="town-narrative-block">
+                  <div class="town-narrative-block-title"><span>🧙</span> Знаменитые маги & герои</div>
+                  <p class="town-narrative-block-text" id="town-narrative-heroes">—</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================
+               КОЛОНКА 3: 3 ПОДРОБНЫЕ ТАБЛИЦЫ (RIGHT COLUMN 3 TABLES)
+               ================================================================ -->
+          <div class="town-col-right">
+
+            <!-- Таблица 1: Районы и достопримечательности -->
+            <div class="town-card" id="card-town-districts">
+              <div class="town-card-header">
+                <h3><span>🗺️</span> Районы и Кварталы (Districts & POI)</h3>
+                <span class="town-card-badge" id="town-districts-count">0 районов</span>
+              </div>
+              <div class="town-table-container">
+                <table class="town-table" id="table-town-districts">
+                  <thead>
+                    <tr>
+                      <th>Район</th>
+                      <th>Тип / POI</th>
+                      <th style="width: 65px; text-align: right;">Зданий</th>
+                      <th>Описание и улицы</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-town-districts">
+                    <!-- Dynamic Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Таблица 2: Жители, герои и маги -->
+            <div class="town-card" id="card-town-citizens">
+              <div class="town-card-header">
+                <h3><span>👥</span> Жители, Герои и Маги (Citizens Roster)</h3>
+                <span class="town-card-badge" id="town-citizens-count">0 жителей</span>
+              </div>
+              <div class="town-table-container">
+                <table class="town-table" id="table-town-citizens">
+                  <thead>
+                    <tr>
+                      <th>Имя и Роль</th>
+                      <th>Раса</th>
+                      <th style="width: 55px;">Возраст</th>
+                      <th>Цель, секрет и особый предмет</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-town-citizens">
+                    <!-- Dynamic Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Таблица 3: Заведения и возможности -->
+            <div class="town-card" id="card-town-establishments">
+              <div class="town-card-header">
+                <h3><span>🏪</span> Заведения и Возможности (Establishments)</h3>
+                <span class="town-card-badge" id="town-establishments-count">0 заведений</span>
+              </div>
+              <div class="town-table-container">
+                <table class="town-table" id="table-town-establishments">
+                  <thead>
+                    <tr>
+                      <th>Заведение</th>
+                      <th>Тип</th>
+                      <th>Владелец и обстановка</th>
+                      <th>Особенность / Зацепка / Цены</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-town-establishments">
+                    <!-- Dynamic Rows -->
                   </tbody>
                 </table>
               </div>

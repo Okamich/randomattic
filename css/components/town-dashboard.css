@@ -1,0 +1,487 @@
+/**
+ * Randomattic - Town & Settlement Architect Stylesheet
+ * 3-Column Layout strictly matching References/TownReferences/2.jpg:
+ * COL 1: Settlement Parameters, Culture & Economy, Threat & Power (with locks)
+ * COL 2: Settlement Details - Name, Illustrated Plan Map, Narratives (2-col grid)
+ * COL 3: 3 Detailed Scrollable Tables (Districts & POI | Citizens | Establishments)
+ */
+
+/* Container wrapper for Town Dashboard */
+.town-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* 3-Column Main Grid */
+.town-main-layout {
+  display: grid;
+  grid-template-columns: minmax(310px, 1fr) minmax(440px, 1.45fr) minmax(420px, 1.35fr);
+  gap: 16px;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 1440px) {
+  .town-main-layout {
+    grid-template-columns: 320px 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .town-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Columns */
+.town-col-left,
+.town-col-center,
+.town-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Card overrides for Town Architect */
+.town-card {
+  background: var(--bg-card, rgba(26, 21, 16, 0.88));
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: var(--radius-lg, 10px);
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.town-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light, rgba(90, 66, 46, 0.4));
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.town-card-header h3 {
+  margin: 0;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 0.98rem;
+  color: var(--accent-primary, #e2b76f);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.town-card-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(226, 183, 111, 0.12);
+  border: 1px solid rgba(226, 183, 111, 0.3);
+  color: var(--accent-primary, #e2b76f);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Parameters List & Controls */
+.town-controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.town-param-row {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+
+.town-param-row label {
+  color: var(--text-primary, #ded4c0);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.town-param-select {
+  width: 100%;
+  padding: 5px 8px;
+  background: var(--bg-input, rgba(15, 12, 9, 0.75));
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 5px;
+  color: var(--text-primary, #f0e6d2);
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.town-param-select:focus {
+  border-color: var(--accent-primary, #e2b76f);
+}
+
+.town-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.town-slider {
+  flex: 1;
+  height: 6px;
+  accent-color: var(--accent-primary, #e2b76f);
+  cursor: pointer;
+}
+
+.town-slider-val {
+  min-width: 58px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-primary, #e2b76f);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Lock buttons */
+.town-lock-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 5px;
+  padding: 4px 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.town-lock-btn:hover {
+  background: rgba(226, 183, 111, 0.15);
+  border-color: var(--accent-primary, #e2b76f);
+}
+
+.town-lock-btn.locked {
+  background: rgba(226, 183, 111, 0.25);
+  border-color: var(--accent-primary, #e2b76f);
+  color: var(--accent-primary, #e2b76f);
+  box-shadow: 0 0 6px rgba(226, 183, 111, 0.4);
+}
+
+/* Big Action button in left col */
+.town-action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-town-primary {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a120b;
+  background: linear-gradient(135deg, #f0cb82, #d19a4c);
+  border: 1px solid #ffe1a6;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(209, 154, 76, 0.35);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-town-primary:hover {
+  background: linear-gradient(135deg, #ffd996, #e2aa5c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(209, 154, 76, 0.5);
+}
+
+.btn-town-secondary {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, #5a422e);
+  border-radius: 6px;
+  color: var(--text-primary, #ded4c0);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-town-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent-primary, #e2b76f);
+  color: var(--accent-primary, #e2b76f);
+}
+
+/* ==========================================================================
+   CENTER COLUMN: MAP PLAN & DOSSIER
+   ========================================================================== */
+.town-details-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-light, rgba(90, 66, 46, 0.4));
+  padding-bottom: 8px;
+}
+
+.town-name-heading {
+  margin: 0;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 1.45rem;
+  color: var(--accent-primary, #e2b76f);
+  letter-spacing: 0.6px;
+}
+
+.town-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.town-meta-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-light, #5a422e);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--text-secondary, #c4baa7);
+}
+
+.town-meta-pill strong {
+  color: var(--accent-primary, #e2b76f);
+}
+
+/* City Map Plan Box */
+.town-map-box {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color, #705338);
+  position: relative;
+  background: #110e0b;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+  max-height: 290px;
+}
+
+.town-map-img {
+  width: 100%;
+  height: 100%;
+  max-height: 290px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.town-map-box:hover .town-map-img {
+  transform: scale(1.02);
+}
+
+.town-map-overlay-title {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(18, 14, 10, 0.85);
+  border: 1px solid var(--border-color, #705338);
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 0.82rem;
+  color: var(--accent-primary, #e2b76f);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.town-map-badges-layer {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.town-map-badge {
+  background: rgba(18, 14, 10, 0.85);
+  border: 1px solid var(--border-color, #705338);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  color: #e2b76f;
+  backdrop-filter: blur(4px);
+}
+
+/* Narrative 2-Column Grid matching 2.jpg */
+.town-narrative-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .town-narrative-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.town-narrative-block {
+  background: rgba(15, 12, 9, 0.6);
+  border: 1px solid rgba(90, 66, 46, 0.35);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.town-narrative-block-title {
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 0.82rem;
+  color: var(--accent-primary, #e2b76f);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.town-narrative-block-text {
+  font-size: 0.8rem;
+  line-height: 1.42;
+  color: var(--text-primary, #ded4c0);
+  margin: 0;
+}
+
+.town-narrative-block-text ul {
+  margin: 2px 0 0 16px;
+  padding: 0;
+}
+
+.town-narrative-block-text li {
+  margin-bottom: 3px;
+}
+
+/* ==========================================================================
+   RIGHT COLUMN: 3 DETAILED SCROLLABLE TABLES
+   ========================================================================== */
+.town-table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 250px;
+  border: 1px solid rgba(90, 66, 46, 0.35);
+  border-radius: 6px;
+  background: rgba(15, 12, 9, 0.5);
+}
+
+.town-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.79rem;
+  text-align: left;
+}
+
+.town-table thead {
+  position: sticky;
+  top: 0;
+  background: #251c14;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.town-table th {
+  padding: 6px 8px;
+  font-family: var(--font-heading, 'Cinzel', serif);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--accent-primary, #e2b76f);
+  border-bottom: 1px solid var(--border-color, #5a422e);
+  white-space: nowrap;
+}
+
+.town-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(90, 66, 46, 0.25);
+  color: var(--text-primary, #ded4c0);
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+.town-table tr:hover {
+  background: rgba(226, 183, 111, 0.05);
+}
+
+/* District Badges */
+.badge-town-busy {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(56, 161, 105, 0.18);
+  color: #68d391;
+  border: 1px solid rgba(56, 161, 105, 0.35);
+}
+
+.badge-town-dangerous {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(229, 62, 62, 0.18);
+  color: #fc8181;
+  border: 1px solid rgba(229, 62, 62, 0.35);
+}
+
+.badge-town-elite {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(214, 158, 46, 0.18);
+  color: #f6e05e;
+  border: 1px solid rgba(214, 158, 46, 0.35);
+}
+
+.badge-town-arcane {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(128, 90, 213, 0.22);
+  color: #b794f4;
+  border: 1px solid rgba(128, 90, 213, 0.4);
+}
+
+.badge-town-moderate {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(49, 130, 206, 0.2);
+  color: #63b3ed;
+  border: 1px solid rgba(49, 130, 206, 0.4);
+}

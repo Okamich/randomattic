@@ -37,6 +37,7 @@ import {
   RACE_PORTRAIT_KEYS,
   OCCUPANCY_LEVELS
 } from './generators/tavern-enhanced.js';
+import { generateTown } from './generators/town.js';
 
 // Текущее состояние приложения
 const state = {
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupRouter() {
   const handleHash = () => {
     const hash = window.location.hash.replace('#', '').trim();
-    const validViews = ['names', 'tavern', 'loot', 'd20-hub', 'd20-wild-magic', 'd20-secret-societies', 'd20-artefacts', 'd20-potions'];
+    const validViews = ['names', 'town', 'tavern', 'loot', 'd20-hub', 'd20-wild-magic', 'd20-secret-societies', 'd20-artefacts', 'd20-potions'];
     
     if (hash && validViews.includes(hash)) {
       openGeneratorView(hash, false);
@@ -229,13 +230,20 @@ export function openGeneratorView(viewId, updateHash = true) {
   const lootWs = document.getElementById('loot-dashboard-workspace');
   const d20Ws = document.getElementById('d20-dashboard-workspace');
   const tavernWs = document.getElementById('tavern-dashboard-workspace');
+  const townWs = document.getElementById('town-dashboard-workspace');
 
   if (namesWs) namesWs.style.display = 'none';
   if (lootWs) lootWs.style.display = 'none';
   if (d20Ws) d20Ws.style.display = 'none';
   if (tavernWs) tavernWs.style.display = 'none';
+  if (townWs) townWs.style.display = 'none';
 
-  if (viewId === 'names') {
+  if (viewId === 'town') {
+    if (townWs) {
+      townWs.style.display = 'flex';
+      initTownDashboard();
+    }
+  } else if (viewId === 'names') {
     if (namesWs) {
       namesWs.style.display = 'flex';
       initNamesDashboard();
@@ -273,12 +281,14 @@ export function closeGeneratorView(updateHash = true) {
   const lootWs = document.getElementById('loot-dashboard-workspace');
   const d20Ws = document.getElementById('d20-dashboard-workspace');
   const tavernWs = document.getElementById('tavern-dashboard-workspace');
+  const townWs = document.getElementById('town-dashboard-workspace');
 
   if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
   if (namesWs) namesWs.style.display = 'none';
   if (lootWs) lootWs.style.display = 'none';
   if (d20Ws) d20Ws.style.display = 'none';
   if (tavernWs) tavernWs.style.display = 'none';
+  if (townWs) townWs.style.display = 'none';
 
   if (boardEl) boardEl.style.display = 'block';
   if (genEl) genEl.style.display = 'none';
@@ -288,7 +298,9 @@ function setupGeneratorViewEvents() {
   setupNamesEvents();
   setupLootEvents();
   setupD20Events();
+  setupTownEvents();
   document.getElementById('btn-back-from-tavern')?.addEventListener('click', () => closeGeneratorView());
+  document.getElementById('btn-back-from-town')?.addEventListener('click', () => closeGeneratorView());
 }
 
 // ==========================================================================
@@ -1630,5 +1642,368 @@ ${d.visitors.map(v => `  - ${v.name} (${v.role}, ${v.dndClass}, ${v.race}) — $
       }, 2000);
     }
   });
+}
+
+// ==========================================================================
+// 5. АРХИТЕКТОР ПОСЕЛЕНИЙ & ГОРОДОВ (TOWN & SETTLEMENT ARCHITECT CONTROLLER)
+// ==========================================================================
+const townState = {
+  initialized: false,
+  locks: {
+    size: false,
+    density: false,
+    layout: false,
+    material: false,
+    race: false,
+    industry: false,
+    wealth: false,
+    religion: false,
+    stratification: false,
+    stability: false,
+    crime: false,
+    monsters: false,
+    guild: false
+  },
+  lastTown: null
+};
+
+function initTownDashboard() {
+  setupTownEvents();
+  if (!townState.lastTown) {
+    executeTownGenerator();
+  }
+}
+
+function setupTownEvents() {
+  if (townState.initialized) return;
+  townState.initialized = true;
+
+  // Locks setup
+  const lockBindings = [
+    { btnId: 'btn-lock-t-size', key: 'size', inputId: 't-param-size', metaKey: 'sizeKey' },
+    { btnId: 'btn-lock-t-density', key: 'density', inputId: 't-param-density' },
+    { btnId: 'btn-lock-t-layout', key: 'layout', inputId: 't-param-layout', metaKey: 'layoutKey' },
+    { btnId: 'btn-lock-t-material', key: 'material', inputId: 't-param-material', metaKey: 'materialKey' },
+    { btnId: 'btn-lock-t-race', key: 'race', inputId: 't-param-race', metaKey: 'raceKey' },
+    { btnId: 'btn-lock-t-industry', key: 'industry', inputId: 't-param-industry', metaKey: 'industryKey' },
+    { btnId: 'btn-lock-t-wealth', key: 'wealth', inputId: 't-param-wealth', metaKey: 'wealthKey' },
+    { btnId: 'btn-lock-t-religion', key: 'religion', inputId: 't-param-religion', metaKey: 'religionKey' },
+    { btnId: 'btn-lock-t-stratification', key: 'stratification', inputId: 't-param-stratification', metaKey: 'stratificationKey' },
+    { btnId: 'btn-lock-t-stability', key: 'stability', inputId: 't-param-stability' },
+    { btnId: 'btn-lock-t-crime', key: 'crime', inputId: 't-param-crime' },
+    { btnId: 'btn-lock-t-monsters', key: 'monsters', inputId: 't-param-monsters' },
+    { btnId: 'btn-lock-t-guild', key: 'guild', inputId: 't-param-guild', metaKey: 'guildPower' }
+  ];
+
+  lockBindings.forEach(({ btnId, key, inputId, metaKey }) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      townState.locks[key] = !townState.locks[key];
+      const isLocked = townState.locks[key];
+      btn.textContent = isLocked ? '🔒' : '🔓';
+      btn.classList.toggle('locked', isLocked);
+
+      const inputEl = document.getElementById(inputId);
+      if (!inputEl) return;
+
+      if (isLocked) {
+        // If locking a dropdown currently in 'random' mode, lock to the generated value
+        if (metaKey && inputEl.value === 'random' && townState.lastTown && townState.lastTown.meta) {
+          const concreteVal = townState.lastTown.meta[metaKey];
+          if (concreteVal) inputEl.value = concreteVal;
+        }
+      } else {
+        // When unlocking a dropdown, revert back to 'random'
+        if (metaKey) {
+          inputEl.value = 'random';
+        }
+      }
+    });
+  });
+
+  // Slider Badges setup
+  const densitySlider = document.getElementById('t-param-density');
+  const densityVal = document.getElementById('t-val-density');
+  const densityLabels = { '1': 'Низкая', '2': 'Обычная', '3': 'Высокая', '4': 'Очень выс.' };
+  if (densitySlider && densityVal) {
+    densitySlider.addEventListener('input', (e) => {
+      densityVal.textContent = densityLabels[e.target.value] || 'Обычная';
+    });
+  }
+
+  const stabilitySlider = document.getElementById('t-param-stability');
+  const stabilityVal = document.getElementById('t-val-stability');
+  if (stabilitySlider && stabilityVal) {
+    stabilitySlider.addEventListener('input', (e) => {
+      stabilityVal.textContent = `${e.target.value} / 5`;
+    });
+  }
+
+  const crimeSlider = document.getElementById('t-param-crime');
+  const crimeVal = document.getElementById('t-val-crime');
+  if (crimeSlider && crimeVal) {
+    crimeSlider.addEventListener('input', (e) => {
+      crimeVal.textContent = `${e.target.value} / 5`;
+    });
+  }
+
+  const monstersSlider = document.getElementById('t-param-monsters');
+  const monstersVal = document.getElementById('t-val-monsters');
+  if (monstersSlider && monstersVal) {
+    monstersSlider.addEventListener('input', (e) => {
+      monstersVal.textContent = `${e.target.value} / 5`;
+    });
+  }
+
+  // Roll button
+  document.getElementById('btn-reroll-town')?.addEventListener('click', () => {
+    executeTownGenerator();
+  });
+
+  // Unlock all button: reset all locks and restore random on all controls
+  document.getElementById('btn-unlock-all-town')?.addEventListener('click', () => {
+    Object.keys(townState.locks).forEach(k => {
+      townState.locks[k] = false;
+    });
+    lockBindings.forEach(({ btnId, inputId, metaKey }) => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.textContent = '🔓';
+        btn.classList.remove('locked');
+      }
+      if (metaKey) {
+        const inputEl = document.getElementById(inputId);
+        if (inputEl) inputEl.value = 'random';
+      }
+    });
+  });
+
+  // Copy dossier summary
+  document.getElementById('btn-copy-town-summary')?.addEventListener('click', () => {
+    copyTownSummary();
+  });
+
+  // Export Markdown
+  document.getElementById('btn-export-town-md')?.addEventListener('click', () => {
+    exportTownMarkdown();
+  });
+
+  // Export CSV
+  document.getElementById('btn-export-town-csv')?.addEventListener('click', () => {
+    exportTownCsv();
+  });
+}
+
+function executeTownGenerator() {
+  const densityMap = { '1': 'low', '2': 'normal', '3': 'high', '4': 'very_high' };
+  const densitySlider = document.getElementById('t-param-density');
+
+  const getSelectOpt = (lockKey, inputId) => {
+    const el = document.getElementById(inputId);
+    if (!el) return undefined;
+    if (townState.locks[lockKey]) return el.value;
+    if (el.value === 'random') return undefined;
+    return el.value;
+  };
+
+  // Prepare generator options based on controls and lock state
+  const options = {
+    size: getSelectOpt('size', 't-param-size'),
+    poiDensity: densityMap[densitySlider?.value] || 'normal',
+    layout: getSelectOpt('layout', 't-param-layout'),
+    material: getSelectOpt('material', 't-param-material'),
+    race: getSelectOpt('race', 't-param-race'),
+    industry: getSelectOpt('industry', 't-param-industry'),
+    wealth: getSelectOpt('wealth', 't-param-wealth'),
+    religion: getSelectOpt('religion', 't-param-religion'),
+    stratification: getSelectOpt('stratification', 't-param-stratification'),
+    stability: townState.locks.stability ? parseInt(document.getElementById('t-param-stability')?.value, 10) : undefined,
+    crime: townState.locks.crime ? parseInt(document.getElementById('t-param-crime')?.value, 10) : undefined,
+    monsters: townState.locks.monsters ? parseInt(document.getElementById('t-param-monsters')?.value, 10) : undefined,
+    guildPower: getSelectOpt('guild', 't-param-guild')
+  };
+
+  const result = generateTown(options);
+  townState.lastTown = result;
+
+  // For sliders, update display if unlocked
+  if (!townState.locks.stability && result.meta.stability) {
+    const el = document.getElementById('t-param-stability');
+    if (el) el.value = result.meta.stability;
+    const val = document.getElementById('t-val-stability');
+    if (val) val.textContent = `${result.meta.stability} / 5`;
+  }
+  if (!townState.locks.crime && result.meta.crime) {
+    const el = document.getElementById('t-param-crime');
+    if (el) el.value = result.meta.crime;
+    const val = document.getElementById('t-val-crime');
+    if (val) val.textContent = `${result.meta.crime} / 5`;
+  }
+  if (!townState.locks.monsters && result.meta.monsters) {
+    const el = document.getElementById('t-param-monsters');
+    if (el) el.value = result.meta.monsters;
+    const val = document.getElementById('t-val-monsters');
+    if (val) val.textContent = `${result.meta.monsters} / 5`;
+  }
+
+  // Render view
+  renderTownView(result);
+}
+
+function renderTownView(town) {
+  const { meta, narrative, districts, citizens, establishments } = town;
+
+  // Header meta
+  const nameEl = document.getElementById('town-display-name');
+  if (nameEl) nameEl.textContent = meta.name;
+
+  const typeEl = document.getElementById('t-meta-type');
+  if (typeEl) typeEl.textContent = `${meta.sizeTitle} (${meta.sizeEnTitle})`;
+
+  const popEl = document.getElementById('t-meta-pop');
+  if (popEl) popEl.textContent = `~${meta.populationFormatted} жит.`;
+
+  const wealthEl = document.getElementById('t-meta-wealth');
+  if (wealthEl) wealthEl.textContent = `${meta.wealthTitle} • ${meta.industryTitle}`;
+
+  const govEl = document.getElementById('t-meta-gov');
+  if (govEl) govEl.textContent = meta.stratificationTitle;
+
+  // Map & Badges
+  const mapImg = document.getElementById('town-map-img');
+  if (mapImg && meta.mapImage) mapImg.src = meta.mapImage;
+
+  const mapTitle = document.getElementById('town-map-title');
+  if (mapTitle) mapTitle.textContent = `План поселения: ${meta.name}`;
+
+  const poiBadge = document.getElementById('town-map-poi-badge');
+  if (poiBadge) poiBadge.textContent = `${districts.length} Районов`;
+
+  const layoutBadge = document.getElementById('town-map-layout-badge');
+  if (layoutBadge) layoutBadge.textContent = meta.layoutTitle;
+
+  // Narratives
+  const setElText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+  const setElHtml = (id, html) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  };
+
+  setElText('town-narrative-desc', narrative.description);
+  setElText('town-narrative-density', narrative.buildingsCitizens);
+  setElHtml('town-narrative-rumors', `<ul>${narrative.rumors.map(r => `<li>«${r}»</li>`).join('')}</ul>`);
+  setElHtml('town-narrative-clues', `<ul>${narrative.clues.map(c => `<li>${c}</li>`).join('')}</ul>`);
+  setElHtml('town-narrative-events', `<ul>${narrative.events.map(ev => `<li>${ev}</li>`).join('')}</ul>`);
+  setElText('town-narrative-opponents', narrative.opponents);
+  setElText('town-narrative-rulers', narrative.rulers);
+  setElText('town-narrative-watch', narrative.watch);
+  setElText('town-narrative-guilds', narrative.guilds);
+  setElText('town-narrative-treasures', narrative.treasures);
+  setElText('town-narrative-battles', narrative.battles);
+  setElText('town-narrative-heroes', narrative.heroes);
+
+  // Table 1: Districts
+  const districtsCountBadge = document.getElementById('town-districts-count');
+  if (districtsCountBadge) districtsCountBadge.textContent = `${districts.length} районов`;
+
+  const tbodyDistricts = document.getElementById('tbody-town-districts');
+  if (tbodyDistricts) {
+    tbodyDistricts.innerHTML = districts.map(d => `
+      <tr>
+        <td><strong>${d.name}</strong><br><small style="color:var(--text-muted);">${d.nameEn}</small></td>
+        <td><span class="badge-town-${d.badgeClass}">${d.typePoi}</span></td>
+        <td style="text-align: right; font-weight: 600; color: var(--accent-primary);">~${d.estimatedBuildings}</td>
+        <td>${d.notes}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Table 2: Citizens
+  const citizensCountBadge = document.getElementById('town-citizens-count');
+  if (citizensCountBadge) citizensCountBadge.textContent = `${citizens.length} жителей`;
+
+  const tbodyCitizens = document.getElementById('tbody-town-citizens');
+  if (tbodyCitizens) {
+    tbodyCitizens.innerHTML = citizens.map(c => `
+      <tr>
+        <td><strong>${c.name}</strong><br><small style="color:var(--accent-primary);">${c.role}</small></td>
+        <td>${c.race}</td>
+        <td>${c.age}</td>
+        <td>${c.notes}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Table 3: Establishments
+  const estabCountBadge = document.getElementById('town-establishments-count');
+  if (estabCountBadge) estabCountBadge.textContent = `${establishments.length} заведений`;
+
+  const tbodyEstab = document.getElementById('tbody-town-establishments');
+  if (tbodyEstab) {
+    tbodyEstab.innerHTML = establishments.map(e => `
+      <tr>
+        <td><strong>${e.name}</strong></td>
+        <td><span class="badge-town-busy">${e.type}</span></td>
+        <td><strong>${e.owner}</strong><br><small style="color:var(--text-muted);">${e.servicesPrices}</small></td>
+        <td>${e.quirkClues}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+function copyTownSummary() {
+  if (!townState.lastTown) return;
+  const t = townState.lastTown;
+  const text = `${t.meta.name} (${t.meta.sizeTitle})
+Население: ~${t.meta.populationFormatted} (${t.meta.raceTitle})
+Планировка: ${t.meta.layoutTitle} | Материалы: ${t.meta.materialTitle}
+Экономика: ${t.meta.industryTitle} (${t.meta.wealthTitle})
+
+Описание:
+${t.narrative.description}
+
+Районы:
+${t.districts.map(d => `• ${d.name} (${d.typePoi}) — ~${d.estimatedBuildings} зданий`).join('\n')}
+
+Слухи:
+${t.narrative.rumors.map(r => `• ${r}`).join('\n')}`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy-town-summary');
+    if (btn) {
+      btn.innerHTML = '<span>✔</span><span>Скопировано!</span>';
+      setTimeout(() => {
+        btn.innerHTML = '<span>📋</span><span>Копировать досье</span>';
+      }, 2000);
+    }
+  });
+}
+
+function exportTownMarkdown() {
+  if (!townState.lastTown) return;
+  const md = townState.lastTown.exportMarkdown;
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${townState.lastTown.meta.name.replace(/[\/\s]/g, '_')}_dossier.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportTownCsv() {
+  if (!townState.lastTown) return;
+  const csv = townState.lastTown.exportCsv;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${townState.lastTown.meta.name.replace(/[\/\s]/g, '_')}_tables.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
