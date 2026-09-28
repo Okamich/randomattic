@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="css/components/tavern-dashboard.css">
   <link rel="stylesheet" href="css/components/generator-dashboard.css">
   <link rel="stylesheet" href="css/components/town-dashboard.css">
+  <link rel="stylesheet" href="css/components/hero-dashboard.css">
 </head>
 <body>
 
@@ -1363,6 +1364,349 @@
 
         </div>
       </div>
+
+      <!-- ================================================================
+           АРХИТЕКТОР ГЕРОЕВ (HERO FOUNDRY / HERO CRAFTER) WORKSPACE
+           ================================================================ -->
+      <div id="hero-dashboard-workspace" class="hero-dashboard" style="display: none;">
+        <!-- Header Action Bar -->
+        <div class="gen-header-bar">
+          <div class="gen-header-left">
+            <button class="btn-tavern-back" id="btn-back-from-hero" title="Вернуться к списку генераторов">
+              <span>←</span>
+              <span>Назад</span>
+            </button>
+            <div class="gen-header-title">
+              <span class="gen-header-icon">⚔️</span>
+              <div>
+                <h2>RAND-OM-ATTIC | Архитектор Героев (Hero Foundry)</h2>
+                <div class="gen-header-subtitle">Main Console • D&D 5e • Расы, классы, предыстории, связи, инвентарь и хроника</div>
+              </div>
+            </div>
+          </div>
+          <div class="gen-actions">
+            <button class="btn-tavern-secondary" id="btn-unlock-all-hero" title="Снять все блокировки параметров">
+              <span>🔓</span>
+              <span>Сбросить замки</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-copy-hero-summary" title="Скопировать краткое досье в буфер">
+              <span>📋</span>
+              <span>Копировать досье</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-export-hero-md" title="Экспортировать полное досье в формате Markdown">
+              <span>📄</span>
+              <span>Экспорт MD</span>
+            </button>
+            <button class="btn-tavern-secondary" id="btn-export-hero-csv" title="Экспортировать таблицы в формате CSV">
+              <span>📊</span>
+              <span>Экспорт CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ROW 1 (TOP, 3 CARDS): Controls | Custom Traits | Profile -->
+        <div class="hero-row-top">
+          <!-- Card 1: Controls -->
+          <div class="hero-card" id="card-hero-controls">
+            <div class="hero-card-header">
+              <h3><span>⚙️</span> Параметры генерации</h3>
+              <span class="hero-card-badge">Controls</span>
+            </div>
+            <div class="hero-control-group">
+              <!-- Race -->
+              <div class="hero-control-row">
+                <span class="hero-control-label">Раса:</span>
+                <select class="hero-select" id="hero-select-race">
+                  <option value="random">🎲 Случайная раса</option>
+                </select>
+                <button class="btn-hero-lock" id="btn-lock-hero-race" data-lock="race" title="Заблокировать расу">🔓</button>
+              </div>
+
+              <!-- Class -->
+              <div class="hero-control-row">
+                <span class="hero-control-label">Класс:</span>
+                <select class="hero-select" id="hero-select-class">
+                  <option value="random">🎲 Случайный класс</option>
+                </select>
+                <button class="btn-hero-lock" id="btn-lock-hero-class" data-lock="classId" title="Заблокировать класс">🔓</button>
+              </div>
+
+              <!-- Gender -->
+              <div class="hero-control-row">
+                <span class="hero-control-label">Пол:</span>
+                <select class="hero-select" id="hero-select-gender">
+                  <option value="random">🎲 Случайно</option>
+                  <option value="male">Мужской</option>
+                  <option value="female">Женский</option>
+                </select>
+                <button class="btn-hero-lock" id="btn-lock-hero-gender" data-lock="gender" title="Заблокировать пол">🔓</button>
+              </div>
+
+              <!-- Primary Ability -->
+              <div class="hero-control-row">
+                <span class="hero-control-label">Осн. хар-ка:</span>
+                <select class="hero-select" id="hero-select-ability">
+                  <option value="auto">⚡ Авто (по классу)</option>
+                  <option value="str">Сила (Strength)</option>
+                  <option value="dex">Ловкость (Dexterity)</option>
+                  <option value="con">Телосложение (Constitution)</option>
+                  <option value="int">Интеллект (Intelligence)</option>
+                  <option value="wis">Мудрость (Wisdom)</option>
+                  <option value="cha">Харизма (Charisma)</option>
+                </select>
+              </div>
+
+              <!-- Trait Complexity Slider -->
+              <div class="hero-control-row" style="margin-top: 4px;">
+                <span class="hero-control-label">Сложность:</span>
+                <div class="hero-slider-row" style="flex:1;">
+                  <input type="range" id="hero-slider-complexity" min="1" max="5" value="3">
+                  <span class="hero-slider-val" id="hero-val-complexity">3</span>
+                </div>
+              </div>
+
+              <!-- Backstory Detail Slider -->
+              <div class="hero-control-row">
+                <span class="hero-control-label">Детализация:</span>
+                <div class="hero-slider-row" style="flex:1;">
+                  <input type="range" id="hero-slider-backstory" min="1" max="5" value="3">
+                  <span class="hero-slider-val" id="hero-val-backstory">3</span>
+                </div>
+              </div>
+
+              <!-- Generate Button -->
+              <button class="btn-hero-generate" id="btn-generate-hero">
+                <span>🎲</span>
+                <span>Сгенерировать героя</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Custom Trait Selection -->
+          <div class="hero-card" id="card-hero-custom-traits">
+            <div class="hero-card-header">
+              <h3><span>✨</span> Настраиваемые черты</h3>
+              <span class="hero-card-badge">Custom Traits</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <!-- Slot 1 -->
+              <div class="hero-trait-slot" id="hero-trait-slot-1">
+                <div class="hero-trait-header">
+                  <span class="hero-trait-title" id="hero-trait-title-1">Прошлое призвание</span>
+                  <div class="hero-trait-actions">
+                    <button class="btn-trait-reroll" data-slot="0" title="Случайно перебросить черту">🎲</button>
+                    <button class="btn-hero-lock" data-slot="0" title="Заблокировать черту">🔓</button>
+                  </div>
+                </div>
+                <div class="hero-trait-body" id="hero-trait-body-1">—</div>
+              </div>
+
+              <!-- Slot 2 -->
+              <div class="hero-trait-slot" id="hero-trait-slot-2">
+                <div class="hero-trait-header">
+                  <span class="hero-trait-title" id="hero-trait-title-2">Источник гордости</span>
+                  <div class="hero-trait-actions">
+                    <button class="btn-trait-reroll" data-slot="1" title="Случайно перебросить черту">🎲</button>
+                    <button class="btn-hero-lock" data-slot="1" title="Заблокировать черту">🔓</button>
+                  </div>
+                </div>
+                <div class="hero-trait-body" id="hero-trait-body-2">—</div>
+              </div>
+
+              <!-- Slot 3 -->
+              <div class="hero-trait-slot" id="hero-trait-slot-3">
+                <div class="hero-trait-header">
+                  <span class="hero-trait-title" id="hero-trait-title-3">Слабость / Изъян</span>
+                  <div class="hero-trait-actions">
+                    <button class="btn-trait-reroll" data-slot="2" title="Случайно перебросить черту">🎲</button>
+                    <button class="btn-hero-lock" data-slot="2" title="Заблокировать черту">🔓</button>
+                  </div>
+                </div>
+                <div class="hero-trait-body" id="hero-trait-body-3">—</div>
+              </div>
+
+              <!-- Slot 4 -->
+              <div class="hero-trait-slot" id="hero-trait-slot-4">
+                <div class="hero-trait-header">
+                  <span class="hero-trait-title" id="hero-trait-title-4">Зов странствий</span>
+                  <div class="hero-trait-actions">
+                    <button class="btn-trait-reroll" data-slot="3" title="Случайно перебросить черту">🎲</button>
+                    <button class="btn-hero-lock" data-slot="3" title="Заблокировать черту">🔓</button>
+                  </div>
+                </div>
+                <div class="hero-trait-body" id="hero-trait-body-4">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Generated Hero Profile -->
+          <div class="hero-card" id="card-hero-foundry-profile">
+            <div class="hero-card-header">
+              <h3><span>👤</span> Профиль героя</h3>
+              <span class="hero-card-badge" id="hero-profile-class-badge">—</span>
+            </div>
+            <div class="hero-profile-container">
+              <div class="hero-portrait-frame">
+                <img src="assets/images/portraits/heroes/hero_0_0.jpg" alt="Портрет героя" class="hero-portrait-img" id="hero-foundry-portrait-img">
+                <div class="hero-portrait-lock-overlay">
+                  <button class="btn-hero-lock" id="btn-lock-hero-portrait" data-lock="portrait" title="Заблокировать портрет">🔓</button>
+                </div>
+                <div class="hero-portrait-coord" id="hero-portrait-coord">Атлас [0;0]</div>
+              </div>
+              <div class="hero-profile-meta">
+                <div class="hero-profile-name" id="hero-profile-name">—</div>
+                <div class="hero-profile-title" id="hero-profile-title">—</div>
+                <div class="hero-profile-sub" id="hero-profile-sub">—</div>
+              </div>
+            </div>
+            <div class="hero-bio-box" id="hero-bio-box">
+              <p>Нажмите «Сгенерировать героя», чтобы создать персонажа с глубокой биографией и связями.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2 (MIDDLE, 2 CARDS): Details & Legacy | Known Associates -->
+        <div class="hero-row-middle">
+          <!-- Card 1: Hero Details & Legacy -->
+          <div class="hero-card" id="card-hero-details">
+            <div class="hero-card-header">
+              <h3><span>🛡️</span> Наследие и Детали — <span id="hero-details-legacy-title">«—»</span></h3>
+              <span class="hero-card-badge" id="hero-details-alignment-badge">—</span>
+            </div>
+            <div class="hero-details-grid">
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🌍</span> Истоки и родина:</span>
+                <span class="hero-detail-val" id="hero-val-origin">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🛡️</span> Архетип / Подкласс:</span>
+                <span class="hero-detail-val" id="hero-val-subclass">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🌟</span> Гордость и доблесть:</span>
+                <span class="hero-detail-val" id="hero-val-pride">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>📜</span> Прошлое и страсть:</span>
+                <span class="hero-detail-val" id="hero-val-profession">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🎭</span> Слабость и уязвимость:</span>
+                <span class="hero-detail-val" id="hero-val-flaw">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>⚔️</span> Боевой стиль / Фокус:</span>
+                <span class="hero-detail-val" id="hero-val-combat">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🎒</span> Памятная реликвия:</span>
+                <span class="hero-detail-val" id="hero-val-carrying">—</span>
+              </div>
+              <div class="hero-detail-item">
+                <span class="hero-detail-key"><span>🎯</span> Главный зов судьбы:</span>
+                <span class="hero-detail-val" id="hero-val-drive">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Known Associates & Rivals -->
+          <div class="hero-card" id="card-hero-associates">
+            <div class="hero-card-header">
+              <h3><span>👥</span> Связи, союзники и соперники</h3>
+              <span class="hero-card-badge" id="hero-associates-count">0 персон</span>
+            </div>
+            <div class="hero-table-container">
+              <table class="hero-table" id="table-hero-associates">
+                <thead>
+                  <tr>
+                    <th>Имя</th>
+                    <th>Роль</th>
+                    <th>Раса</th>
+                    <th>Статус / Организация</th>
+                    <th>История отношений</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-hero-associates">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3 (BOTTOM, 3 TABLES): Personality | Equipment | Story Events -->
+        <div class="hero-row-bottom">
+          <!-- Table 1: Personality Breakdown -->
+          <div class="hero-card" id="card-hero-personality">
+            <div class="hero-card-header">
+              <h3><span>🌟</span> Грань личности</h3>
+              <span class="hero-card-badge">Breakdown</span>
+            </div>
+            <div class="hero-table-container">
+              <table class="hero-table" id="table-hero-personality">
+                <thead>
+                  <tr>
+                    <th>Грань</th>
+                    <th>Описание</th>
+                    <th>Триггер / Проявление</th>
+                    <th>Заметка</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-hero-personality">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Table 2: Equipment & Possessions -->
+          <div class="hero-card" id="card-hero-equipment">
+            <div class="hero-card-header">
+              <h3><span>🎒</span> Снаряжение и реликвии</h3>
+              <span class="hero-card-badge">Equipment</span>
+            </div>
+            <div class="hero-table-container">
+              <table class="hero-table" id="table-hero-equipment">
+                <thead>
+                  <tr>
+                    <th>Предмет</th>
+                    <th>Категория</th>
+                    <th>Качество</th>
+                    <th>Статус</th>
+                    <th>Свойство / История</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-hero-equipment">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Table 3: Key Story Events & Achievements -->
+          <div class="hero-card" id="card-hero-story">
+            <div class="hero-card-header">
+              <h3><span>📖</span> Хроника ключевых событий</h3>
+              <span class="hero-card-badge">Chronicle</span>
+            </div>
+            <div class="hero-table-container">
+              <table class="hero-table" id="table-hero-story">
+                <thead>
+                  <tr>
+                    <th>Событие</th>
+                    <th>Описание</th>
+                    <th>Период</th>
+                    <th>Итог / Последствия</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-hero-story">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -1440,6 +1784,6 @@
   </footer>
 
   <!-- Основной модуль JavaScript -->
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=hero1"></script>
 </body>
 </html>

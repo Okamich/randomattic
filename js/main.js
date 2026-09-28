@@ -38,6 +38,8 @@ import {
   OCCUPANCY_LEVELS
 } from './generators/tavern-enhanced.js';
 import { generateTown } from './generators/town.js';
+import { generateHero } from './generators/hero.js';
+import { HERO_DATA } from './data/hero-data.js';
 
 // Текущее состояние приложения
 const state = {
@@ -66,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupRouter() {
   const handleHash = () => {
     const hash = window.location.hash.replace('#', '').trim();
-    const validViews = ['names', 'town', 'tavern', 'loot', 'd20-hub', 'd20-wild-magic', 'd20-secret-societies', 'd20-artefacts', 'd20-potions'];
+    const validViews = ['names', 'town', 'tavern', 'loot', 'd20-hub', 'd20-wild-magic', 'd20-secret-societies', 'd20-artefacts', 'd20-potions', 'hero'];
     
     if (hash && validViews.includes(hash)) {
       openGeneratorView(hash, false);
@@ -231,14 +233,21 @@ export function openGeneratorView(viewId, updateHash = true) {
   const d20Ws = document.getElementById('d20-dashboard-workspace');
   const tavernWs = document.getElementById('tavern-dashboard-workspace');
   const townWs = document.getElementById('town-dashboard-workspace');
+  const heroWs = document.getElementById('hero-dashboard-workspace');
 
   if (namesWs) namesWs.style.display = 'none';
   if (lootWs) lootWs.style.display = 'none';
   if (d20Ws) d20Ws.style.display = 'none';
   if (tavernWs) tavernWs.style.display = 'none';
   if (townWs) townWs.style.display = 'none';
+  if (heroWs) heroWs.style.display = 'none';
 
-  if (viewId === 'town') {
+  if (viewId === 'hero') {
+    if (heroWs) {
+      heroWs.style.display = 'flex';
+      initHeroDashboard();
+    }
+  } else if (viewId === 'town') {
     if (townWs) {
       townWs.style.display = 'flex';
       initTownDashboard();
@@ -282,6 +291,7 @@ export function closeGeneratorView(updateHash = true) {
   const d20Ws = document.getElementById('d20-dashboard-workspace');
   const tavernWs = document.getElementById('tavern-dashboard-workspace');
   const townWs = document.getElementById('town-dashboard-workspace');
+  const heroWs = document.getElementById('hero-dashboard-workspace');
 
   if (mainContainer) mainContainer.classList.remove('container-fluid-tavern');
   if (namesWs) namesWs.style.display = 'none';
@@ -289,6 +299,7 @@ export function closeGeneratorView(updateHash = true) {
   if (d20Ws) d20Ws.style.display = 'none';
   if (tavernWs) tavernWs.style.display = 'none';
   if (townWs) townWs.style.display = 'none';
+  if (heroWs) heroWs.style.display = 'none';
 
   if (boardEl) boardEl.style.display = 'block';
   if (genEl) genEl.style.display = 'none';
@@ -299,8 +310,10 @@ function setupGeneratorViewEvents() {
   setupLootEvents();
   setupD20Events();
   setupTownEvents();
+  setupHeroEvents();
   document.getElementById('btn-back-from-tavern')?.addEventListener('click', () => closeGeneratorView());
   document.getElementById('btn-back-from-town')?.addEventListener('click', () => closeGeneratorView());
+  document.getElementById('btn-back-from-hero')?.addEventListener('click', () => closeGeneratorView());
 }
 
 // ==========================================================================
@@ -2006,4 +2019,380 @@ function exportTownCsv() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ==========================================================================
+// 6. АРХИТЕКТОР ГЕРОЕВ (HERO FOUNDRY / HERO CRAFTER DASHBOARD CONTROLLER)
+// ==========================================================================
+const heroState = {
+  initialized: false,
+  locks: {
+    race: false,
+    classId: false,
+    gender: false,
+    portrait: false
+  },
+  customTraitSlots: [
+    { locked: false, key: 'pastProfession', title: 'Прошлое призвание', option: null },
+    { locked: false, key: 'pride', title: 'Источник гордости', option: null },
+    { locked: false, key: 'flaw', title: 'Слабость / Изъян', option: null },
+    { locked: false, key: 'adventurerReason', title: 'Зов странствий', option: null }
+  ],
+  lastHero: null
+};
+
+function initHeroDashboard() {
+  if (!heroState.initialized) {
+    populateHeroSelects();
+    heroState.initialized = true;
+  }
+  if (!heroState.lastHero) {
+    executeHeroGenerator();
+  }
+}
+
+function populateHeroSelects() {
+  const raceSelect = document.getElementById('hero-select-race');
+  if (raceSelect && raceSelect.options.length <= 1) {
+    HERO_DATA.races.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.nameRu;
+      raceSelect.appendChild(opt);
+    });
+  }
+
+  const classSelect = document.getElementById('hero-select-class');
+  if (classSelect && classSelect.options.length <= 1) {
+    Object.values(HERO_DATA.classes).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.icon} ${c.nameRu} (${c.nameEn})`;
+      classSelect.appendChild(opt);
+    });
+  }
+}
+
+function setupHeroEvents() {
+  // Lock toggles
+  const lockButtons = [
+    { btnId: 'btn-lock-hero-race', key: 'race', selectId: 'hero-select-race' },
+    { btnId: 'btn-lock-hero-class', key: 'classId', selectId: 'hero-select-class' },
+    { btnId: 'btn-lock-hero-gender', key: 'gender', selectId: 'hero-select-gender' },
+    { btnId: 'btn-lock-hero-portrait', key: 'portrait' }
+  ];
+
+  lockButtons.forEach(({ btnId, key, selectId }) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      heroState.locks[key] = !heroState.locks[key];
+      const isLocked = heroState.locks[key];
+      btn.textContent = isLocked ? '🔒' : '🔓';
+      btn.classList.toggle('locked', isLocked);
+      btn.title = isLocked ? 'Разблокировать' : 'Заблокировать';
+
+      // If locking a select that was on 'random', sync with current hero
+      if (isLocked && selectId && heroState.lastHero) {
+        const sel = document.getElementById(selectId);
+        if (sel && sel.value === 'random') {
+          if (key === 'race') sel.value = heroState.lastHero.race.id;
+          if (key === 'classId') sel.value = heroState.lastHero.class.id;
+          if (key === 'gender') sel.value = heroState.lastHero.gender;
+        }
+      }
+    });
+  });
+
+  // Custom trait reroll and lock buttons
+  document.querySelectorAll('#card-hero-custom-traits .btn-trait-reroll').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const slotIdx = parseInt(e.currentTarget.dataset.slot, 10);
+      rerollHeroTraitSlot(slotIdx);
+    });
+  });
+
+  document.querySelectorAll('#card-hero-custom-traits .btn-hero-lock').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const slotIdx = parseInt(e.currentTarget.dataset.slot, 10);
+      if (heroState.customTraitSlots[slotIdx]) {
+        const slot = heroState.customTraitSlots[slotIdx];
+        slot.locked = !slot.locked;
+        e.currentTarget.textContent = slot.locked ? '🔒' : '🔓';
+        e.currentTarget.classList.toggle('locked', slot.locked);
+      }
+    });
+  });
+
+  // Sliders display
+  const sliderComplexity = document.getElementById('hero-slider-complexity');
+  const valComplexity = document.getElementById('hero-val-complexity');
+  if (sliderComplexity && valComplexity) {
+    sliderComplexity.addEventListener('input', (e) => {
+      valComplexity.textContent = e.target.value;
+    });
+  }
+
+  const sliderBackstory = document.getElementById('hero-slider-backstory');
+  const valBackstory = document.getElementById('hero-val-backstory');
+  if (sliderBackstory && valBackstory) {
+    sliderBackstory.addEventListener('input', (e) => {
+      valBackstory.textContent = e.target.value;
+    });
+  }
+
+  // Generate hero button
+  document.getElementById('btn-generate-hero')?.addEventListener('click', () => {
+    executeHeroGenerator();
+  });
+
+  // Unlock all
+  document.getElementById('btn-unlock-all-hero')?.addEventListener('click', () => {
+    Object.keys(heroState.locks).forEach(k => { heroState.locks[k] = false; });
+    lockButtons.forEach(({ btnId, selectId }) => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.textContent = '🔓';
+        btn.classList.remove('locked');
+      }
+      if (selectId) {
+        const sel = document.getElementById(selectId);
+        if (sel) sel.value = 'random';
+      }
+    });
+    // Unlock trait slots
+    heroState.customTraitSlots.forEach(slot => {
+      slot.locked = false;
+    });
+    document.querySelectorAll('#card-hero-custom-traits .btn-hero-lock').forEach(btn => {
+      btn.textContent = '🔓';
+      btn.classList.remove('locked');
+    });
+  });
+
+  // Copy dossier
+  document.getElementById('btn-copy-hero-summary')?.addEventListener('click', () => {
+    copyHeroSummary();
+  });
+
+  // Export Markdown
+  document.getElementById('btn-export-hero-md')?.addEventListener('click', () => {
+    exportHeroMarkdown();
+  });
+
+  // Export CSV
+  document.getElementById('btn-export-hero-csv')?.addEventListener('click', () => {
+    exportHeroCsv();
+  });
+}
+
+function rerollHeroTraitSlot(slotIdx) {
+  if (!heroState.lastHero) return;
+  const classKey = heroState.lastHero.class.id;
+  const classDef = HERO_DATA.classes[classKey];
+  const slot = heroState.customTraitSlots[slotIdx];
+  if (!classDef || !slot) return;
+
+  const tbl = classDef.tables[slot.key];
+  if (!tbl || !tbl.options?.length) return;
+
+  const opt = randInt(0, tbl.options.length - 1);
+  slot.option = tbl.options[opt];
+  renderHeroTraitSlots();
+}
+
+function executeHeroGenerator() {
+  const getOpt = (lockKey, inputId) => {
+    const el = document.getElementById(inputId);
+    if (!el) return undefined;
+    if (heroState.locks[lockKey]) return el.value;
+    if (el.value === 'random') return undefined;
+    return el.value;
+  };
+
+  const options = {
+    race: getOpt('race', 'hero-select-race'),
+    classId: getOpt('classId', 'hero-select-class'),
+    gender: getOpt('gender', 'hero-select-gender'),
+    primaryAbility: document.getElementById('hero-select-ability')?.value,
+    traitComplexity: document.getElementById('hero-slider-complexity')?.value,
+    backstoryDetail: document.getElementById('hero-slider-backstory')?.value,
+    customTraits: heroState.customTraitSlots,
+    locks: heroState.locks,
+    currentHero: heroState.lastHero
+  };
+
+  const hero = generateHero(options);
+  heroState.lastHero = hero;
+
+  // Sync custom trait slots
+  hero.customTraits.forEach((t, i) => {
+    if (heroState.customTraitSlots[i]) {
+      heroState.customTraitSlots[i].option = t.option;
+      heroState.customTraitSlots[i].title = t.title;
+      heroState.customTraitSlots[i].key = t.key;
+    }
+  });
+
+  renderHeroView(hero);
+}
+
+function renderHeroView(hero) {
+  // Profile
+  const imgEl = document.getElementById('hero-foundry-portrait-img');
+  if (imgEl && hero.portrait) {
+    imgEl.src = hero.portrait.url;
+  }
+  const coordEl = document.getElementById('hero-portrait-coord');
+  if (coordEl && hero.portrait) {
+    coordEl.textContent = `Атлас [${hero.portrait.row};${hero.portrait.col}]`;
+  }
+  const nameEl = document.getElementById('hero-profile-name');
+  if (nameEl) nameEl.textContent = hero.name;
+  const titleEl = document.getElementById('hero-profile-title');
+  if (titleEl) titleEl.textContent = `«${hero.legacyTitle}»`;
+  const subEl = document.getElementById('hero-profile-sub');
+  if (subEl) subEl.textContent = `${hero.race.nameRu} • ${hero.class.nameRu} • ${hero.gender === 'female' ? 'Женщина' : 'Мужчина'} • ${hero.age} лет`;
+  const classBadge = document.getElementById('hero-profile-class-badge');
+  if (classBadge) classBadge.textContent = `${hero.class.icon} ${hero.class.nameRu}`;
+  const bioBox = document.getElementById('hero-bio-box');
+  if (bioBox) {
+    bioBox.innerHTML = hero.bioSummary.split('\n\n').map(p => `<p>${p}</p>`).join('');
+  }
+
+  // Trait slots
+  renderHeroTraitSlots();
+
+  // Details
+  const legTitle = document.getElementById('hero-details-legacy-title');
+  if (legTitle) legTitle.textContent = `«${hero.legacyTitle}»`;
+  const alignBadge = document.getElementById('hero-details-alignment-badge');
+  if (alignBadge) alignBadge.textContent = hero.alignment;
+
+  const setDetail = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text || '—';
+  };
+  setDetail('hero-val-origin', hero.details.origin.textRu);
+  setDetail('hero-val-subclass', hero.class.subclass);
+  setDetail('hero-val-pride', hero.details.corePersonality.textRu);
+  setDetail('hero-val-profession', `${hero.details.pastProfession.textRu} / Страсть: ${hero.details.keenInterest.textRu}`);
+  setDetail('hero-val-flaw', hero.details.fearsAndFlaws.textRu);
+  setDetail('hero-val-combat', hero.details.favoredCombat.textRu);
+  setDetail('hero-val-carrying', hero.details.carrying.textRu);
+  setDetail('hero-val-drive', hero.details.ultimateGoal.textRu);
+
+  // Associates
+  const assocTbody = document.getElementById('tbody-hero-associates');
+  const assocCount = document.getElementById('hero-associates-count');
+  if (assocCount) assocCount.textContent = `${hero.associates.length} персон`;
+  if (assocTbody) {
+    assocTbody.innerHTML = hero.associates.map(a => `
+      <tr>
+        <td><strong>${a.name}</strong></td>
+        <td><span class="${a.badge}">${a.role}</span></td>
+        <td>${a.race}</td>
+        <td>${a.affiliation}</td>
+        <td>${a.notes}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Personality Breakdown
+  const persTbody = document.getElementById('tbody-hero-personality');
+  if (persTbody) {
+    persTbody.innerHTML = hero.personalityBreakdown.map(p => `
+      <tr>
+        <td><strong>${p.facet}</strong></td>
+        <td>${p.description}</td>
+        <td>${p.trigger}</td>
+        <td style="color:var(--color-text-muted);">${p.note}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Equipment
+  const equipTbody = document.getElementById('tbody-hero-equipment');
+  if (equipTbody) {
+    equipTbody.innerHTML = hero.equipment.map(e => `
+      <tr>
+        <td><strong>${e.item}</strong></td>
+        <td>${e.category}</td>
+        <td>${e.quality}</td>
+        <td><span class="badge-mentor" style="font-size:0.7rem;">${e.status}</span></td>
+        <td style="color:var(--color-text-muted);">${e.notes}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Story Events
+  const storyTbody = document.getElementById('tbody-hero-story');
+  if (storyTbody) {
+    storyTbody.innerHTML = hero.storyEvents.map(s => `
+      <tr>
+        <td><strong>${s.event}</strong></td>
+        <td>${s.description}</td>
+        <td><span class="town-card-badge" style="font-size:0.68rem;">${s.timeline}</span></td>
+        <td>${s.outcome}</td>
+      </tr>
+    `).join('');
+  }
+}
+
+function renderHeroTraitSlots() {
+  heroState.customTraitSlots.forEach((slot, i) => {
+    const idx = i + 1;
+    const titleEl = document.getElementById(`hero-trait-title-${idx}`);
+    const bodyEl = document.getElementById(`hero-trait-body-${idx}`);
+    if (titleEl) titleEl.textContent = slot.title;
+    if (bodyEl && slot.option) bodyEl.textContent = slot.option.textRu;
+  });
+}
+
+function copyHeroSummary() {
+  if (!heroState.lastHero) return;
+  const h = heroState.lastHero;
+  const summary = `Герой: ${h.name} «${h.legacyTitle}»\n` +
+    `Раса: ${h.race.nameRu} | Класс: ${h.class.nameRu} (${h.class.subclass})\n` +
+    `Возраст: ${h.age} лет | Мировоззрение: ${h.alignment}\n` +
+    `Истоки: ${h.details.origin.textRu}\n` +
+    `Гордость: ${h.details.corePersonality.textRu}\n` +
+    `Изъян: ${h.details.fearsAndFlaws.textRu}\n` +
+    `Зов судьбы: ${h.details.ultimateGoal.textRu}\n\n` +
+    `${h.bioSummary}`;
+
+  navigator.clipboard.writeText(summary).then(() => {
+    const btn = document.getElementById('btn-copy-hero-summary');
+    if (btn) {
+      btn.innerHTML = '<span>✅</span><span>Скопировано!</span>';
+      setTimeout(() => {
+        btn.innerHTML = '<span>📋</span><span>Копировать досье</span>';
+      }, 2000);
+    }
+  });
+}
+
+function exportHeroMarkdown() {
+  if (!heroState.lastHero) return;
+  const md = heroState.lastHero.exportMarkdown;
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${heroState.lastHero.name.replace(/[\/\s]/g, '_')}_hero_dossier.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportHeroCsv() {
+  if (!heroState.lastHero) return;
+  const csv = heroState.lastHero.exportCsv;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${heroState.lastHero.name.replace(/[\/\s]/g, '_')}_hero_traits.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 

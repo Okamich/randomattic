@@ -73,6 +73,21 @@ export const GENERATORS = [
     actionText: 'Создать НИПа'
   },
   {
+    id: 'hero-generator',
+    viewId: 'hero',
+    title: 'Архитектор Героев (Hero Foundry)',
+    category: 'characters',
+    badge: 'Новинка · D&D 5e',
+    badgeType: 'dm',
+    bgImage: 'assets/images/cards/card-hero.jpg',
+    description: 'Генератор героев и предысторий по 12 классам D&D 5e: атлас портретов, настраиваемые черты, связи, союзники и соперники, снаряжение и хроника.',
+    icon: '⚔️',
+    status: 'ready',
+    tags: ['Герой', 'D&D 5e', 'Предыстория', 'Портреты', 'Связи & Враги', 'Инвентарь'],
+    exampleOutput: '«Сильфир Звёздный Росток» — Эльф-монах («Несломленный»), мастерство, клятва, соратники и снаряжение.',
+    actionText: 'Создать героя'
+  },
+  {
     id: 'loot-generator',
     viewId: 'loot',
     title: 'Генератор Сокровищ & Лута',
