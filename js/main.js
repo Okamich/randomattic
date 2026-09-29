@@ -22,6 +22,7 @@ import {
 import { generateCharacterName } from './generators/names.js';
 import {
   generateFullNPC,
+  generateNPCMotives,
   getRussianAgeWord,
   NPC_RACE_AGE_RANGES,
   NPC_HALFBREED_ORIGINS
@@ -329,7 +330,10 @@ const namesState = {
     origin: false,
     appCount: false,
     persCount: false,
-    count: false
+    count: false,
+    reaction: false,
+    motivation: false,
+    area: false
   },
   lastNPC: null
 };
@@ -398,7 +402,10 @@ function setupNamesEvents() {
     { id: 'btn-lock-n-origin', key: 'origin' },
     { id: 'btn-lock-n-app-count', key: 'appCount' },
     { id: 'btn-lock-n-pers-count', key: 'persCount' },
-    { id: 'btn-lock-n-count', key: 'count' }
+    { id: 'btn-lock-n-count', key: 'count' },
+    { id: 'btn-lock-n-reaction', key: 'reaction' },
+    { id: 'btn-lock-n-motivation', key: 'motivation' },
+    { id: 'btn-lock-n-area', key: 'area' }
   ];
 
   lockDefs.forEach(({ id, key }) => {
@@ -479,6 +486,112 @@ function setupNamesEvents() {
       }
     });
   });
+
+  // Перебросить только сюжетные мотивы
+  document.getElementById('btn-reroll-motives')?.addEventListener('click', () => {
+    if (!namesState.lastNPC) return;
+    const reactionEl = document.getElementById('n-param-reaction');
+    const motivEl = document.getElementById('n-param-motivation');
+    const areaEl = document.getElementById('n-param-area');
+
+    const reaction = (namesState.locks.reaction && reactionEl) ? reactionEl.value : 'any';
+    const motivation = (namesState.locks.motivation && motivEl) ? motivEl.value : 'any';
+    const area = (namesState.locks.area && areaEl) ? areaEl.value : 'any';
+
+    const newMotives = generateNPCMotives({ reaction, motivation, area });
+    namesState.lastNPC.motives = newMotives;
+
+    renderNPCMotives(newMotives);
+    updateNPCDossierText(namesState.lastNPC);
+  });
+
+  // Копировать мотивы
+  document.getElementById('btn-copy-motives')?.addEventListener('click', () => {
+    if (!namesState.lastNPC || !namesState.lastNPC.motives) return;
+    const text = namesState.lastNPC.motives.summaryText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-motives');
+      if (btn) {
+        btn.innerHTML = '✔ Скопировано!';
+        setTimeout(() => {
+          btn.innerHTML = '📋 Копировать';
+        }, 1800);
+      }
+    });
+  });
+}
+
+function updateNPCDossierText(npc) {
+  if (!npc) return;
+  const raceTitle = npc.race;
+  const genderText = npc.gender;
+  const ageStr = npc.ageFormatted;
+  const profession = npc.profession;
+  const isHalfbreed = npc.isHalfbreed;
+  const halfbreedOrigin = npc.halfbreedOrigin;
+
+  npc.fullDossierText = `НИП: ${npc.name} (${raceTitle}, ${genderText}, ${ageStr})\n` +
+    (profession ? `Профессия: ${profession.title} [${profession.role}]\n` : '') +
+    (isHalfbreed && halfbreedOrigin ? `Воспитание: ${halfbreedOrigin.description}\n` : '') +
+    `Сводка: ${npc.structuredSummary}\n\n` +
+    `👗 Внешность:\n  ${npc.appearance.items.map(i => i.name).join('; ')}\n\n` +
+    `🧠 Характер:\n` +
+    `  • Дарование: ${npc.character.talentText}\n` +
+    `  • Взаимодействие: ${npc.character.interactionText} (${npc.character.interactions.map(i => i.desc).join(', ')})\n` +
+    `  • Манера: ${npc.character.mannerismText}\n\n` +
+    `⚔️ Характеристики:\n` +
+    `  • Высокая: ${npc.abilities.high.formatted}\n` +
+    `  • Низкая: ${npc.abilities.low.formatted}\n\n` +
+    `⚖️ Идеал: ${npc.ideal.formatted}\n` +
+    `🔗 Привязанность: ${npc.bond.textSummary}\n` +
+    `🗝️ Слабость или тайна: ${npc.flaw.textSummary}\n\n` +
+    `${npc.motives ? npc.motives.summaryText : ''}`;
+}
+
+function renderNPCMotives(motives) {
+  const container = document.getElementById('npc-motives-content');
+  if (!container || !motives) return;
+
+  const r = motives.reaction;
+  const m = motives.motivation;
+  const a = motives.area;
+
+  let attitudeClass = 'neutral';
+  if (r.type === 'hostile') attitudeClass = 'hostile';
+  else if (r.type === 'unfriendly') attitudeClass = 'unfriendly';
+  else if (r.type === 'suspicious') attitudeClass = 'suspicious';
+  else if (r.type === 'helpful') attitudeClass = 'helpful';
+  else if (r.type === 'friendly') attitudeClass = 'friendly';
+  else if (r.type === 'ally') attitudeClass = 'ally';
+
+  container.innerHTML = `
+    <!-- 1. Реакция -->
+    <div class="npc-motive-row">
+      <div class="npc-motive-row-title">
+        <span>💬 Первичная реакция:</span>
+        <span class="npc-motive-badge ${attitudeClass}">к20 [${r.roll}] • ${r.attitude}</span>
+      </div>
+      <div class="npc-motive-body">${r.htmlText}</div>
+    </div>
+
+    <!-- 2. Скрытые мотивы -->
+    <div class="npc-motive-row">
+      <div class="npc-motive-row-title">
+        <span>🧭 Скрытый мотив:</span>
+        <span class="npc-motive-badge theme">к20 [${m.roll}] • ${m.theme}</span>
+      </div>
+      <div class="npc-motive-body">${m.htmlText}</div>
+    </div>
+
+    <!-- 3. Обстановка / Местность -->
+    <div class="npc-motive-row">
+      <div class="npc-motive-row-title">
+        <span>🗺️ Обстановка / Место:</span>
+        <span class="npc-motive-badge area">к20 [${a.roll}] • ${a.theme}</span>
+      </div>
+      <div class="npc-motive-body">${a.htmlText}</div>
+    </div>
+  `;
 }
 
 function executeNamesGenerator() {
@@ -492,6 +605,9 @@ function executeNamesGenerator() {
   const appCountEl = document.getElementById('n-param-app-count');
   const persCountEl = document.getElementById('n-param-pers-count');
   const countEl = document.getElementById('n-param-count');
+  const reactionEl = document.getElementById('n-param-reaction');
+  const motivEl = document.getElementById('n-param-motivation');
+  const areaEl = document.getElementById('n-param-area');
 
   const race = (namesState.locks.race && raceEl) ? raceEl.value : (raceEl?.value || 'any');
   const gender = (namesState.locks.gender && genderEl) ? genderEl.value : (genderEl?.value || 'any');
@@ -502,6 +618,9 @@ function executeNamesGenerator() {
   const appearanceCount = (namesState.locks.appCount && appCountEl) ? Number(appCountEl.value) : Number(appCountEl?.value || 2);
   const personalityCount = (namesState.locks.persCount && persCountEl) ? Number(persCountEl.value) : Number(persCountEl?.value || 1);
   const count = (namesState.locks.count && countEl) ? Number(countEl.value) : Number(countEl?.value || 3);
+  const reaction = (namesState.locks.reaction && reactionEl) ? reactionEl.value : (reactionEl?.value || 'any');
+  const motivation = (namesState.locks.motivation && motivEl) ? motivEl.value : (motivEl?.value || 'any');
+  const area = (namesState.locks.area && areaEl) ? areaEl.value : (areaEl?.value || 'any');
 
   const npc = generateFullNPC({
     race,
@@ -512,7 +631,10 @@ function executeNamesGenerator() {
     elfKinAll,
     appearanceCount,
     personalityCount,
-    count
+    count,
+    reaction,
+    motivation,
+    area
   });
 
   namesState.lastNPC = npc;
@@ -571,6 +693,9 @@ function executeNamesGenerator() {
   if (narrativeText) {
     narrativeText.textContent = `«${npc.structuredSummary}»`;
   }
+
+  // Сюжетные мотивы, реакция и обстановка
+  renderNPCMotives(npc.motives);
 
   // Детализация: Внешность, Характер (Дарование + Взаимодействие + Манера), Характеристики, Привязанность, Слабость, Идеал
   const detailsGrid = document.getElementById('hero-details-grid');
@@ -674,9 +799,10 @@ function executeNamesGenerator() {
         <td>${v.gender}</td>
         <td><span class="tavern-card-badge">${v.age}</span></td>
         <td>
-          <div style="font-size: 0.78rem; line-height: 1.3;">
+          <div style="font-size: 0.78rem; line-height: 1.35;">
             <div>⚖️ <strong>${v.ideal.name}</strong> <span style="color: var(--text-muted);">(${v.ideal.category})</span></div>
             <div style="color: var(--text-muted);">🤝 ${v.character.interactionText} • 🎭 ${v.character.mannerismText}</div>
+            <div style="color: #ffd54f; font-size: 0.75rem; margin-top: 2px;">🎯 ${v.motives.reaction.attitude.split(' ')[0]} • ${v.motives.motivation.theme.split(' ')[0]}</div>
           </div>
         </td>
         <td style="text-align: right;">

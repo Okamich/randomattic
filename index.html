@@ -283,6 +283,66 @@
                     <button class="btn-lock" id="btn-lock-n-count" title="Заблокировать количество">🔓</button>
                   </div>
                 </div>
+              </div>
+
+              <!-- Подблок: Сюжетные мотивы, Реакция & Обстановка -->
+              <div class="param-subblock">
+                <div class="param-subblock-title"><span>🎯</span> Сюжетные Мотивы & Ситуация</div>
+                <div class="param-controls-list">
+                  <!-- Reaction -->
+                  <div class="param-row">
+                    <label for="n-param-reaction">Первичная реакция:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-reaction" class="param-select">
+                        <option value="any" selected>🎲 Случайная реакция</option>
+                        <option value="0">1–3: Враждебный (Hostile)</option>
+                        <option value="1">4–6: Недовольный (Unhappy)</option>
+                        <option value="2">7–9: Раздражённый (Disgruntled)</option>
+                        <option value="3">10–12: Равнодушный (Indifferent)</option>
+                        <option value="4">13–15: Благосклонный (Pleased)</option>
+                        <option value="5">16–18: Радостный (Happy)</option>
+                        <option value="6">19–20: Союзник (Friendly)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-reaction" title="Заблокировать реакцию">🔓</button>
+                  </div>
+
+                  <!-- Motivation -->
+                  <div class="param-row">
+                    <label for="n-param-motivation">Скрытый мотив:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-motivation" class="param-select">
+                        <option value="any" selected>🎲 Случайный мотив</option>
+                        <option value="0">1–3: В бегах (On the run)</option>
+                        <option value="1">4–6: Кровная месть (Vendetta)</option>
+                        <option value="2">7–9: Поиск сведений (Seeking info)</option>
+                        <option value="3">10–12: Торговля и дом (Trade)</option>
+                        <option value="4">13–15: Местное поручение (Minor quest)</option>
+                        <option value="5">16–18: Подневольная служба (Coerced)</option>
+                        <option value="6">19–20: Великая миссия (Major quest)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-motivation" title="Заблокировать мотив">🔓</button>
+                  </div>
+
+                  <!-- Area -->
+                  <div class="param-row">
+                    <label for="n-param-area">Обстановка / Местность:</label>
+                    <div class="param-input-group">
+                      <select id="n-param-area" class="param-select">
+                        <option value="any" selected>🎲 Случайная обстановка</option>
+                        <option value="0">1–3: Место силы (Faith/Weavetouched)</option>
+                        <option value="1">4–6: Логово сомнительной фракции</option>
+                        <option value="2">7–9: Охотничьи угодья зверя</option>
+                        <option value="3">10–12: Обыденная / заброшенная зона</option>
+                        <option value="4">13–15: Оплот благородной фракции</option>
+                        <option value="5">16–18: Владения свирепого монстра</option>
+                        <option value="6">19–20: Проклятая земля (Cursed/Haunted)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-area" title="Заблокировать обстановку">🔓</button>
+                  </div>
+                </div>
 
                 <div class="param-reroll-wrapper">
                   <button class="btn-tavern-primary btn-reroll-integrated" id="btn-reroll-names">
@@ -314,6 +374,18 @@
                       <button class="btn-mini-copy" id="btn-copy-narrative" title="Копировать краткое описание">📋 Копировать</button>
                     </div>
                     <div class="npc-narrative-text" id="npc-narrative-text"></div>
+                  </div>
+
+                  <!-- Motives, Situation & Rumors Box -->
+                  <div class="npc-motives-box" id="npc-motives-container">
+                    <div class="npc-motives-header">
+                      <span class="npc-motives-header-title">🎯 Сюжетные мотивы, Реакция & Обстановка:</span>
+                      <div class="npc-motives-actions">
+                        <button class="btn-mini-copy" id="btn-reroll-motives" title="Перебросить только мотивы и реакцию">🎲 Перебросить мотивы</button>
+                        <button class="btn-mini-copy" id="btn-copy-motives" title="Копировать мотивы">📋 Копировать</button>
+                      </div>
+                    </div>
+                    <div class="npc-motives-content" id="npc-motives-content"></div>
                   </div>
 
                   <div class="hero-details-grid" id="hero-details-grid"></div>

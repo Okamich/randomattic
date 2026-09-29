@@ -208,6 +208,166 @@
   color: #2b1f13;
 }
 
+/* NPC Motives & Situation Box */
+.npc-motives-box {
+  background: rgba(30, 24, 18, 0.7);
+  border: 1px solid rgba(226, 183, 111, 0.35);
+  border-left: 4px solid #b388ff;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .npc-motives-box {
+  background: #fbf7f0;
+  border-color: #d1b89d;
+  border-left-color: #7b1fa2;
+}
+
+.npc-motives-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.npc-motives-header-title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ffd54f;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npc-motives-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npc-motives-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.npc-motive-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .npc-motive-row {
+  background: #f4ecdf;
+  border-color: #e5d7c3;
+}
+
+.npc-motive-row-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--accent-primary, #e2b76f);
+  font-size: 0.8rem;
+}
+
+.npc-motive-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.npc-motive-badge.hostile {
+  background: rgba(220, 53, 69, 0.25);
+  border: 1px solid #dc3545;
+  color: #ff6b6b;
+}
+
+.npc-motive-badge.unfriendly {
+  background: rgba(253, 126, 20, 0.25);
+  border: 1px solid #fd7e14;
+  color: #ffa94d;
+}
+
+.npc-motive-badge.suspicious {
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid #ffc107;
+  color: #ffe066;
+}
+
+.npc-motive-badge.neutral {
+  background: rgba(108, 117, 125, 0.25);
+  border: 1px solid #adb5bd;
+  color: #e9ecef;
+}
+
+.npc-motive-badge.helpful,
+.npc-motive-badge.friendly {
+  background: rgba(40, 167, 69, 0.22);
+  border: 1px solid #28a745;
+  color: #69db7c;
+}
+
+.npc-motive-badge.ally {
+  background: rgba(13, 202, 240, 0.22);
+  border: 1px solid #0dcaf0;
+  color: #66d9e8;
+}
+
+.npc-motive-badge.theme {
+  background: rgba(179, 136, 255, 0.2);
+  border: 1px solid #b388ff;
+  color: #d1c4e9;
+}
+
+.npc-motive-badge.area {
+  background: rgba(77, 171, 247, 0.2);
+  border: 1px solid #4dabf7;
+  color: #a5d8ff;
+}
+
+.npc-motive-body {
+  color: #e8dcc8;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+[data-theme="light"] .npc-motive-body {
+  color: #2b1f13;
+}
+
+.npc-motive-tag {
+  color: #ffd54f;
+  background: rgba(255, 213, 79, 0.12);
+  padding: 1px 4px;
+  border-radius: 3px;
+  border-bottom: 1px dashed rgba(255, 213, 79, 0.4);
+  font-weight: 500;
+}
+
+[data-theme="light"] .npc-motive-tag {
+  color: #8c5d00;
+  background: rgba(212, 175, 55, 0.15);
+  border-bottom-color: #b8860b;
+}
+
 .hero-details-grid {
   display: flex;
   flex-direction: column;

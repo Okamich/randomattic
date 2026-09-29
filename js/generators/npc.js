@@ -24,6 +24,8 @@ import {
   DMG_FLAWS_SECRETS
 } from '../data/npc-data.js';
 
+import { NPC_MOTIVES_DATA } from '../data/npc-motives-data.js';
+
 export {
   NPC_NAMES_DATA,
   NPC_APPEARANCE_DATA,
@@ -39,7 +41,8 @@ export {
   DMG_MANNERISMS,
   DMG_IDEALS,
   DMG_BONDS,
-  DMG_FLAWS_SECRETS
+  DMG_FLAWS_SECRETS,
+  NPC_MOTIVES_DATA
 };
 
 import { pickOne, pickMultiple, randInt } from '../utils/random.js';
@@ -662,6 +665,181 @@ export function generateNPCProfession(chosenProfession, gender) {
 }
 
 /**
+ * Разрешение одиночного тега подтаблицы (например, 'ENEMY', 'F', 'AA_OR_BB')
+ * @param {string} tagKey
+ * @returns {{subtableKey: string, subtableTitle: string, text: string}}
+ */
+export function resolveMotivesTag(tagKey) {
+  let subtableKey = tagKey;
+  if (tagKey === 'ENEMY') {
+    subtableKey = pickOne(['Q', 'R']);
+  } else if (tagKey === 'DEED') {
+    subtableKey = pickOne(['O', 'P']);
+  } else if (tagKey === 'INFO') {
+    subtableKey = pickOne(['A', 'B', 'C']);
+  } else if (tagKey === 'A_OR_B') {
+    subtableKey = pickOne(['A', 'B']);
+  } else if (tagKey === 'M_OR_N') {
+    subtableKey = pickOne(['M', 'N']);
+  } else if (tagKey === 'AA_OR_BB') {
+    subtableKey = pickOne(['AA', 'BB']);
+  } else if (tagKey === 'S_OR_T') {
+    subtableKey = pickOne(['S', 'T']);
+  }
+
+  const subtable = NPC_MOTIVES_DATA.subtables ? NPC_MOTIVES_DATA.subtables[subtableKey] : null;
+  if (!subtable || !subtable.options || subtable.options.length === 0) {
+    return {
+      subtableKey,
+      subtableTitle: subtableKey,
+      text: tagKey
+    };
+  }
+
+  const picked = pickOne(subtable.options);
+  return {
+    subtableKey,
+    subtableTitle: subtable.titleRu,
+    text: picked.textRu
+  };
+}
+
+/**
+ * Рекурсивное разрешение макросов/тегов в тексте ситуации
+ * @param {string} template
+ * @param {number} depth
+ * @param {Array} picksLog
+ * @returns {{text: string, html: string, picks: Array}}
+ */
+export function resolveMotivesTemplate(template, depth = 0, picksLog = []) {
+  if (depth > 8) {
+    return {
+      text: template,
+      html: template.replace(/\[/g, '<span class="npc-motive-tag">[').replace(/\]/g, ']</span>'),
+      picks: picksLog
+    };
+  }
+
+  const tagRegex = /\[\{([A-Za-z0-9_]+)\}\]|\{([A-Za-z0-9_]+)\}/g;
+  let hasMatches = false;
+
+  const replaced = template.replace(tagRegex, (match, p1, p2) => {
+    hasMatches = true;
+    const tag = p1 || p2;
+    const resolved = resolveMotivesTag(tag);
+    picksLog.push(resolved);
+    return `[${resolved.text}]`;
+  });
+
+  if (hasMatches && (/\[\{([A-Za-z0-9_]+)\}\]|\{([A-Za-z0-9_]+)\}/.test(replaced))) {
+    return resolveMotivesTemplate(replaced, depth + 1, picksLog);
+  }
+
+  const html = replaced.replace(/\[/g, '<span class="npc-motive-tag">[').replace(/\]/g, ']</span>');
+
+  return {
+    text: replaced,
+    html,
+    picks: picksLog
+  };
+}
+
+/**
+ * Сгенерировать мотивы, реакцию и обстановку НИПа (на основе файлов npc_self_motives.xlsx)
+ * @param {object} [options]
+ * @param {string|number} [options.reaction]
+ * @param {string|number} [options.motivation]
+ * @param {string|number} [options.area]
+ * @returns {object}
+ */
+export function generateNPCMotives(options = {}) {
+  const tableData = NPC_MOTIVES_DATA.situationTables;
+
+  // 1. Реакция (Reaction)
+  const reactionOpts = tableData.reaction.options;
+  let reactionIndex = -1;
+  if (options.reaction !== undefined && options.reaction !== 'any') {
+    const parsed = parseInt(options.reaction, 10);
+    if (!isNaN(parsed) && parsed >= 0 && parsed < reactionOpts.length) {
+      reactionIndex = parsed;
+    }
+  }
+  if (reactionIndex === -1) {
+    reactionIndex = randInt(0, reactionOpts.length - 1);
+  }
+  const rawReaction = reactionOpts[reactionIndex];
+  const reactionResolved = resolveMotivesTemplate(rawReaction.templateRu, 0, []);
+
+  // 2. Мотивация (Motivation)
+  const motivationOpts = tableData.motivation.options;
+  let motivationIndex = -1;
+  if (options.motivation !== undefined && options.motivation !== 'any') {
+    const parsed = parseInt(options.motivation, 10);
+    if (!isNaN(parsed) && parsed >= 0 && parsed < motivationOpts.length) {
+      motivationIndex = parsed;
+    }
+  }
+  if (motivationIndex === -1) {
+    motivationIndex = randInt(0, motivationOpts.length - 1);
+  }
+  const rawMotivation = motivationOpts[motivationIndex];
+  const motivationResolved = resolveMotivesTemplate(rawMotivation.templateRu, 0, []);
+
+  // 3. Обстановка / Местность (Area)
+  const areaOpts = tableData.area.options;
+  let areaIndex = -1;
+  if (options.area !== undefined && options.area !== 'any') {
+    const parsed = parseInt(options.area, 10);
+    if (!isNaN(parsed) && parsed >= 0 && parsed < areaOpts.length) {
+      areaIndex = parsed;
+    }
+  }
+  if (areaIndex === -1) {
+    areaIndex = randInt(0, areaOpts.length - 1);
+  }
+  const rawArea = areaOpts[areaIndex];
+  const areaResolved = resolveMotivesTemplate(rawArea.templateRu, 0, []);
+
+  const summaryText =
+    `🎯 Мотивы и ситуация:\n` +
+    `  • Первичная реакция (${rawReaction.attitude}): ${reactionResolved.text}\n` +
+    `  • Скрытые мотивы (${rawMotivation.theme}): ${motivationResolved.text}\n` +
+    `  • Обстановка / Местность (${rawArea.theme}): ${areaResolved.text}`;
+
+  return {
+    reaction: {
+      index: reactionIndex,
+      roll: rawReaction.roll,
+      attitude: rawReaction.attitude,
+      type: rawReaction.type,
+      template: rawReaction.templateRu,
+      text: reactionResolved.text,
+      htmlText: reactionResolved.html,
+      picks: reactionResolved.picks
+    },
+    motivation: {
+      index: motivationIndex,
+      roll: rawMotivation.roll,
+      theme: rawMotivation.theme,
+      template: rawMotivation.templateRu,
+      text: motivationResolved.text,
+      htmlText: motivationResolved.html,
+      picks: motivationResolved.picks
+    },
+    area: {
+      index: areaIndex,
+      roll: rawArea.roll,
+      theme: rawArea.theme,
+      template: rawArea.templateRu,
+      text: areaResolved.text,
+      htmlText: areaResolved.html,
+      picks: areaResolved.picks
+    },
+    summaryText
+  };
+}
+
+/**
  * Сгенерировать полного NPC по заданным параметрам в точности по Книге Мастера (DMG 5e)
  * @param {object} options
  * @returns {object}
@@ -715,12 +893,19 @@ export function generateFullNPC(options = {}) {
   const bondData = generateDMGBond();
   const flawData = generateDMGFlaw();
 
-  // 10. Портрет
+  // 10. Мотивы, реакция и ситуация (npc_self_motives.xlsx)
+  const motivesData = generateNPCMotives({
+    reaction: options.reaction,
+    motivation: options.motivation,
+    area: options.area
+  });
+
+  // 11. Портрет
   const raceSlug = NPC_RACE_SLUGS[raceKey] || 'human';
   const genderSlug = gender === 'male' ? 'male' : 'female';
   const portraitPath = `assets/images/portraits/${raceSlug}_${genderSlug}.jpg`;
 
-  // 11. Составление структурированного краткого описания:
+  // 12. Составление структурированного краткого описания:
   // "{имя_фамилия} — это {раса} {профессия}, {возраст} лет отроду, (если полукровка: кем и где был воспитан). Внешность: {внешность}. Характер: {характер}."
   const raceLower = raceTitle.toLowerCase();
   const ageStr = `${ageData.age} ${ageData.ageWord} отроду`;
@@ -751,9 +936,10 @@ export function generateFullNPC(options = {}) {
     `  • Низкая: ${abilitiesData.low.formatted}\n\n` +
     `⚖️ Идеал: ${idealData.formatted}\n` +
     `🔗 Привязанность: ${bondData.textSummary}\n` +
-    `🗝️ Слабость или тайна: ${flawData.textSummary}`;
+    `🗝️ Слабость или тайна: ${flawData.textSummary}\n\n` +
+    `${motivesData.summaryText}`;
 
-  // 12. Генерация альтернативных вариантов для списка
+  // 13. Генерация альтернативных вариантов для списка
   const count = parseInt(options.count || '3', 10);
   const variants = [];
   for (let i = 0; i < count; i++) {
@@ -769,6 +955,11 @@ export function generateFullNPC(options = {}) {
     const vIdeal = generateDMGIdeal();
     const vBond = generateDMGBond();
     const vFlaw = generateDMGFlaw();
+    const vMotives = generateNPCMotives({
+      reaction: options.reaction,
+      motivation: options.motivation,
+      area: options.area
+    });
 
     let vUpbringing = '';
     if (isHalfbreed && vHalfbreed) {
@@ -786,7 +977,8 @@ export function generateFullNPC(options = {}) {
       `Характеристики: высокая — ${vAbilities.high.formatted}; низкая — ${vAbilities.low.formatted}\n` +
       `Идеал: ${vIdeal.formatted}\n` +
       `Привязанность: ${vBond.textSummary}\n` +
-      `Слабость: ${vFlaw.textSummary}`;
+      `Слабость: ${vFlaw.textSummary}\n\n` +
+      `${vMotives.summaryText}`;
 
     variants.push({
       id: i + 1,
@@ -806,6 +998,7 @@ export function generateFullNPC(options = {}) {
       ideal: vIdeal,
       bond: vBond,
       flaw: vFlaw,
+      motives: vMotives,
       structuredSummary: vSummary,
       fullDossierText: vFullDossier
     });
@@ -836,6 +1029,7 @@ export function generateFullNPC(options = {}) {
     ideal: idealData,
     bond: bondData,
     flaw: flawData,
+    motives: motivesData,
     structuredSummary,
     fullDossierText,
     portraitPath,
