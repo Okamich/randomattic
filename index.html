@@ -371,8 +371,16 @@
                 <span class="tavern-card-badge" id="hero-badge-role">НИП</span>
               </div>
               <div class="hero-profile-layout">
-                <div class="hero-portrait-frame">
-                  <img id="hero-portrait-img" class="hero-portrait-img" src="assets/images/portraits/human_male.jpg" alt="Портрет НИПа">
+                <div class="hero-portrait-wrapper">
+                  <div class="hero-portrait-frame" id="hero-portrait-frame">
+                    <div id="hero-portrait-vector" class="hero-portrait-vector"></div>
+                    <img id="hero-portrait-img" class="hero-portrait-img" src="assets/images/portraits/human_male.jpg" alt="Портрет НИПа" style="display: none;">
+                  </div>
+                  <div class="portrait-mode-controls">
+                    <button type="button" class="btn-portrait-mode active" id="btn-portrait-mode-vector" title="Векторный процедурный портрет (Flat minimal)">🎨 Вектор</button>
+                    <button type="button" class="btn-portrait-mode" id="btn-portrait-mode-raster" title="Растровый арт">🖼️ Арт</button>
+                    <button type="button" class="btn-portrait-reroll" id="btn-reroll-portrait-only" title="Сгенерировать другой вид лица">🎲</button>
+                  </div>
                 </div>
                 <div class="hero-info">
                   <h4 class="hero-name-title" id="hero-name-title">Эларион Лунный Шепот</h4>
@@ -440,7 +448,8 @@
                 <table class="tavern-table" id="table-names-variants">
                   <thead>
                     <tr>
-                      <th style="width: 40px; text-align: center;">#</th>
+                      <th style="width: 36px; text-align: center;">#</th>
+                      <th style="width: 44px; text-align: center;">Арт</th>
                       <th>Полное имя НИПа</th>
                       <th>Профессия / Роль</th>
                       <th>Раса</th>

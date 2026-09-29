@@ -26,6 +26,9 @@ import {
   generateNPCJob,
   generateNPCVoice,
   generateNPCExtendedTraits,
+  buildPortraitRecipeFromNPC,
+  renderPortraitSVG,
+  getPortraitDataUrl,
   NPC_JOBS_D100,
   getRussianAgeWord,
   NPC_RACE_AGE_RANGES,
@@ -326,6 +329,7 @@ function setupGeneratorViewEvents() {
 // ==========================================================================
 const namesState = {
   initialized: false,
+  portraitMode: 'vector',
   locks: {
     race: false,
     gender: false,
@@ -581,6 +585,64 @@ function setupNamesEvents() {
       }
     });
   });
+
+  // Режим портрета: Вектор vs Растровый арт
+  document.getElementById('btn-portrait-mode-vector')?.addEventListener('click', () => {
+    namesState.portraitMode = 'vector';
+    renderNPCPortrait(namesState.lastNPC);
+  });
+
+  document.getElementById('btn-portrait-mode-raster')?.addEventListener('click', () => {
+    namesState.portraitMode = 'raster';
+    renderNPCPortrait(namesState.lastNPC);
+  });
+
+  // Перебросить только внешность/портрет
+  document.getElementById('btn-reroll-portrait-only')?.addEventListener('click', () => {
+    if (!namesState.lastNPC) return;
+    const npc = namesState.lastNPC;
+    const newRecipe = buildPortraitRecipeFromNPC({
+      raceKey: npc.raceKey,
+      gender: npc.gender,
+      age: npc.age,
+      ageStage: npc.ageStage,
+      profession: npc.profession,
+      extendedTraits: npc.extendedTraits
+    });
+    npc.portraitRecipe = newRecipe;
+    npc.portraitSvg = renderPortraitSVG(newRecipe);
+    npc.portraitDataUrl = getPortraitDataUrl(newRecipe);
+    renderNPCPortrait(npc);
+  });
+}
+
+function renderNPCPortrait(npc) {
+  if (!npc) return;
+  const vectorContainer = document.getElementById('hero-portrait-vector');
+  const imgEl = document.getElementById('hero-portrait-img');
+  const btnVector = document.getElementById('btn-portrait-mode-vector');
+  const btnRaster = document.getElementById('btn-portrait-mode-raster');
+
+  if (namesState.portraitMode === 'vector') {
+    if (vectorContainer) {
+      vectorContainer.innerHTML = npc.portraitSvg || '';
+      vectorContainer.style.display = 'flex';
+    }
+    if (imgEl) imgEl.style.display = 'none';
+    btnVector?.classList.add('active');
+    btnRaster?.classList.remove('active');
+  } else {
+    if (vectorContainer) vectorContainer.style.display = 'none';
+    if (imgEl) {
+      imgEl.src = npc.portraitPath || 'assets/images/portraits/human_male.jpg';
+      imgEl.style.display = 'block';
+      imgEl.onerror = () => {
+        imgEl.src = 'assets/images/portraits/human_male.jpg';
+      };
+    }
+    btnRaster?.classList.add('active');
+    btnVector?.classList.remove('active');
+  }
 }
 
 function updateNPCDossierText(npc) {
@@ -826,14 +888,8 @@ function executeNamesGenerator() {
   // Обновляем видимость настроек полукровки
   updateHalfbreedControlsVisibility(npc.raceKey);
 
-  // Портрет
-  const portraitImg = document.getElementById('hero-portrait-img');
-  if (portraitImg) {
-    portraitImg.src = npc.portraitPath;
-    portraitImg.onerror = () => {
-      portraitImg.src = 'assets/images/portraits/human_male.jpg';
-    };
-  }
+  // Портрет (векторный или растровый арт)
+  renderNPCPortrait(npc);
 
   // Имя и бейдж
   const nameTitle = document.getElementById('hero-name-title');
@@ -982,6 +1038,11 @@ function executeNamesGenerator() {
     tbody.innerHTML = npc.variants.map(v => `
       <tr>
         <td style="text-align: center; font-weight: 700; color: var(--accent-primary);">${v.id}</td>
+        <td style="text-align: center; vertical-align: middle;">
+          <div class="variant-avatar-mini" title="${v.fullName}">
+            ${v.portraitSvg || ''}
+          </div>
+        </td>
         <td><strong style="color: #f0c97d;">${v.fullName}</strong></td>
         <td>
           <div style="display: flex; flex-direction: column; gap: 2px;">

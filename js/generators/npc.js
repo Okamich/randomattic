@@ -28,8 +28,18 @@ import { NPC_MOTIVES_DATA } from '../data/npc-motives-data.js';
 import { NPC_JOBS_D100 } from '../data/npc-job-data.js';
 import { NPC_VOICE_DATA } from '../data/npc-voice-data.js';
 import { NPC_EXTENDED_TRAITS_DATA } from '../data/npc-traits-data.js';
+import {
+  buildPortraitRecipeFromNPC,
+  renderPortraitSVG,
+  getPortraitDataUrl,
+  PORTRAIT_PALETTES
+} from './portrait-composer.js';
 
 export {
+  buildPortraitRecipeFromNPC,
+  renderPortraitSVG,
+  getPortraitDataUrl,
+  PORTRAIT_PALETTES,
   NPC_NAMES_DATA,
   NPC_APPEARANCE_DATA,
   NPC_PERSONALITY_DATA,
@@ -1032,6 +1042,17 @@ export function generateFullNPC(options = {}) {
   const genderSlug = gender === 'male' ? 'male' : 'female';
   const portraitPath = `assets/images/portraits/${raceSlug}_${genderSlug}.jpg`;
 
+  const portraitRecipe = buildPortraitRecipeFromNPC({
+    raceKey,
+    gender: genderText,
+    age: ageData.age,
+    ageStage: ageData.ageStage,
+    profession,
+    extendedTraits
+  });
+  const portraitSvg = renderPortraitSVG(portraitRecipe);
+  const portraitDataUrl = getPortraitDataUrl(portraitRecipe);
+
   // 14. Составление структурированного краткого описания:
   const raceLower = raceTitle.toLowerCase();
   const ageStr = `${ageData.age} ${ageData.ageWord} отроду`;
@@ -1128,6 +1149,17 @@ export function generateFullNPC(options = {}) {
       `Слабость: ${vFlaw.textSummary}\n\n` +
       `${vMotives.summaryText}`;
 
+    const vRecipe = buildPortraitRecipeFromNPC({
+      raceKey,
+      gender: genderText,
+      age: vAge.age,
+      ageStage: vAge.ageStage,
+      profession: vProf,
+      extendedTraits: vTraits
+    });
+    const vPortraitSvg = renderPortraitSVG(vRecipe);
+    const vPortraitDataUrl = getPortraitDataUrl(vRecipe);
+
     variants.push({
       id: i + 1,
       fullName: vName.fullName,
@@ -1151,7 +1183,10 @@ export function generateFullNPC(options = {}) {
       flaw: vFlaw,
       motives: vMotives,
       structuredSummary: vSummary,
-      fullDossierText: vFullDossier
+      fullDossierText: vFullDossier,
+      portraitRecipe: vRecipe,
+      portraitSvg: vPortraitSvg,
+      portraitDataUrl: vPortraitDataUrl
     });
   }
 
@@ -1187,6 +1222,9 @@ export function generateFullNPC(options = {}) {
     structuredSummary,
     fullDossierText,
     portraitPath,
+    portraitRecipe,
+    portraitSvg,
+    portraitDataUrl,
     variants
   };
 }
