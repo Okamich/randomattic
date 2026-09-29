@@ -1,0 +1,496 @@
+{
+  "speed": [
+    {
+      "roll": 1,
+      "key": "slow",
+      "textEn": "Slow",
+      "textRu": "Медленная, размеренная речь"
+    },
+    {
+      "roll": 2,
+      "key": "medium",
+      "textEn": "Medium",
+      "textRu": "Обычный, умеренный темп"
+    },
+    {
+      "roll": 3,
+      "key": "fast",
+      "textEn": "Fast",
+      "textRu": "Быстрая, торопливая речь"
+    }
+  ],
+  "pitch": [
+    {
+      "roll": 1,
+      "key": "low",
+      "textEn": "Low",
+      "textRu": "Низкий, басовитый тон"
+    },
+    {
+      "roll": 2,
+      "key": "medium",
+      "textEn": "Medium",
+      "textRu": "Средний, естественный тон"
+    },
+    {
+      "roll": 3,
+      "key": "high",
+      "textEn": "High",
+      "textRu": "Высокий, звонкий тон"
+    }
+  ],
+  "textures": [
+    {
+      "roll": 1,
+      "key": "gruff",
+      "textEn": "Gruff",
+      "textRu": "Хриплый, грубый"
+    },
+    {
+      "roll": 2,
+      "key": "smooth",
+      "textEn": "Smooth",
+      "textRu": "Бархатистый, мягкий"
+    },
+    {
+      "roll": 3,
+      "key": "strained",
+      "textEn": "Strained",
+      "textRu": "Напряжённый, сдавленный"
+    },
+    {
+      "roll": 4,
+      "key": "relaxed",
+      "textEn": "Relaxed",
+      "textRu": "Расслабленный, спокойный"
+    },
+    {
+      "roll": 5,
+      "key": "breathy",
+      "textEn": "Breathy",
+      "textRu": "С придыханием, вкрадчивый"
+    },
+    {
+      "roll": 6,
+      "key": "wolfish",
+      "textEn": "Wolfish (from the back of the throat)",
+      "textRu": "Гортанный, рычащий («волчий»)"
+    },
+    {
+      "roll": 7,
+      "key": "scratchy",
+      "textEn": "Scratchy",
+      "textRu": "Скрипучий, дребезжащий"
+    },
+    {
+      "roll": 8,
+      "key": "nasal",
+      "textEn": "Nasal",
+      "textRu": "Гнусавый, в нос"
+    }
+  ],
+  "speechPatterns": [
+    {
+      "roll": 1,
+      "textEn": "Incoherent except for a few key words"
+    },
+    {
+      "roll": 2,
+      "textEn": "Stutters"
+    },
+    {
+      "roll": 3,
+      "textEn": "lots of um"
+    },
+    {
+      "roll": 4,
+      "textEn": "lots of like"
+    },
+    {
+      "roll": 5,
+      "textEn": "lots of swearing"
+    },
+    {
+      "roll": 6,
+      "textEn": "uses thee's and thou's"
+    },
+    {
+      "roll": 7,
+      "textEn": "never stops to breathe"
+    },
+    {
+      "roll": 8,
+      "textEn": "Short, clipped sentences"
+    },
+    {
+      "roll": 9,
+      "textEn": "talks in third person"
+    },
+    {
+      "roll": 10,
+      "textEn": "doesn't conjugate well (\"me make good soup\")"
+    },
+    {
+      "roll": 11,
+      "textEn": "all S-sounds become Z-sounds"
+    },
+    {
+      "roll": 12,
+      "textEn": "all w-sounds become v-sounds"
+    },
+    {
+      "roll": 13,
+      "textEn": "R's arrrrrre always rrrrrrrolled"
+    },
+    {
+      "roll": 14,
+      "textEn": "never uses contractions"
+    },
+    {
+      "roll": 15,
+      "textEn": "Whiny"
+    },
+    {
+      "roll": 16,
+      "textEn": "stuffy nose"
+    },
+    {
+      "roll": 17,
+      "textEn": "tongue stuck to back of teeth"
+    },
+    {
+      "roll": 18,
+      "textEn": "opens mouth too wide"
+    },
+    {
+      "roll": 19,
+      "textEn": "clenched teeth"
+    },
+    {
+      "roll": 20,
+      "textEn": "barely opens lips"
+    },
+    {
+      "roll": 21,
+      "textEn": "all Th-sounds become Z-sounds"
+    },
+    {
+      "roll": 22,
+      "textEn": "repeats the last few words of a sentence/thought (\"nice to meet you, meet you.\")"
+    },
+    {
+      "roll": 23,
+      "textEn": "uses full titles or descriptions (\"jon-farmers-son\"\")"
+    },
+    {
+      "roll": 24,
+      "textEn": "repeats adj/adv for more impact (\"pretty-pretty!\")"
+    },
+    {
+      "roll": 25,
+      "textEn": "Nouns end with \"en\"/\"sen\" (applesen, moosen)"
+    },
+    {
+      "roll": 26,
+      "textEn": "L-sounds become w-sounds"
+    },
+    {
+      "roll": 27,
+      "textEn": "repeats the last word you say before responding"
+    },
+    {
+      "roll": 28,
+      "textEn": "sings everything"
+    },
+    {
+      "roll": 29,
+      "textEn": "does the wrong emphasis on the wrong syllables"
+    },
+    {
+      "roll": 30,
+      "textEn": "pauses often"
+    },
+    {
+      "roll": 31,
+      "textEn": "staccato speech"
+    },
+    {
+      "roll": 32,
+      "textEn": "Monotonous"
+    },
+    {
+      "roll": 33,
+      "textEn": "whistles on S-sounds"
+    },
+    {
+      "roll": 34,
+      "textEn": "Heavy lisp on Th and S (th-ufferin th-uckertash!)"
+    },
+    {
+      "roll": 35,
+      "textEn": "Light lisp"
+    },
+    {
+      "roll": 36,
+      "textEn": "r-sounds become w-sounds"
+    },
+    {
+      "roll": 37,
+      "textEn": "severe underbite"
+    },
+    {
+      "roll": 38,
+      "textEn": "severe overbite"
+    },
+    {
+      "roll": 39,
+      "textEn": "speaks out of the corner of his mouth"
+    },
+    {
+      "roll": 40,
+      "textEn": "always pouting"
+    },
+    {
+      "roll": 41,
+      "textEn": "\"ar\" becomes \"ayr\" (cart = cayrt, bear = beayr)"
+    },
+    {
+      "roll": 42,
+      "textEn": "soft letters are elongated (\"sso, hhow arre yyou?\")"
+    },
+    {
+      "roll": 43,
+      "textEn": "slurrs words"
+    },
+    {
+      "roll": 44,
+      "textEn": "mouth is always full when talking"
+    },
+    {
+      "roll": 45,
+      "textEn": "Sighs after each sentence"
+    },
+    {
+      "roll": 46,
+      "textEn": "Never uses am/is/are/was/were (“I big.” “She pretty.”)"
+    },
+    {
+      "roll": 47,
+      "textEn": "Responds in the form of questions"
+    },
+    {
+      "roll": 48,
+      "textEn": "Always over-exaggerates"
+    },
+    {
+      "roll": 49,
+      "textEn": "Never tells the complete truth"
+    },
+    {
+      "roll": 50,
+      "textEn": "mutters to self"
+    }
+  ],
+  "mannerisms": [
+    {
+      "roll": 1,
+      "textEn": "pulls on ear"
+    },
+    {
+      "roll": 2,
+      "textEn": "taps chin"
+    },
+    {
+      "roll": 3,
+      "textEn": "wrings hands"
+    },
+    {
+      "roll": 4,
+      "textEn": "flexes arms"
+    },
+    {
+      "roll": 5,
+      "textEn": "puffs out chest"
+    },
+    {
+      "roll": 6,
+      "textEn": "clenches fist(s)"
+    },
+    {
+      "roll": 7,
+      "textEn": "clenches jaw"
+    },
+    {
+      "roll": 8,
+      "textEn": "looks at the speakers forehead"
+    },
+    {
+      "roll": 9,
+      "textEn": "taps nose"
+    },
+    {
+      "roll": 10,
+      "textEn": "licks lips"
+    },
+    {
+      "roll": 11,
+      "textEn": "chews nails"
+    },
+    {
+      "roll": 12,
+      "textEn": "chews straw/tobacco/gum"
+    },
+    {
+      "roll": 13,
+      "textEn": "clicks tounge"
+    },
+    {
+      "roll": 14,
+      "textEn": "acts bored"
+    },
+    {
+      "roll": 15,
+      "textEn": "swallows a lot"
+    },
+    {
+      "roll": 16,
+      "textEn": "pulls/twists clothing"
+    },
+    {
+      "roll": 17,
+      "textEn": "covers mouth when speaking"
+    },
+    {
+      "roll": 18,
+      "textEn": "sniffs often"
+    },
+    {
+      "roll": 19,
+      "textEn": "bites lips"
+    },
+    {
+      "roll": 20,
+      "textEn": "teeth chatter or grind"
+    },
+    {
+      "roll": 21,
+      "textEn": "coughing (genuine)"
+    },
+    {
+      "roll": 22,
+      "textEn": "constantly clears throat (think umbridge)"
+    },
+    {
+      "roll": 23,
+      "textEn": "adjusts glasses/spectacles"
+    },
+    {
+      "roll": 24,
+      "textEn": "caresses a coin"
+    },
+    {
+      "roll": 25,
+      "textEn": "strokes chin/beard"
+    },
+    {
+      "roll": 26,
+      "textEn": "invades personal space"
+    },
+    {
+      "roll": 27,
+      "textEn": "flips a coin"
+    },
+    {
+      "roll": 28,
+      "textEn": "rests hand on hilt of sword/dagger"
+    },
+    {
+      "roll": 29,
+      "textEn": "shamelessly hits on all male PCs (winks, waggle-brows, touching, etc)"
+    },
+    {
+      "roll": 30,
+      "textEn": "shamelessly hits on all female PCs (winks, waggle-brows, touching, etc)"
+    },
+    {
+      "roll": 31,
+      "textEn": "Rarely blinks"
+    },
+    {
+      "roll": 32,
+      "textEn": "Excessive blinking"
+    },
+    {
+      "roll": 33,
+      "textEn": "Pops lips"
+    },
+    {
+      "roll": 34,
+      "textEn": "Flexes muscles"
+    },
+    {
+      "roll": 35,
+      "textEn": "Taps foot"
+    },
+    {
+      "roll": 36,
+      "textEn": "Never looks at the person talking"
+    },
+    {
+      "roll": 37,
+      "textEn": "Eyes constantly shifting around"
+    },
+    {
+      "roll": 38,
+      "textEn": "Gets lost in a daze"
+    },
+    {
+      "roll": 39,
+      "textEn": "Easily distracted"
+    },
+    {
+      "roll": 40,
+      "textEn": "Cracks knuckles"
+    },
+    {
+      "roll": 41,
+      "textEn": "Drums fingers"
+    },
+    {
+      "roll": 42,
+      "textEn": "Waggles eyebrows"
+    },
+    {
+      "roll": 43,
+      "textEn": "Picks nose"
+    },
+    {
+      "roll": 44,
+      "textEn": "Holds head high"
+    },
+    {
+      "roll": 45,
+      "textEn": "Delayed reactions"
+    },
+    {
+      "roll": 46,
+      "textEn": "Slumps shoulders"
+    },
+    {
+      "roll": 47,
+      "textEn": "Shuffles feet"
+    },
+    {
+      "roll": 48,
+      "textEn": "Jogs in place"
+    },
+    {
+      "roll": 49,
+      "textEn": "Writes down every word said"
+    },
+    {
+      "roll": 50,
+      "textEn": "Only looks at the speaker’s chin"
+    }
+  ]
+}

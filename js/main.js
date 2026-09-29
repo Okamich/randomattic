@@ -23,6 +23,10 @@ import { generateCharacterName } from './generators/names.js';
 import {
   generateFullNPC,
   generateNPCMotives,
+  generateNPCJob,
+  generateNPCVoice,
+  generateNPCExtendedTraits,
+  NPC_JOBS_D100,
   getRussianAgeWord,
   NPC_RACE_AGE_RANGES,
   NPC_HALFBREED_ORIGINS
@@ -326,6 +330,7 @@ const namesState = {
     race: false,
     gender: false,
     profession: false,
+    job: false,
     age: false,
     origin: false,
     appCount: false,
@@ -338,7 +343,15 @@ const namesState = {
   lastNPC: null
 };
 
+function populateJobOptions() {
+  const select = document.getElementById('n-param-job');
+  if (!select || select.options.length > 1) return;
+  const opts = NPC_JOBS_D100.map(j => `<option value="${j.roll}">${j.roll}. ${j.titleRu}</option>`).join('');
+  select.innerHTML = '<option value="any" selected>🎲 Случайное занятие (d100)</option>' + opts;
+}
+
 function initNamesDashboard() {
+  populateJobOptions();
   setupNamesEvents();
   executeNamesGenerator();
 }
@@ -398,6 +411,7 @@ function setupNamesEvents() {
     { id: 'btn-lock-n-race', key: 'race' },
     { id: 'btn-lock-n-gender', key: 'gender' },
     { id: 'btn-lock-n-profession', key: 'profession' },
+    { id: 'btn-lock-n-job', key: 'job' },
     { id: 'btn-lock-n-age', key: 'age' },
     { id: 'btn-lock-n-origin', key: 'origin' },
     { id: 'btn-lock-n-app-count', key: 'appCount' },
@@ -519,6 +533,54 @@ function setupNamesEvents() {
       }
     });
   });
+
+  // Перебросить только голос и повадки
+  document.getElementById('btn-reroll-voice')?.addEventListener('click', () => {
+    if (!namesState.lastNPC) return;
+    const newVoice = generateNPCVoice({});
+    namesState.lastNPC.voice = newVoice;
+    renderNPCVoice(newVoice);
+    updateNPCDossierText(namesState.lastNPC);
+  });
+
+  // Копировать голос
+  document.getElementById('btn-copy-voice')?.addEventListener('click', () => {
+    if (!namesState.lastNPC || !namesState.lastNPC.voice) return;
+    const text = namesState.lastNPC.voice.summaryText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-voice');
+      if (btn) {
+        btn.innerHTML = '✔ Скопировано!';
+        setTimeout(() => {
+          btn.innerHTML = '📋 Копировать';
+        }, 1800);
+      }
+    });
+  });
+
+  // Перебросить детальные черты
+  document.getElementById('btn-reroll-traits')?.addEventListener('click', () => {
+    if (!namesState.lastNPC) return;
+    const newTraits = generateNPCExtendedTraits({});
+    namesState.lastNPC.extendedTraits = newTraits;
+    renderNPCTraits(newTraits);
+    updateNPCDossierText(namesState.lastNPC);
+  });
+
+  // Копировать детальные черты
+  document.getElementById('btn-copy-traits')?.addEventListener('click', () => {
+    if (!namesState.lastNPC || !namesState.lastNPC.extendedTraits) return;
+    const text = namesState.lastNPC.extendedTraits.summaryText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btn-copy-traits');
+      if (btn) {
+        btn.innerHTML = '✔ Скопировано!';
+        setTimeout(() => {
+          btn.innerHTML = '📋 Копировать';
+        }, 1800);
+      }
+    });
+  });
 }
 
 function updateNPCDossierText(npc) {
@@ -529,13 +591,44 @@ function updateNPCDossierText(npc) {
   const profession = npc.profession;
   const isHalfbreed = npc.isHalfbreed;
   const halfbreedOrigin = npc.halfbreedOrigin;
+  const jobD100 = npc.jobD100;
+  const voice = npc.voice;
+  const t = npc.extendedTraits;
+
+  let extraSections = '';
+  if (t) {
+    extraSections += `\n\n✨ Детальные черты:\n` +
+      `  • Лицо: глаза — ${t.face.eyes.textRu}; нос — ${t.face.nose.textRu}; причёска — ${t.face.hair.textRu}; рот — ${t.face.mouth.textRu}; уши — ${t.face.ears.textRu}; подбородок — ${t.face.chin.textRu}; примета — ${t.face.otherFace.textRu}\n` +
+      `  • Тело: ${t.physical.height.textRu}; ${t.physical.body.textRu}; руки — ${t.physical.hands.textRu}${t.physical.scar ? '; шрам — ' + t.physical.scar.textRu : ''}\n` +
+      `  • Одежда & Украшения: ${t.accessories.clothes.textRu}; украшение — ${t.accessories.jewelry.textRu} (${t.accessories.jewelryMaterial.textRu})${t.accessories.tattoo ? '; тату — ' + t.accessories.tattoo.textRu : ''}`;
+  }
+
+  if (voice) {
+    extraSections += `\n\n🗣️ Голос & Повадки:\n` +
+      `  • Темп и тон: ${voice.speed.nameRu}, ${voice.pitch.nameRu}\n` +
+      `  • Тембр: ${voice.texture.nameRu} (${voice.texture.descRu})\n` +
+      `  • Речевая привычка: ${voice.speechPattern.textRu}\n` +
+      `  • Физическая повадка: ${voice.mannerism.textRu}`;
+  }
+
+  let emotionsSection = '';
+  if (t) {
+    emotionsSection = `\n\n🎭 Эмоции & Вера:\n` +
+      `  • В покое: ${t.emotions.calmTrait.textRu}\n` +
+      `  • Текущее настроение: ${t.emotions.mood.textRu}\n` +
+      `  • В стрессе: ${t.emotions.stressTrait.textRu}\n` +
+      `  • Отношение к вере: ${t.beliefs.faith.textRu}\n` +
+      `  • Предрассудок: ${t.beliefs.prejudice.textRu}\n` +
+      `  • Бытовой изъян: ${t.beliefs.flaw.textRu}`;
+  }
 
   npc.fullDossierText = `НИП: ${npc.name} (${raceTitle}, ${genderText}, ${ageStr})\n` +
-    (profession ? `Профессия: ${profession.title} [${profession.role}]\n` : '') +
+    (profession ? `Профессия: ${profession.title} [${profession.role}] (Занятие d100: ${jobD100 ? jobD100.titleRu : '—'})\n` : (jobD100 ? `Занятие (d100): ${jobD100.titleRu}\n` : '')) +
     (isHalfbreed && halfbreedOrigin ? `Воспитание: ${halfbreedOrigin.description}\n` : '') +
     `Сводка: ${npc.structuredSummary}\n\n` +
-    `👗 Внешность:\n  ${npc.appearance.items.map(i => i.name).join('; ')}\n\n` +
-    `🧠 Характер:\n` +
+    `👗 Внешность (DMG):\n  ${npc.appearance.items.map(i => i.name).join('; ')}` +
+    extraSections +
+    `\n\n🧠 Характер:\n` +
     `  • Дарование: ${npc.character.talentText}\n` +
     `  • Взаимодействие: ${npc.character.interactionText} (${npc.character.interactions.map(i => i.desc).join(', ')})\n` +
     `  • Манера: ${npc.character.mannerismText}\n\n` +
@@ -544,8 +637,9 @@ function updateNPCDossierText(npc) {
     `  • Низкая: ${npc.abilities.low.formatted}\n\n` +
     `⚖️ Идеал: ${npc.ideal.formatted}\n` +
     `🔗 Привязанность: ${npc.bond.textSummary}\n` +
-    `🗝️ Слабость или тайна: ${npc.flaw.textSummary}\n\n` +
-    `${npc.motives ? npc.motives.summaryText : ''}`;
+    `🗝️ Слабость или тайна: ${npc.flaw.textSummary}` +
+    emotionsSection +
+    `\n\n${npc.motives ? npc.motives.summaryText : ''}`;
 }
 
 function renderNPCMotives(motives) {
@@ -594,10 +688,89 @@ function renderNPCMotives(motives) {
   `;
 }
 
+function renderNPCVoice(voice) {
+  const container = document.getElementById('npc-voice-content');
+  if (!container || !voice) return;
+
+  container.innerHTML = `
+    <div class="npc-voice-pills">
+      <span class="npc-voice-pill">⚡ Скорость: <strong>${voice.speed.nameRu}</strong></span>
+      <span class="npc-voice-pill">🎵 Тон: <strong>${voice.pitch.nameRu}</strong></span>
+      <span class="npc-voice-pill">🎙️ Тембр: <strong>${voice.texture.nameRu}</strong></span>
+    </div>
+    <div class="npc-motive-row">
+      <div class="npc-motive-row-title">
+        <span>💬 Речевая привычка (d50 [${voice.speechPattern.roll}]):</span>
+      </div>
+      <div class="npc-motive-body">${voice.speechPattern.textRu}</div>
+    </div>
+    <div class="npc-motive-row">
+      <div class="npc-motive-row-title">
+        <span>✋ Физическая повадка (d50 [${voice.mannerism.roll}]):</span>
+      </div>
+      <div class="npc-motive-body">${voice.mannerism.textRu}</div>
+    </div>
+  `;
+}
+
+function renderNPCTraits(traits) {
+  const container = document.getElementById('npc-traits-content');
+  if (!container || !traits) return;
+
+  const f = traits.face;
+  const p = traits.physical;
+  const a = traits.accessories;
+  const e = traits.emotions;
+  const b = traits.beliefs;
+
+  container.innerHTML = `
+    <!-- Лицо -->
+    <div class="npc-trait-section">
+      <div class="npc-trait-section-title"><span>👁️</span> Черты лица:</div>
+      <div class="npc-trait-section-body">
+        <strong>Глаза:</strong> ${f.eyes.textRu} • <strong>Нос:</strong> ${f.nose.textRu} • <strong>Волосы:</strong> ${f.hair.textRu} • <strong>Рот:</strong> ${f.mouth.textRu} • <strong>Уши:</strong> ${f.ears.textRu} • <strong>Подбородок:</strong> ${f.chin.textRu} • <strong>Примета:</strong> ${f.otherFace.textRu}
+      </div>
+    </div>
+
+    <!-- Телосложение -->
+    <div class="npc-trait-section">
+      <div class="npc-trait-section-title"><span>💪</span> Физические черты:</div>
+      <div class="npc-trait-section-body">
+        <strong>Рост:</strong> ${p.height.textRu} • <strong>Телосложение:</strong> ${p.body.textRu} • <strong>Руки:</strong> ${p.hands.textRu}${p.scar ? ` • <strong>Шрам:</strong> ${p.scar.textRu}` : ''}
+      </div>
+    </div>
+
+    <!-- Одежда и Аксессуары -->
+    <div class="npc-trait-section">
+      <div class="npc-trait-section-title"><span>💍</span> Одежда & Украшения:</div>
+      <div class="npc-trait-section-body">
+        <strong>Наряд:</strong> ${a.clothes.textRu} • <strong>Украшение:</strong> ${a.jewelry.textRu} (${a.jewelryMaterial.textRu})${a.tattoo ? ` • <strong>Татуировка:</strong> ${a.tattoo.textRu}` : ''}
+      </div>
+    </div>
+
+    <!-- Эмоции и Настрой -->
+    <div class="npc-trait-section">
+      <div class="npc-trait-section-title"><span>🎭</span> Эмоциональный спектр:</div>
+      <div class="npc-trait-section-body">
+        <strong>В покое:</strong> ${e.calmTrait.textRu} • <strong>Текущее настроение:</strong> ${e.mood.textRu} • <strong>В стрессе:</strong> ${e.stressTrait.textRu}
+      </div>
+    </div>
+
+    <!-- Вера, взгляды и изъяны -->
+    <div class="npc-trait-section">
+      <div class="npc-trait-section-title"><span>🕊️</span> Вера, взгляды & изъяны:</div>
+      <div class="npc-trait-section-body">
+        <strong>Отношение к вере:</strong> ${b.faith.textRu} • <strong>Предрассудок:</strong> ${b.prejudice.textRu} • <strong>Бытовой изъян:</strong> ${b.flaw.textRu}
+      </div>
+    </div>
+  `;
+}
+
 function executeNamesGenerator() {
   const raceEl = document.getElementById('n-param-race');
   const genderEl = document.getElementById('n-param-gender');
   const profEl = document.getElementById('n-param-profession');
+  const jobEl = document.getElementById('n-param-job');
   const ageEl = document.getElementById('n-param-age');
   const ageVal = document.getElementById('n-val-age');
   const originEl = document.getElementById('n-param-origin');
@@ -612,6 +785,7 @@ function executeNamesGenerator() {
   const race = (namesState.locks.race && raceEl) ? raceEl.value : (raceEl?.value || 'any');
   const gender = (namesState.locks.gender && genderEl) ? genderEl.value : (genderEl?.value || 'any');
   const profession = (namesState.locks.profession && profEl) ? profEl.value : (profEl?.value || 'any');
+  const job = (namesState.locks.job && jobEl) ? jobEl.value : (jobEl?.value || 'any');
   const age = (namesState.locks.age && ageEl) ? Number(ageEl.value) : 'random';
   const halfbreedOrigin = (namesState.locks.origin && originEl) ? originEl.value : (originEl?.value || 'any');
   const elfKinAll = elfkinEl ? elfkinEl.checked : true;
@@ -626,6 +800,7 @@ function executeNamesGenerator() {
     race,
     gender,
     profession,
+    job,
     age,
     halfbreedOrigin,
     elfKinAll,
@@ -682,6 +857,9 @@ function executeNamesGenerator() {
     if (npc.profession) {
       badgesHtml += `<span class="tavern-card-badge" style="background:rgba(212, 175, 55, 0.25); border-color:#ffd54f; color:#ffe082;">${npc.profession.icon} ${npc.profession.title}</span>`;
     }
+    if (npc.jobD100) {
+      badgesHtml += `<span class="tavern-card-badge" style="background:rgba(0, 180, 216, 0.18); border-color:#00b4d8; color:#90e0ef;">🛠️ ${npc.jobD100.titleRu} [№${npc.jobD100.roll}]</span>`;
+    }
     if (npc.isHalfbreed && npc.halfbreedOrigin) {
       badgesHtml += `<span class="tavern-card-badge" style="background:rgba(120, 80, 200, 0.2); border-color:#b388ff; color:#d1c4e9;">${npc.halfbreedOrigin.title}</span>`;
     }
@@ -697,17 +875,28 @@ function executeNamesGenerator() {
   // Сюжетные мотивы, реакция и обстановка
   renderNPCMotives(npc.motives);
 
+  // Голос и особенности речи (npc_voice.xlsx)
+  renderNPCVoice(npc.voice);
+
+  // Детальные физические черты, повадки, одежда, вера (NPC_TRAITS.xlsx)
+  renderNPCTraits(npc.extendedTraits);
+
   // Детализация: Внешность, Характер (Дарование + Взаимодействие + Манера), Характеристики, Привязанность, Слабость, Идеал
   const detailsGrid = document.getElementById('hero-details-grid');
   if (detailsGrid) {
     let detailsHtml = '<div class="npc-details-container">';
 
     // Профессия и роль
-    if (npc.profession) {
+    if (npc.profession || npc.jobD100) {
+      const profPart = npc.profession ? `<strong>${npc.profession.icon} ${npc.profession.title}</strong> — ${npc.profession.role}` : '';
+      const jobPart = npc.jobD100 ? `<strong>🛠️ Занятие (к100 №${npc.jobD100.roll}):</strong> ${npc.jobD100.titleRu}` : '';
       detailsHtml += `
         <div class="npc-detail-block">
-          <div class="npc-detail-title">💼 Профессия & Роль:</div>
-          <div class="npc-detail-content"><strong>${npc.profession.icon} ${npc.profession.title}</strong> — ${npc.profession.role}</div>
+          <div class="npc-detail-title">💼 Профессия & Ремесло:</div>
+          <div class="npc-detail-content">
+            ${profPart ? `<div>${profPart}</div>` : ''}
+            ${jobPart ? `<div style="${profPart ? 'margin-top: 4px;' : ''}">${jobPart}</div>` : ''}
+          </div>
         </div>
       `;
     }
@@ -794,7 +983,12 @@ function executeNamesGenerator() {
       <tr>
         <td style="text-align: center; font-weight: 700; color: var(--accent-primary);">${v.id}</td>
         <td><strong style="color: #f0c97d;">${v.fullName}</strong></td>
-        <td><span class="tavern-card-badge" style="font-size: 0.78rem; background: rgba(212, 175, 55, 0.15); border-color: #ffd54f; color: #ffe082;">${v.professionTitle}</span></td>
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span class="tavern-card-badge" style="font-size: 0.78rem; background: rgba(212, 175, 55, 0.15); border-color: #ffd54f; color: #ffe082;">${v.professionTitle}</span>
+            ${v.jobD100 ? `<span style="font-size: 0.74rem; color: #90e0ef;">🛠️ ${v.jobD100.titleRu}</span>` : ''}
+          </div>
+        </td>
         <td>${v.race}</td>
         <td>${v.gender}</td>
         <td><span class="tavern-card-badge">${v.age}</span></td>
@@ -803,6 +997,7 @@ function executeNamesGenerator() {
             <div>⚖️ <strong>${v.ideal.name}</strong> <span style="color: var(--text-muted);">(${v.ideal.category})</span></div>
             <div style="color: var(--text-muted);">🤝 ${v.character.interactionText} • 🎭 ${v.character.mannerismText}</div>
             <div style="color: #ffd54f; font-size: 0.75rem; margin-top: 2px;">🎯 ${v.motives.reaction.attitude.split(' ')[0]} • ${v.motives.motivation.theme.split(' ')[0]}</div>
+            ${v.voice ? `<div style="color: #80d8ff; font-size: 0.74rem; margin-top: 2px;">🗣️ ${v.voice.speed.nameRu}, ${v.voice.pitch.nameRu}, ${v.voice.texture.nameRu}</div>` : ''}
           </div>
         </td>
         <td style="text-align: right;">

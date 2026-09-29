@@ -1,0 +1,1951 @@
+{
+  "face": [
+    {
+      "row": 1,
+      "items": [
+        [
+          1,
+          "Random NPC Traits"
+        ]
+      ]
+    },
+    {
+      "row": 2,
+      "items": [
+        [
+          1,
+          "Use these tables for quick inspiration or roll them up randomly."
+        ]
+      ]
+    },
+    {
+      "row": 4,
+      "items": [
+        [
+          1,
+          "FACIAL FEATURES"
+        ]
+      ]
+    },
+    {
+      "row": 5,
+      "items": [
+        [
+          1,
+          "d20 Eyes: The person has..."
+        ],
+        [
+          5,
+          "d20 Hair: The person has..."
+        ],
+        [
+          9,
+          "d10 Mouth: The person has..."
+        ],
+        [
+          13,
+          "d12 Nose: The person has..."
+        ]
+      ]
+    },
+    {
+      "row": 6,
+      "items": [
+        [
+          1,
+          "1. Sleepy eyes."
+        ],
+        [
+          5,
+          "1. Thick hair."
+        ],
+        [
+          9,
+          "1. Full lips."
+        ],
+        [
+          13,
+          "1. A crooked nose."
+        ],
+        [
+          15,
+          "7. An angular nose."
+        ]
+      ]
+    },
+    {
+      "row": 7,
+      "items": [
+        [
+          1,
+          "2. Shifty eyes."
+        ],
+        [
+          5,
+          "2. Wispy hair."
+        ],
+        [
+          9,
+          "2. Buck-teeth."
+        ],
+        [
+          13,
+          "2. A bulbous nose."
+        ],
+        [
+          15,
+          "8. A round nose."
+        ]
+      ]
+    },
+    {
+      "row": 8,
+      "items": [
+        [
+          1,
+          "3. Watery eyes."
+        ],
+        [
+          5,
+          "3. Straight hair."
+        ],
+        [
+          9,
+          "3. Thin lips."
+        ],
+        [
+          13,
+          "3. A narrow nose."
+        ],
+        [
+          15,
+          "9. A broken nose."
+        ]
+      ]
+    },
+    {
+      "row": 9,
+      "items": [
+        [
+          1,
+          "4. Bright eyes."
+        ],
+        [
+          5,
+          "4. Wavy hair."
+        ],
+        [
+          9,
+          "4. Rotting teeth."
+        ],
+        [
+          13,
+          "4. A button nose."
+        ],
+        [
+          15,
+          "10. A hawk-like nose."
+        ]
+      ]
+    },
+    {
+      "row": 10,
+      "items": [
+        [
+          1,
+          "5. Cold eyes."
+        ],
+        [
+          5,
+          "5. Curly hair."
+        ],
+        [
+          9,
+          "5. Crooked teeth."
+        ],
+        [
+          13,
+          "5. A long nose."
+        ],
+        [
+          15,
+          "11. A wide nose."
+        ]
+      ]
+    },
+    {
+      "row": 11,
+      "items": [
+        [
+          1,
+          "6. Smiling eyes."
+        ],
+        [
+          5,
+          "6. Wiry hair."
+        ],
+        [
+          9,
+          "6. A broken or missing tooth."
+        ],
+        [
+          13,
+          "6. A broad nose."
+        ],
+        [
+          15,
+          "12. A delicate nose."
+        ]
+      ]
+    },
+    {
+      "row": 12,
+      "items": [
+        [
+          1,
+          "7. Close-set eyes."
+        ],
+        [
+          5,
+          "7. Oily hair."
+        ],
+        [
+          9,
+          "7. Pursed lips."
+        ]
+      ]
+    },
+    {
+      "row": 13,
+      "items": [
+        [
+          1,
+          "8. Wild eyes."
+        ],
+        [
+          5,
+          "8. Lush hair."
+        ],
+        [
+          9,
+          "8. Dry, cracked lips."
+        ],
+        [
+          13,
+          "d12 Ears: The person has..."
+        ]
+      ]
+    },
+    {
+      "row": 14,
+      "items": [
+        [
+          1,
+          "9. Distant eyes."
+        ],
+        [
+          5,
+          "9. Poofy hair."
+        ],
+        [
+          9,
+          "9. One or more false teeth."
+        ],
+        [
+          13,
+          "1. Over-sized ears."
+        ],
+        [
+          15,
+          "7. Short ear lobes."
+        ]
+      ]
+    },
+    {
+      "row": 15,
+      "items": [
+        [
+          1,
+          "10. A lazy eye."
+        ],
+        [
+          5,
+          "10. Long braids."
+        ],
+        [
+          9,
+          "10. A mouth that hangs open."
+        ],
+        [
+          13,
+          "2. Long ear lobes."
+        ],
+        [
+          15,
+          "8. Ears that stick out."
+        ]
+      ]
+    },
+    {
+      "row": 16,
+      "items": [
+        [
+          1,
+          "11. Piercing eyes."
+        ],
+        [
+          5,
+          "11. Braids tight against the head."
+        ],
+        [
+          13,
+          "3. Small ears."
+        ],
+        [
+          15,
+          "9. Jug-handle ears."
+        ]
+      ]
+    },
+    {
+      "row": 17,
+      "items": [
+        [
+          1,
+          "12. Watchful eyes."
+        ],
+        [
+          5,
+          "12. Very long hair."
+        ],
+        [
+          9,
+          "d8 Chin or jaw: He/she has..."
+        ],
+        [
+          13,
+          "4. Uneven ears."
+        ],
+        [
+          15,
+          "10. Elaborately pierced ears."
+        ]
+      ]
+    },
+    {
+      "row": 18,
+      "items": [
+        [
+          1,
+          "13. Dark eyes."
+        ],
+        [
+          5,
+          "13. Greasy hair."
+        ],
+        [
+          9,
+          "1. A pronounced chin."
+        ],
+        [
+          13,
+          "5. Hairy ears."
+        ],
+        [
+          15,
+          "11. Cauliflower ears."
+        ]
+      ]
+    },
+    {
+      "row": 19,
+      "items": [
+        [
+          1,
+          "14. Hooded eyes."
+        ],
+        [
+          5,
+          "14. Unruly hair."
+        ],
+        [
+          9,
+          "2. A cleft chin."
+        ],
+        [
+          13,
+          "6. Pointy ears."
+        ],
+        [
+          15,
+          "12. Ears with improbable tufts of hair."
+        ]
+      ]
+    },
+    {
+      "row": 20,
+      "items": [
+        [
+          1,
+          "15. Eyes of two different colors."
+        ],
+        [
+          5,
+          "15. An unusual hairstyle."
+        ],
+        [
+          9,
+          "3. A dimple on the chin."
+        ]
+      ]
+    },
+    {
+      "row": 21,
+      "items": [
+        [
+          1,
+          "16. Slightly crossed eyes."
+        ],
+        [
+          5,
+          "16. An outdated hairstyle."
+        ],
+        [
+          9,
+          "4. A rounded chin."
+        ],
+        [
+          13,
+          "d8 Other: His/her face has..."
+        ]
+      ]
+    },
+    {
+      "row": 22,
+      "items": [
+        [
+          1,
+          "17. Wide eyes."
+        ],
+        [
+          5,
+          "17. A high-maintenance hairstyle."
+        ],
+        [
+          9,
+          "5. A sharp jawline."
+        ],
+        [
+          13,
+          "1. High cheekbones."
+        ],
+        [
+          15,
+          "5. A large mole."
+        ]
+      ]
+    },
+    {
+      "row": 23,
+      "items": [
+        [
+          1,
+          "18. Beautiful eyes."
+        ],
+        [
+          5,
+          "18. Short-cropped hair."
+        ],
+        [
+          9,
+          "6. A square jaw."
+        ],
+        [
+          13,
+          "2. Tight, drawn cheeks."
+        ],
+        [
+          15,
+          "6. A beauty mark."
+        ]
+      ]
+    },
+    {
+      "row": 24,
+      "items": [
+        [
+          1,
+          "19. Beady eyes."
+        ],
+        [
+          5,
+          "19. A shaved head."
+        ],
+        [
+          9,
+          "7. A round jaw."
+        ],
+        [
+          13,
+          "3. Chubby cheeks."
+        ],
+        [
+          15,
+          "7. Freckles."
+        ]
+      ]
+    },
+    {
+      "row": 25,
+      "items": [
+        [
+          1,
+          "20. Penetrating eyes."
+        ],
+        [
+          5,
+          "20. No hair at all."
+        ],
+        [
+          9,
+          "8. An underbite."
+        ],
+        [
+          13,
+          "4. An unpleasant pustule."
+        ],
+        [
+          15,
+          "8. Terrible scarring."
+        ]
+      ]
+    }
+  ],
+  "PHYSICAL": [
+    {
+      "row": 1,
+      "items": [
+        [
+          1,
+          "Random NPC Traits"
+        ]
+      ]
+    },
+    {
+      "row": 2,
+      "items": [
+        [
+          1,
+          "Use these tables for quick inspiration or roll them up randomly."
+        ]
+      ]
+    },
+    {
+      "row": 4,
+      "items": [
+        [
+          1,
+          "PHYSICAL TRAITS"
+        ]
+      ]
+    },
+    {
+      "row": 5,
+      "items": [
+        [
+          1,
+          "d6 Height: The person is..."
+        ],
+        [
+          5,
+          "d20 Body: The person’s body is..."
+        ]
+      ]
+    },
+    {
+      "row": 6,
+      "items": [
+        [
+          1,
+          "1. Unusually short."
+        ],
+        [
+          5,
+          "1. Thin and delicate."
+        ]
+      ]
+    },
+    {
+      "row": 7,
+      "items": [
+        [
+          1,
+          "2. Short in stature."
+        ],
+        [
+          5,
+          "2. Of average build."
+        ]
+      ]
+    },
+    {
+      "row": 8,
+      "items": [
+        [
+          1,
+          "3. Average height."
+        ],
+        [
+          5,
+          "3. Well-muscled."
+        ]
+      ]
+    },
+    {
+      "row": 9,
+      "items": [
+        [
+          1,
+          "4. Slightly above average height."
+        ],
+        [
+          5,
+          "4. Slightly overweight."
+        ]
+      ]
+    },
+    {
+      "row": 10,
+      "items": [
+        [
+          1,
+          "5. Well above average height."
+        ],
+        [
+          5,
+          "5. Grotesquely obese."
+        ]
+      ]
+    },
+    {
+      "row": 11,
+      "items": [
+        [
+          1,
+          "6. Unusually tall."
+        ],
+        [
+          5,
+          "6. Lean and lanky."
+        ]
+      ]
+    },
+    {
+      "row": 12,
+      "items": [
+        [
+          5,
+          "7. Lithe and lean."
+        ]
+      ]
+    },
+    {
+      "row": 13,
+      "items": [
+        [
+          1,
+          "d6 Hands: The person has..."
+        ],
+        [
+          5,
+          "8. Thin and wiry."
+        ]
+      ]
+    },
+    {
+      "row": 14,
+      "items": [
+        [
+          1,
+          "1. Powerful hands."
+        ],
+        [
+          5,
+          "9. Sinewy and strong."
+        ]
+      ]
+    },
+    {
+      "row": 15,
+      "items": [
+        [
+          1,
+          "2. Delicate hands."
+        ],
+        [
+          5,
+          "10. Flabby and weak."
+        ]
+      ]
+    },
+    {
+      "row": 16,
+      "items": [
+        [
+          1,
+          "3. Rough hands."
+        ],
+        [
+          5,
+          "11. Lumpy or bent."
+        ]
+      ]
+    },
+    {
+      "row": 17,
+      "items": [
+        [
+          1,
+          "4. Soft hands."
+        ],
+        [
+          5,
+          "12. Thin and flimsy."
+        ]
+      ]
+    },
+    {
+      "row": 18,
+      "items": [
+        [
+          1,
+          "5. A light touch."
+        ],
+        [
+          5,
+          "13. Soft and chubby."
+        ]
+      ]
+    },
+    {
+      "row": 19,
+      "items": [
+        [
+          1,
+          "6. A heavy touch."
+        ],
+        [
+          5,
+          "14. Thin and petite."
+        ]
+      ]
+    },
+    {
+      "row": 20,
+      "items": [
+        [
+          5,
+          "15. Pudgy."
+        ]
+      ]
+    },
+    {
+      "row": 21,
+      "items": [
+        [
+          1,
+          "d4 Scar: The person has..."
+        ],
+        [
+          5,
+          "16. Big and broad."
+        ]
+      ]
+    },
+    {
+      "row": 22,
+      "items": [
+        [
+          1,
+          "1. A jagged scar."
+        ],
+        [
+          5,
+          "17. Stocky and strong."
+        ]
+      ]
+    },
+    {
+      "row": 23,
+      "items": [
+        [
+          1,
+          "2. A dark purple scar."
+        ],
+        [
+          5,
+          "18. Bony."
+        ]
+      ]
+    },
+    {
+      "row": 24,
+      "items": [
+        [
+          1,
+          "3. An angry red scar."
+        ],
+        [
+          5,
+          "19. Wide and ponderous."
+        ]
+      ]
+    },
+    {
+      "row": 25,
+      "items": [
+        [
+          1,
+          "4. A long, thin scar."
+        ],
+        [
+          5,
+          "20. Covered in hair."
+        ]
+      ]
+    }
+  ],
+  "ACCESSORIES": [
+    {
+      "row": 1,
+      "items": [
+        [
+          1,
+          "Random NPC Traits"
+        ]
+      ]
+    },
+    {
+      "row": 2,
+      "items": [
+        [
+          1,
+          "Use these tables for quick inspiration or roll them up randomly."
+        ]
+      ]
+    },
+    {
+      "row": 4,
+      "items": [
+        [
+          1,
+          "ACCESSORIES"
+        ]
+      ]
+    },
+    {
+      "row": 5,
+      "items": [
+        [
+          1,
+          "d12 Tattoo: The person has..."
+        ],
+        [
+          5,
+          "d12 Jewelry: The person wears..."
+        ]
+      ]
+    },
+    {
+      "row": 6,
+      "items": [
+        [
+          1,
+          "1. A dagger tattoo."
+        ],
+        [
+          5,
+          "1. An earring."
+        ]
+      ]
+    },
+    {
+      "row": 7,
+      "items": [
+        [
+          1,
+          "2. An arrow tattoo."
+        ],
+        [
+          5,
+          "2. Two earrings."
+        ]
+      ]
+    },
+    {
+      "row": 8,
+      "items": [
+        [
+          1,
+          "3. An anchor tattoo."
+        ],
+        [
+          5,
+          "3. A small chain about the neck."
+        ]
+      ]
+    },
+    {
+      "row": 9,
+      "items": [
+        [
+          1,
+          "4. A skull tattoo."
+        ],
+        [
+          5,
+          "4. A large chain about the neck."
+        ]
+      ]
+    },
+    {
+      "row": 10,
+      "items": [
+        [
+          1,
+          "5. A pair of crossed bones tattoo."
+        ],
+        [
+          5,
+          "5. A tight choker about the neck."
+        ]
+      ]
+    },
+    {
+      "row": 11,
+      "items": [
+        [
+          1,
+          "6. A snake tattoo."
+        ],
+        [
+          5,
+          "6. A brooch."
+        ]
+      ]
+    },
+    {
+      "row": 12,
+      "items": [
+        [
+          1,
+          "7. A scorpion tattoo."
+        ],
+        [
+          5,
+          "7. A ring."
+        ]
+      ]
+    },
+    {
+      "row": 13,
+      "items": [
+        [
+          1,
+          "8. A spider web tattoo."
+        ],
+        [
+          5,
+          "8. Several rings."
+        ]
+      ]
+    },
+    {
+      "row": 14,
+      "items": [
+        [
+          1,
+          "9. A heart tattoo."
+        ],
+        [
+          5,
+          "9. A bracelet."
+        ]
+      ]
+    },
+    {
+      "row": 15,
+      "items": [
+        [
+          1,
+          "10. A ring of thorns tattoo."
+        ],
+        [
+          5,
+          "10. A nose ring."
+        ]
+      ]
+    },
+    {
+      "row": 16,
+      "items": [
+        [
+          1,
+          "11. A mermaid tattoo."
+        ],
+        [
+          5,
+          "11. A medallion."
+        ]
+      ]
+    },
+    {
+      "row": 17,
+      "items": [
+        [
+          1,
+          "12. A dragon tattoo."
+        ],
+        [
+          5,
+          "12. An ornate belt."
+        ]
+      ]
+    },
+    {
+      "row": 19,
+      "items": [
+        [
+          1,
+          "d8 Clothes: The person’s clothing is..."
+        ],
+        [
+          5,
+          "d8 The jewelry is made of…"
+        ]
+      ]
+    },
+    {
+      "row": 20,
+      "items": [
+        [
+          1,
+          "1. Crisp and new."
+        ],
+        [
+          5,
+          "1. Steel."
+        ]
+      ]
+    },
+    {
+      "row": 21,
+      "items": [
+        [
+          1,
+          "2. Fashionable and hip."
+        ],
+        [
+          5,
+          "2. Bronze."
+        ]
+      ]
+    },
+    {
+      "row": 22,
+      "items": [
+        [
+          1,
+          "3. A bit old-fashioned."
+        ],
+        [
+          5,
+          "3. Pewter."
+        ]
+      ]
+    },
+    {
+      "row": 23,
+      "items": [
+        [
+          1,
+          "4. Of the highest quality."
+        ],
+        [
+          5,
+          "4. Silver."
+        ]
+      ]
+    },
+    {
+      "row": 24,
+      "items": [
+        [
+          1,
+          "5. Faded, but in good condition."
+        ],
+        [
+          5,
+          "5. Gold."
+        ]
+      ]
+    },
+    {
+      "row": 25,
+      "items": [
+        [
+          1,
+          "6. Faded and patched."
+        ],
+        [
+          5,
+          "6. Platinum."
+        ]
+      ]
+    },
+    {
+      "row": 26,
+      "items": [
+        [
+          1,
+          "7. Torn in places; missing buttons."
+        ],
+        [
+          5,
+          "7. Copper."
+        ]
+      ]
+    },
+    {
+      "row": 27,
+      "items": [
+        [
+          1,
+          "8. Tattered and worn."
+        ],
+        [
+          5,
+          "8. One or more gemstones (d12): 1. amethyst; 2. crystal; 3. diamond; 4. emerald; 5. jade; 6. obsidian; 7. opal; 8. pearl; 9. ruby; 10. sapphire; 11. topaz; 12. turquoise."
+        ]
+      ]
+    }
+  ],
+  "EMOTIONS": [
+    {
+      "row": 1,
+      "items": [
+        [
+          1,
+          "Random NPC Traits"
+        ]
+      ]
+    },
+    {
+      "row": 2,
+      "items": [
+        [
+          1,
+          "Use these tables for quick inspiration or roll them up randomly."
+        ]
+      ]
+    },
+    {
+      "row": 4,
+      "items": [
+        [
+          1,
+          "EMOTIONS AND ATTITUDE"
+        ]
+      ]
+    },
+    {
+      "row": 5,
+      "items": [
+        [
+          1,
+          "d32 Calm Trait: When calm, the person is typically..."
+        ],
+        [
+          9,
+          "d20 Mood: Now, the person is..."
+        ]
+      ]
+    },
+    {
+      "row": 6,
+      "items": [
+        [
+          1,
+          "1. Compassionate"
+        ],
+        [
+          3,
+          "9. Foolish"
+        ],
+        [
+          5,
+          "17. Greedy"
+        ],
+        [
+          7,
+          "25. Assertive"
+        ],
+        [
+          9,
+          "1. Agreeable."
+        ]
+      ]
+    },
+    {
+      "row": 7,
+      "items": [
+        [
+          1,
+          "2. Cheerful"
+        ],
+        [
+          3,
+          "10. Strict"
+        ],
+        [
+          5,
+          "18. Funny"
+        ],
+        [
+          7,
+          "26. Carefree"
+        ],
+        [
+          9,
+          "2. Carefree."
+        ]
+      ]
+    },
+    {
+      "row": 8,
+      "items": [
+        [
+          1,
+          "3. Reserved"
+        ],
+        [
+          3,
+          "11. Agreeable"
+        ],
+        [
+          5,
+          "19. Dour"
+        ],
+        [
+          7,
+          "27. Cautious"
+        ],
+        [
+          9,
+          "3. Curious."
+        ]
+      ]
+    },
+    {
+      "row": 9,
+      "items": [
+        [
+          1,
+          "4. Outspoken"
+        ],
+        [
+          3,
+          "12. Mischeivious"
+        ],
+        [
+          5,
+          "20. Fun-Loving"
+        ],
+        [
+          7,
+          "28. Confident"
+        ],
+        [
+          9,
+          "4. Eager."
+        ]
+      ]
+    },
+    {
+      "row": 10,
+      "items": [
+        [
+          1,
+          "5. Uninterested"
+        ],
+        [
+          3,
+          "13. Angry"
+        ],
+        [
+          5,
+          "21. Lazy"
+        ],
+        [
+          7,
+          "29. Thoughtful"
+        ],
+        [
+          9,
+          "5. Friendly."
+        ]
+      ]
+    },
+    {
+      "row": 11,
+      "items": [
+        [
+          1,
+          "6. Gruff"
+        ],
+        [
+          3,
+          "14. Fearful"
+        ],
+        [
+          5,
+          "22. Driven"
+        ],
+        [
+          7,
+          "30. Loyal"
+        ],
+        [
+          9,
+          "6. Happy."
+        ]
+      ]
+    },
+    {
+      "row": 12,
+      "items": [
+        [
+          1,
+          "7. Eager"
+        ],
+        [
+          3,
+          "15. Manipulative"
+        ],
+        [
+          5,
+          "23. Boastful"
+        ],
+        [
+          7,
+          "31. Sophisticated"
+        ],
+        [
+          9,
+          "7. Hopeful."
+        ]
+      ]
+    },
+    {
+      "row": 13,
+      "items": [
+        [
+          1,
+          "8. Deceitful"
+        ],
+        [
+          3,
+          "16. Devout"
+        ],
+        [
+          5,
+          "24. Artistic"
+        ],
+        [
+          7,
+          "32. Weak-Willed"
+        ],
+        [
+          9,
+          "8. Upbeat."
+        ]
+      ]
+    },
+    {
+      "row": 14,
+      "items": [
+        [
+          9,
+          "9. Indifferent."
+        ]
+      ]
+    },
+    {
+      "row": 15,
+      "items": [
+        [
+          1,
+          "d32 Stress Trait: When stressed, the person often becomes..."
+        ],
+        [
+          9,
+          "10. Bored."
+        ]
+      ]
+    },
+    {
+      "row": 16,
+      "items": [
+        [
+          1,
+          "1. Withdrawn"
+        ],
+        [
+          3,
+          "9. Caustic"
+        ],
+        [
+          5,
+          "17. Sarcastic"
+        ],
+        [
+          7,
+          "25. Courageous"
+        ],
+        [
+          9,
+          "11. Focused."
+        ]
+      ]
+    },
+    {
+      "row": 17,
+      "items": [
+        [
+          1,
+          "2. Murderous"
+        ],
+        [
+          3,
+          "10. Reckless"
+        ],
+        [
+          5,
+          "18. Stubborn"
+        ],
+        [
+          7,
+          "26. Impractical"
+        ],
+        [
+          9,
+          "12. Suspicious."
+        ]
+      ]
+    },
+    {
+      "row": 18,
+      "items": [
+        [
+          1,
+          "3. Obsessive"
+        ],
+        [
+          3,
+          "11. Argumentative"
+        ],
+        [
+          5,
+          "19. Destructive"
+        ],
+        [
+          7,
+          "27. Calculating"
+        ],
+        [
+          9,
+          "13. Tired."
+        ]
+      ]
+    },
+    {
+      "row": 19,
+      "items": [
+        [
+          1,
+          "4. Authoritarian"
+        ],
+        [
+          3,
+          "12. Gluttonous"
+        ],
+        [
+          5,
+          "20. Practical"
+        ],
+        [
+          7,
+          "28. Industrious"
+        ],
+        [
+          9,
+          "14. Withdrawn."
+        ]
+      ]
+    },
+    {
+      "row": 20,
+      "items": [
+        [
+          1,
+          "5. Determined"
+        ],
+        [
+          3,
+          "13. Overly Protective"
+        ],
+        [
+          5,
+          "21. Pushy"
+        ],
+        [
+          7,
+          "29. Manipulative"
+        ],
+        [
+          9,
+          "15. Disagreeable."
+        ]
+      ]
+    },
+    {
+      "row": 21,
+      "items": [
+        [
+          1,
+          "6. Brave"
+        ],
+        [
+          3,
+          "14. Angry"
+        ],
+        [
+          5,
+          "22. Fanatical"
+        ],
+        [
+          7,
+          "30. Destructive"
+        ],
+        [
+          9,
+          "16. Agitated."
+        ]
+      ]
+    },
+    {
+      "row": 22,
+      "items": [
+        [
+          1,
+          "7. Spiteful"
+        ],
+        [
+          3,
+          "15. Cowardly"
+        ],
+        [
+          5,
+          "23. Secretive"
+        ],
+        [
+          7,
+          "31. Compulsive"
+        ],
+        [
+          9,
+          "17. Angry."
+        ]
+      ]
+    },
+    {
+      "row": 23,
+      "items": [
+        [
+          1,
+          "8. Belligerent"
+        ],
+        [
+          3,
+          "16. Meticulous"
+        ],
+        [
+          5,
+          "24. Scornful"
+        ],
+        [
+          7,
+          "32. Intolerant"
+        ],
+        [
+          9,
+          "18. Despondent."
+        ]
+      ]
+    },
+    {
+      "row": 24,
+      "items": [
+        [
+          9,
+          "19. Gloomy."
+        ]
+      ]
+    },
+    {
+      "row": 25,
+      "items": [
+        [
+          9,
+          "20. Nervous."
+        ]
+      ]
+    }
+  ],
+  "FAITH_BELIEFS_FLAWS": [
+    {
+      "row": 1,
+      "items": [
+        [
+          1,
+          "Random NPC Traits"
+        ]
+      ]
+    },
+    {
+      "row": 2,
+      "items": [
+        [
+          1,
+          "Use these tables for quick inspiration or roll them up randomly."
+        ]
+      ]
+    },
+    {
+      "row": 4,
+      "items": [
+        [
+          1,
+          "FAITH AND BELIEFS"
+        ]
+      ]
+    },
+    {
+      "row": 5,
+      "items": [
+        [
+          1,
+          "d8 Faith: The person is a..."
+        ],
+        [
+          4,
+          "d6 Prejudice: The person is prejudice against..."
+        ]
+      ]
+    },
+    {
+      "row": 6,
+      "items": [
+        [
+          1,
+          "1. Quiet true believer."
+        ],
+        [
+          4,
+          "1. Other genders."
+        ]
+      ]
+    },
+    {
+      "row": 7,
+      "items": [
+        [
+          1,
+          "2. Casual observer."
+        ],
+        [
+          4,
+          "2. An age group (d3): 1. children; 2. teenagers; 3. elderly."
+        ]
+      ]
+    },
+    {
+      "row": 8,
+      "items": [
+        [
+          1,
+          "3. Critical student."
+        ],
+        [
+          4,
+          "3. A social class (d3): 1. ruling class and authority figures; 2. powerful rich; 3. destitute poor."
+        ]
+      ]
+    },
+    {
+      "row": 9,
+      "items": [
+        [
+          1,
+          "4. Outspoken cynic."
+        ],
+        [
+          4,
+          "4. Social deviants (d3): 1. beggars; 2. drunks; 3. drug-users."
+        ]
+      ]
+    },
+    {
+      "row": 10,
+      "items": [
+        [
+          1,
+          "5. Open-minded seeker."
+        ],
+        [
+          4,
+          "5. A profession (d12): 1. farmers; 2. artists; 3. clergy; 4. soldiers; 5. fishers; 6. harlots; 7. miners; 8. merchants; 9. scholars; 10. herders; 11. sailors; 12. mages"
+        ]
+      ]
+    },
+    {
+      "row": 11,
+      "items": [
+        [
+          1,
+          "6. Broken heretic."
+        ],
+        [
+          4,
+          "6. A race (d8): 1. dwarves; 2. elves; 3. gnomes;; 4. goblins; 5. half-breeds; 5. halflings; 6. humans; 7. orcs; 8. reptilians."
+        ]
+      ]
+    },
+    {
+      "row": 12,
+      "items": [
+        [
+          1,
+          "7. Cautious listener."
+        ]
+      ]
+    },
+    {
+      "row": 13,
+      "items": [
+        [
+          1,
+          "8. Fanatical true believer."
+        ]
+      ]
+    },
+    {
+      "row": 15,
+      "items": [
+        [
+          1,
+          "FLAWS"
+        ]
+      ]
+    },
+    {
+      "row": 16,
+      "items": [
+        [
+          1,
+          "d20 Flaw: The person..."
+        ]
+      ]
+    },
+    {
+      "row": 17,
+      "items": [
+        [
+          1,
+          "1. Fidgets."
+        ]
+      ]
+    },
+    {
+      "row": 18,
+      "items": [
+        [
+          1,
+          "2. Drinks too much."
+        ]
+      ]
+    },
+    {
+      "row": 19,
+      "items": [
+        [
+          1,
+          "3. Eats too much."
+        ]
+      ]
+    },
+    {
+      "row": 20,
+      "items": [
+        [
+          1,
+          "4. Swears often."
+        ]
+      ]
+    },
+    {
+      "row": 21,
+      "items": [
+        [
+          1,
+          "5. Has poor hygiene."
+        ]
+      ]
+    },
+    {
+      "row": 22,
+      "items": [
+        [
+          1,
+          "6. Can’t resist flirting."
+        ]
+      ]
+    },
+    {
+      "row": 23,
+      "items": [
+        [
+          1,
+          "7. Can’t stop staring."
+        ]
+      ]
+    },
+    {
+      "row": 24,
+      "items": [
+        [
+          1,
+          "8. Sweats profusely and easily."
+        ]
+      ]
+    },
+    {
+      "row": 25,
+      "items": [
+        [
+          1,
+          "9. Is a habitual liar."
+        ]
+      ]
+    },
+    {
+      "row": 26,
+      "items": [
+        [
+          1,
+          "10. Embellishes the truth."
+        ]
+      ]
+    },
+    {
+      "row": 27,
+      "items": [
+        [
+          1,
+          "11. Exaggerates details."
+        ]
+      ]
+    },
+    {
+      "row": 28,
+      "items": [
+        [
+          1,
+          "12. Has a short temper."
+        ]
+      ]
+    },
+    {
+      "row": 29,
+      "items": [
+        [
+          1,
+          "13. Is melodramatic."
+        ]
+      ]
+    },
+    {
+      "row": 30,
+      "items": [
+        [
+          1,
+          "14. Gossips."
+        ]
+      ]
+    },
+    {
+      "row": 31,
+      "items": [
+        [
+          1,
+          "15. Chews with an open mouth."
+        ]
+      ]
+    },
+    {
+      "row": 32,
+      "items": [
+        [
+          1,
+          "16. Often sniffs audibly."
+        ]
+      ]
+    },
+    {
+      "row": 33,
+      "items": [
+        [
+          1,
+          "17. Believes what you tell him/her."
+        ]
+      ]
+    },
+    {
+      "row": 34,
+      "items": [
+        [
+          1,
+          "18. Is skeptical of everything."
+        ]
+      ]
+    },
+    {
+      "row": 35,
+      "items": [
+        [
+          1,
+          "19. Paces."
+        ]
+      ]
+    },
+    {
+      "row": 36,
+      "items": [
+        [
+          1,
+          "20. Makes poor eye contact."
+        ]
+      ]
+    }
+  ]
+}

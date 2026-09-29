@@ -208,6 +208,17 @@
                     <button class="btn-lock" id="btn-lock-n-profession" title="Заблокировать профессию">🔓</button>
                   </div>
 
+                  <!-- d100 Occupation / Job -->
+                  <div class="param-row">
+                    <label for="n-param-job">Занятие (d100):</label>
+                    <div class="param-input-group">
+                      <select id="n-param-job" class="param-select">
+                        <option value="any" selected>🎲 Случайное занятие (d100)</option>
+                      </select>
+                    </div>
+                    <button class="btn-lock" id="btn-lock-n-job" title="Заблокировать занятие">🔓</button>
+                  </div>
+
                   <!-- Age Slider -->
                   <div class="param-row">
                     <label for="n-param-age">Возраст НИПа:</label>
@@ -386,6 +397,30 @@
                       </div>
                     </div>
                     <div class="npc-motives-content" id="npc-motives-content"></div>
+                  </div>
+
+                  <!-- Voice & Mannerisms Box (files/NPC/npc_voice.xlsx) -->
+                  <div class="npc-voice-box" id="npc-voice-container">
+                    <div class="npc-voice-header">
+                      <span class="npc-voice-header-title">🗣️ Голос, Речь & Повадки:</span>
+                      <div class="npc-voice-actions">
+                        <button class="btn-mini-copy" id="btn-reroll-voice" title="Перебросить голос и повадки">🎲 Перебросить голос</button>
+                        <button class="btn-mini-copy" id="btn-copy-voice" title="Копировать голос">📋 Копировать</button>
+                      </div>
+                    </div>
+                    <div class="npc-voice-content" id="npc-voice-content"></div>
+                  </div>
+
+                  <!-- Extended Traits Box (files/NPC/NPC_TRAITS.xlsx) -->
+                  <div class="npc-traits-box" id="npc-traits-container">
+                    <div class="npc-traits-header">
+                      <span class="npc-traits-header-title">✨ Детальные Черты & Особенности:</span>
+                      <div class="npc-traits-actions">
+                        <button class="btn-mini-copy" id="btn-reroll-traits" title="Перебросить детальные черты">🎲 Перебросить черты</button>
+                        <button class="btn-mini-copy" id="btn-copy-traits" title="Копировать черты">📋 Копировать</button>
+                      </div>
+                    </div>
+                    <div class="npc-traits-content" id="npc-traits-content"></div>
                   </div>
 
                   <div class="hero-details-grid" id="hero-details-grid"></div>

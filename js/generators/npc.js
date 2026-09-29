@@ -25,6 +25,9 @@ import {
 } from '../data/npc-data.js';
 
 import { NPC_MOTIVES_DATA } from '../data/npc-motives-data.js';
+import { NPC_JOBS_D100 } from '../data/npc-job-data.js';
+import { NPC_VOICE_DATA } from '../data/npc-voice-data.js';
+import { NPC_EXTENDED_TRAITS_DATA } from '../data/npc-traits-data.js';
 
 export {
   NPC_NAMES_DATA,
@@ -42,7 +45,10 @@ export {
   DMG_IDEALS,
   DMG_BONDS,
   DMG_FLAWS_SECRETS,
-  NPC_MOTIVES_DATA
+  NPC_MOTIVES_DATA,
+  NPC_JOBS_D100,
+  NPC_VOICE_DATA,
+  NPC_EXTENDED_TRAITS_DATA
 };
 
 import { pickOne, pickMultiple, randInt } from '../utils/random.js';
@@ -840,6 +846,120 @@ export function generateNPCMotives(options = {}) {
 }
 
 /**
+ * Сгенерировать занятие / профессию НИПа из каталога d100 (files/NPC/npc_job.xlsx)
+ * @param {string|number} [chosenJob]
+ * @returns {{roll: number, titleRu: string}}
+ */
+export function generateNPCJob(chosenJob) {
+  if (chosenJob && chosenJob !== 'any') {
+    const num = parseInt(chosenJob, 10);
+    const found = !isNaN(num)
+      ? NPC_JOBS_D100.find(j => j.roll === num)
+      : NPC_JOBS_D100.find(j => j.titleRu.toLowerCase() === String(chosenJob).toLowerCase());
+    if (found) return found;
+  }
+  return pickOne(NPC_JOBS_D100);
+}
+
+/**
+ * Сгенерировать голос, речевые паттерны и физические повадки НИПа (по файлу npc_voice.xlsx)
+ * @param {object} [options]
+ * @returns {object}
+ */
+export function generateNPCVoice(options = {}) {
+  const speed = options.speed && options.speed !== 'any'
+    ? NPC_VOICE_DATA.speed.find(s => s.key === options.speed || s.roll === Number(options.speed)) || pickOne(NPC_VOICE_DATA.speed)
+    : pickOne(NPC_VOICE_DATA.speed);
+
+  const pitch = options.pitch && options.pitch !== 'any'
+    ? NPC_VOICE_DATA.pitch.find(p => p.key === options.pitch || p.roll === Number(options.pitch)) || pickOne(NPC_VOICE_DATA.pitch)
+    : pickOne(NPC_VOICE_DATA.pitch);
+
+  const texture = options.texture && options.texture !== 'any'
+    ? NPC_VOICE_DATA.textures.find(t => t.key === options.texture || t.roll === Number(options.texture)) || pickOne(NPC_VOICE_DATA.textures)
+    : pickOne(NPC_VOICE_DATA.textures);
+
+  const speechPattern = pickOne(NPC_VOICE_DATA.speechPatterns);
+  const mannerism = pickOne(NPC_VOICE_DATA.mannerisms);
+
+  const summaryText =
+    `🗣️ Голос & Повадки:\n` +
+    `  • Темп и тон: ${speed.nameRu} (1d3: ${speed.roll}), ${pitch.nameRu} (1d3: ${pitch.roll})\n` +
+    `  • Тембр: ${texture.nameRu} — ${texture.descRu} (1d8: ${texture.roll})\n` +
+    `  • Речевая привычка: ${speechPattern.textRu} (1d50: ${speechPattern.roll})\n` +
+    `  • Физическая повадка: ${mannerism.textRu} (1d50: ${mannerism.roll})`;
+
+  return {
+    speed,
+    pitch,
+    texture,
+    speechPattern,
+    mannerism,
+    summaryText
+  };
+}
+
+/**
+ * Сгенерировать расширенные черты НИПа (лицо, телосложение, аксессуары, эмоции, вера и изъяны)
+ * на основе таблиц files/NPC/NPC_TRAITS.xlsx
+ * @param {object} [options]
+ * @returns {object}
+ */
+export function generateNPCExtendedTraits(options = {}) {
+  const t = NPC_EXTENDED_TRAITS_DATA;
+
+  // 1. Лицо (Face)
+  const eyes = pickOne(t.eyes.options);
+  const hair = pickOne(t.hair.options);
+  const mouth = pickOne(t.mouth.options);
+  const nose = pickOne(t.nose.options);
+  const ears = pickOne(t.ears.options);
+  const chin = pickOne(t.chin.options);
+  const otherFace = pickOne(t.otherFace.options);
+
+  // 2. Телосложение (Physical)
+  const height = pickOne(t.height.options);
+  const body = pickOne(t.body.options);
+  const hands = pickOne(t.hands.options);
+  const hasScar = randInt(1, 100) <= 50;
+  const scar = hasScar ? pickOne(t.scar.options) : null;
+
+  // 3. Аксессуары (Accessories)
+  const hasTattoo = randInt(1, 100) <= 40;
+  const tattoo = hasTattoo ? pickOne(t.tattoo.options) : null;
+  const jewelry = pickOne(t.jewelry.options);
+  const jewelryMaterial = pickOne(t.jewelryMaterial.options);
+  const clothes = pickOne(t.clothes.options);
+
+  // 4. Эмоции и настрой (Emotions)
+  const calmTrait = pickOne(t.calmTrait.options);
+  const mood = pickOne(t.mood.options);
+  const stressTrait = pickOne(t.stressTrait.options);
+
+  // 5. Вера и взгляды (Faith & Beliefs)
+  const faith = pickOne(t.faith.options);
+  const prejudice = pickOne(t.prejudice.options);
+  const flaw = pickOne(t.flaw.options);
+
+  const summaryText =
+    `✨ Детальные черты:\n` +
+    `  • Лицо: глаза — ${eyes.textRu}; нос — ${nose.textRu}; причёска — ${hair.textRu}; рот — ${mouth.textRu}; уши — ${ears.textRu}; подбородок — ${chin.textRu}; примета — ${otherFace.textRu}\n` +
+    `  • Тело: ${height.textRu}; ${body.textRu}; руки — ${hands.textRu}${scar ? '; шрам — ' + scar.textRu : ''}\n` +
+    `  • Одежда & Аксессуары: ${clothes.textRu}; украшение — ${jewelry.textRu} (${jewelryMaterial.textRu})${tattoo ? '; тату — ' + tattoo.textRu : ''}\n` +
+    `  • Эмоции: в покое — ${calmTrait.textRu}; текущее настроение — ${mood.textRu}; в стрессе — ${stressTrait.textRu}\n` +
+    `  • Взгляды & Изъян: вера — ${faith.textRu}; предрассудок — ${prejudice.textRu}; бытовой изъян — ${flaw.textRu}`;
+
+  return {
+    face: { eyes, hair, mouth, nose, ears, chin, otherFace },
+    physical: { height, body, hands, scar },
+    accessories: { tattoo, jewelry, jewelryMaterial, clothes },
+    emotions: { calmTrait, mood, stressTrait },
+    beliefs: { faith, prejudice, flaw },
+    summaryText
+  };
+}
+
+/**
  * Сгенерировать полного NPC по заданным параметрам в точности по Книге Мастера (DMG 5e)
  * @param {object} options
  * @returns {object}
@@ -863,8 +983,9 @@ export function generateFullNPC(options = {}) {
   // 3. Возраст
   const ageData = generateNPCAge(raceKey, options.age);
 
-  // 4. Профессия / Роль
+  // 4. Профессия / Роль (DMG) и d100 Занятие (files/NPC/npc_job.xlsx)
   const profession = generateNPCProfession(options.profession, gender);
+  const jobD100 = generateNPCJob(options.job);
 
   // 5. Полукровка: происхождение и воспитание
   const isHalfbreed = raceKey === 'halfelf' || raceKey === 'halforc';
@@ -880,33 +1001,38 @@ export function generateFullNPC(options = {}) {
   const appearanceCount = Number(options.appearanceCount) || 2;
   const appearanceData = generateDMGAppearance(gender, appearanceCount);
 
-  // 8. Характер = Дарование (к20) + Взаимодействие (к12) + Манера (к20) (так же может быть несколько)
+  // 8. Расширенные черты (лицо, тело, одежда, аксессуары, эмоции, вера) (files/NPC/NPC_TRAITS.xlsx)
+  const extendedTraits = generateNPCExtendedTraits(options.traits || {});
+
+  // 9. Голос и повадки (files/NPC/npc_voice.xlsx)
+  const voice = generateNPCVoice(options.voice || {});
+
+  // 10. Характер = Дарование (к20) + Взаимодействие (к12) + Манера (к20)
   const persOption = Number(options.personalityCount) || 1;
   const talentCount = persOption >= 2 ? 2 : 1;
   const mannerCount = persOption >= 2 ? 2 : 1;
   const interactionCount = persOption >= 2 ? 2 : 1;
   const characterData = generateDMGCharacter(gender, talentCount, mannerCount, interactionCount);
 
-  // 9. Отдельные блоки DMG: Характеристики, Идеал, Привязанность, Слабость
+  // 11. Отдельные блоки DMG: Характеристики, Идеал, Привязанность, Слабость
   const abilitiesData = generateDMGAbilities(gender);
   const idealData = generateDMGIdeal();
   const bondData = generateDMGBond();
   const flawData = generateDMGFlaw();
 
-  // 10. Мотивы, реакция и ситуация (npc_self_motives.xlsx)
+  // 12. Мотивы, реакция и ситуация (files/NPC/npc_self_motives.xlsx)
   const motivesData = generateNPCMotives({
     reaction: options.reaction,
     motivation: options.motivation,
     area: options.area
   });
 
-  // 11. Портрет
+  // 13. Портрет
   const raceSlug = NPC_RACE_SLUGS[raceKey] || 'human';
   const genderSlug = gender === 'male' ? 'male' : 'female';
   const portraitPath = `assets/images/portraits/${raceSlug}_${genderSlug}.jpg`;
 
-  // 12. Составление структурированного краткого описания:
-  // "{имя_фамилия} — это {раса} {профессия}, {возраст} лет отроду, (если полукровка: кем и где был воспитан). Внешность: {внешность}. Характер: {характер}."
+  // 14. Составление структурированного краткого описания:
   const raceLower = raceTitle.toLowerCase();
   const ageStr = `${ageData.age} ${ageData.ageWord} отроду`;
 
@@ -915,18 +1041,27 @@ export function generateFullNPC(options = {}) {
     upbringingPart = `${halfbreedOrigin.description}, `;
   }
 
-  const professionClause = profession ? `, ${profession.narrative}` : '';
-  const appearanceClause = appearanceData.textSummary;
-  const characterClause = characterData.textSummary;
+  const professionClause = profession ? `, ${profession.narrative}` : `, ремесло: ${jobD100.titleRu}`;
+  const appearanceClause = `${appearanceData.textSummary}. Особые приметы: ${extendedTraits.face.eyes.textRu}, ${extendedTraits.face.hair.textRu}, ${extendedTraits.face.otherFace.textRu}`;
+  const characterClause = `${characterData.textSummary}. Настроение: ${extendedTraits.emotions.mood.textRu}`;
 
   const structuredSummary = `${nameData.fullName} — это ${raceLower}${professionClause}, ${ageStr}, ${upbringingPart}внешность: ${appearanceClause}. По характеру: ${characterClause}.`;
 
   // Полная текстовая карточка для копирования
   const fullDossierText = `НИП: ${nameData.fullName} (${raceTitle}, ${genderText}, ${ageData.age} ${ageData.ageWord})\n` +
-    (profession ? `Профессия: ${profession.title} [${profession.role}]\n` : '') +
+    (profession ? `Профессия: ${profession.title} [${profession.role}] (Занятие d100: ${jobD100.titleRu} [№${jobD100.roll}])\n` : `Занятие (d100): ${jobD100.titleRu} [№${jobD100.roll}]\n`) +
     (isHalfbreed && halfbreedOrigin ? `Воспитание: ${halfbreedOrigin.description}\n` : '') +
     `Сводка: ${structuredSummary}\n\n` +
-    `👗 Внешность:\n  ${appearanceData.items.map(i => i.name).join('; ')}\n\n` +
+    `👗 Внешность (DMG):\n  ${appearanceData.items.map(i => i.name).join('; ')}\n\n` +
+    `✨ Детальные черты:\n` +
+    `  • Лицо: глаза — ${extendedTraits.face.eyes.textRu}; нос — ${extendedTraits.face.nose.textRu}; причёска — ${extendedTraits.face.hair.textRu}; рот — ${extendedTraits.face.mouth.textRu}; уши — ${extendedTraits.face.ears.textRu}; подбородок — ${extendedTraits.face.chin.textRu}; примета — ${extendedTraits.face.otherFace.textRu}\n` +
+    `  • Тело: ${extendedTraits.physical.height.textRu}; ${extendedTraits.physical.body.textRu}; руки — ${extendedTraits.physical.hands.textRu}${extendedTraits.physical.scar ? '; шрам — ' + extendedTraits.physical.scar.textRu : ''}\n` +
+    `  • Одежда & Украшения: ${extendedTraits.accessories.clothes.textRu}; украшение — ${extendedTraits.accessories.jewelry.textRu} (${extendedTraits.accessories.jewelryMaterial.textRu})${extendedTraits.accessories.tattoo ? '; тату — ' + extendedTraits.accessories.tattoo.textRu : ''}\n\n` +
+    `🗣️ Голос & Повадки:\n` +
+    `  • Темп и тон: ${voice.speed.nameRu}, ${voice.pitch.nameRu}\n` +
+    `  • Тембр: ${voice.texture.nameRu} (${voice.texture.descRu})\n` +
+    `  • Речевая привычка: ${voice.speechPattern.textRu}\n` +
+    `  • Физическая повадка: ${voice.mannerism.textRu}\n\n` +
     `🧠 Характер:\n` +
     `  • Дарование: ${characterData.talentText}\n` +
     `  • Взаимодействие: ${characterData.interactionText} (${characterData.interactions.map(i => i.desc).join(', ')})\n` +
@@ -937,9 +1072,16 @@ export function generateFullNPC(options = {}) {
     `⚖️ Идеал: ${idealData.formatted}\n` +
     `🔗 Привязанность: ${bondData.textSummary}\n` +
     `🗝️ Слабость или тайна: ${flawData.textSummary}\n\n` +
+    `🎭 Эмоции & Вера:\n` +
+    `  • В покое: ${extendedTraits.emotions.calmTrait.textRu}\n` +
+    `  • Текущее настроение: ${extendedTraits.emotions.mood.textRu}\n` +
+    `  • В стрессе: ${extendedTraits.emotions.stressTrait.textRu}\n` +
+    `  • Отношение к вере: ${extendedTraits.beliefs.faith.textRu}\n` +
+    `  • Предрассудок: ${extendedTraits.beliefs.prejudice.textRu}\n` +
+    `  • Бытовой изъян: ${extendedTraits.beliefs.flaw.textRu}\n\n` +
     `${motivesData.summaryText}`;
 
-  // 13. Генерация альтернативных вариантов для списка
+  // 15. Генерация альтернативных вариантов для списка
   const count = parseInt(options.count || '3', 10);
   const variants = [];
   for (let i = 0; i < count; i++) {
@@ -949,7 +1091,10 @@ export function generateFullNPC(options = {}) {
     const vName = generateNPCName(raceKey, gender, vHalfbreed, elfKinAll);
     const vAge = generateNPCAge(raceKey, 'random');
     const vProf = generateNPCProfession(options.profession, gender);
+    const vJobD100 = generateNPCJob(options.job);
     const vApp = generateDMGAppearance(gender, 1);
+    const vTraits = generateNPCExtendedTraits({});
+    const vVoice = generateNPCVoice({});
     const vChar = generateDMGCharacter(gender, 1, 1, 1);
     const vAbilities = generateDMGAbilities(gender);
     const vIdeal = generateDMGIdeal();
@@ -966,14 +1111,17 @@ export function generateFullNPC(options = {}) {
       vUpbringing = `${vHalfbreed.description}, `;
     }
 
-    const vProfClause = vProf ? `, ${vProf.narrative}` : '';
-    const vSummary = `${vName.fullName} — это ${raceLower}${vProfClause}, ${vAge.age} ${vAge.ageWord} отроду, ${vUpbringing}внешность: ${vApp.textSummary}. По характеру: ${vChar.textSummary}.`;
+    const vProfClause = vProf ? `, ${vProf.narrative}` : `, ремесло: ${vJobD100.titleRu}`;
+    const vSummary = `${vName.fullName} — это ${raceLower}${vProfClause}, ${vAge.age} ${vAge.ageWord} отроду, ${vUpbringing}внешность: ${vApp.textSummary}. Особые приметы: ${vTraits.face.eyes.textRu}, ${vTraits.face.hair.textRu}. Настроение: ${vTraits.emotions.mood.textRu}.`;
 
     const vFullDossier = `НИП: ${vName.fullName} (${raceTitle}, ${genderText}, ${vAge.age} ${vAge.ageWord})\n` +
-      (vProf ? `Профессия: ${vProf.title} [${vProf.role}]\n` : '') +
+      (vProf ? `Профессия: ${vProf.title} [${vProf.role}] (Занятие: ${vJobD100.titleRu})\n` : `Занятие: ${vJobD100.titleRu}\n`) +
       (isHalfbreed && vHalfbreed ? `Воспитание: ${vHalfbreed.description}\n` : '') +
       `Внешность: ${vApp.items.map(it => it.name).join('; ')}\n` +
+      `Лицо & Тело: глаза — ${vTraits.face.eyes.textRu}; нос — ${vTraits.face.nose.textRu}; ${vTraits.physical.height.textRu}; ${vTraits.physical.body.textRu}\n` +
+      `Голос & Повадки: ${vVoice.speed.nameRu}, ${vVoice.texture.nameRu}; ${vVoice.speechPattern.textRu}; ${vVoice.mannerism.textRu}\n` +
       `Характер: дарование — ${vChar.talentText}; взаимодействие — ${vChar.interactionText}; манера — ${vChar.mannerismText}\n` +
+      `Эмоции: настроение — ${vTraits.emotions.mood.textRu}; в покое — ${vTraits.emotions.calmTrait.textRu}\n` +
       `Характеристики: высокая — ${vAbilities.high.formatted}; низкая — ${vAbilities.low.formatted}\n` +
       `Идеал: ${vIdeal.formatted}\n` +
       `Привязанность: ${vBond.textSummary}\n` +
@@ -990,9 +1138,12 @@ export function generateFullNPC(options = {}) {
       gender: genderText,
       age: `${vAge.age} ${vAge.ageWord}`,
       profession: vProf,
-      professionTitle: vProf ? `${vProf.icon} ${vProf.title}` : '—',
+      professionTitle: vProf ? `${vProf.icon} ${vProf.title}` : `🛠️ ${vJobD100.titleRu}`,
+      jobD100: vJobD100,
       upbringingTitle: vHalfbreed ? vHalfbreed.title : '—',
       appearance: vApp,
+      extendedTraits: vTraits,
+      voice: vVoice,
       character: vChar,
       abilities: vAbilities,
       ideal: vIdeal,
@@ -1019,10 +1170,13 @@ export function generateFullNPC(options = {}) {
     ageFormatted: `${ageData.age} ${ageData.ageWord}`,
     ageStage: ageData.ageStage,
     profession,
-    professionTitle: profession ? `${profession.icon} ${profession.title}` : 'Без профессии',
+    professionTitle: profession ? `${profession.icon} ${profession.title}` : `🛠️ ${jobD100.titleRu}`,
+    jobD100,
     isHalfbreed,
     halfbreedOrigin,
     appearance: appearanceData,
+    extendedTraits,
+    voice,
     character: characterData,
     personality: characterData,
     abilities: abilitiesData,
