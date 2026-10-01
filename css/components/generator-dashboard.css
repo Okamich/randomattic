@@ -133,6 +133,18 @@
   justify-content: center;
 }
 
+.hero-portrait-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.hero-portrait-canvas:hover {
+  transform: scale(1.03);
+}
+
 .hero-portrait-vector {
   width: 100%;
   height: 100%;
@@ -223,9 +235,12 @@
   margin: 0 auto;
 }
 
-.variant-avatar-mini svg {
+.variant-avatar-mini svg,
+.variant-avatar-mini canvas,
+.variant-avatar-mini img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
   display: block;
 }
 

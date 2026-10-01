@@ -32,14 +32,22 @@ import {
   buildPortraitRecipeFromNPC,
   renderPortraitSVG,
   getPortraitDataUrl,
-  PORTRAIT_PALETTES
+  renderPortraitToCanvas,
+  renderPortraitDataUrl,
+  preloadPortraitLayers,
+  PORTRAIT_PALETTES,
+  LAYER_PATHS
 } from './portrait-composer.js';
 
 export {
   buildPortraitRecipeFromNPC,
   renderPortraitSVG,
   getPortraitDataUrl,
+  renderPortraitToCanvas,
+  renderPortraitDataUrl,
+  preloadPortraitLayers,
   PORTRAIT_PALETTES,
+  LAYER_PATHS,
   NPC_NAMES_DATA,
   NPC_APPEARANCE_DATA,
   NPC_PERSONALITY_DATA,

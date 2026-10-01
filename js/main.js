@@ -29,6 +29,9 @@ import {
   buildPortraitRecipeFromNPC,
   renderPortraitSVG,
   getPortraitDataUrl,
+  renderPortraitToCanvas,
+  renderPortraitDataUrl,
+  preloadPortraitLayers,
   NPC_JOBS_D100,
   getRussianAgeWord,
   NPC_RACE_AGE_RANGES,
@@ -355,6 +358,7 @@ function populateJobOptions() {
 }
 
 function initNamesDashboard() {
+  preloadPortraitLayers();
   populateJobOptions();
   setupNamesEvents();
   executeNamesGenerator();
@@ -598,7 +602,7 @@ function setupNamesEvents() {
   });
 
   // Перебросить только внешность/портрет
-  document.getElementById('btn-reroll-portrait-only')?.addEventListener('click', () => {
+  document.getElementById('btn-reroll-portrait-only')?.addEventListener('click', async () => {
     if (!namesState.lastNPC) return;
     const npc = namesState.lastNPC;
     const newRecipe = buildPortraitRecipeFromNPC({
@@ -612,26 +616,31 @@ function setupNamesEvents() {
     npc.portraitRecipe = newRecipe;
     npc.portraitSvg = renderPortraitSVG(newRecipe);
     npc.portraitDataUrl = getPortraitDataUrl(newRecipe);
-    renderNPCPortrait(npc);
+    await renderNPCPortrait(npc);
   });
 }
 
-function renderNPCPortrait(npc) {
+async function renderNPCPortrait(npc) {
   if (!npc) return;
+  const canvasEl = document.getElementById('hero-portrait-canvas');
   const vectorContainer = document.getElementById('hero-portrait-vector');
   const imgEl = document.getElementById('hero-portrait-img');
   const btnVector = document.getElementById('btn-portrait-mode-vector');
   const btnRaster = document.getElementById('btn-portrait-mode-raster');
 
   if (namesState.portraitMode === 'vector') {
-    if (vectorContainer) {
-      vectorContainer.innerHTML = npc.portraitSvg || '';
-      vectorContainer.style.display = 'flex';
+    if (canvasEl) {
+      canvasEl.style.display = 'block';
+      if (npc.portraitRecipe) {
+        await renderPortraitToCanvas(npc.portraitRecipe, canvasEl);
+      }
     }
+    if (vectorContainer) vectorContainer.style.display = 'none';
     if (imgEl) imgEl.style.display = 'none';
     btnVector?.classList.add('active');
     btnRaster?.classList.remove('active');
   } else {
+    if (canvasEl) canvasEl.style.display = 'none';
     if (vectorContainer) vectorContainer.style.display = 'none';
     if (imgEl) {
       imgEl.src = npc.portraitPath || 'assets/images/portraits/human_male.jpg';
@@ -1040,7 +1049,7 @@ function executeNamesGenerator() {
         <td style="text-align: center; font-weight: 700; color: var(--accent-primary);">${v.id}</td>
         <td style="text-align: center; vertical-align: middle;">
           <div class="variant-avatar-mini" title="${v.fullName}">
-            ${v.portraitSvg || ''}
+            <canvas class="variant-avatar-mini-canvas" width="192" height="256"></canvas>
           </div>
         </td>
         <td><strong style="color: #f0c97d;">${v.fullName}</strong></td>
@@ -1066,6 +1075,15 @@ function executeNamesGenerator() {
         </td>
       </tr>
     `).join('');
+
+    // Отрисовываем мини-портреты для каждого варианта
+    const miniCanvases = tbody.querySelectorAll('.variant-avatar-mini-canvas');
+    npc.variants.forEach((v, idx) => {
+      const mc = miniCanvases[idx];
+      if (mc && v.portraitRecipe) {
+        renderPortraitToCanvas(v.portraitRecipe, mc);
+      }
+    });
 
     tbody.querySelectorAll('.btn-mini-copy').forEach(btn => {
       btn.addEventListener('click', () => {
